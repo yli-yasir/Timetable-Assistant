@@ -11,6 +11,9 @@
     <Label text="Please select a file."/>
     </top>
 
+    <left>
+        <GridPane fx:id="tableSample"/>
+    </left>
     <bottom>
         <Button
                 fx:id="browseButton"
