@@ -13,7 +13,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Timetable Assistant: Welcome");
-        Scene scene = new Scene(root, 300, 275);
+        Scene scene = new Scene(root, 1100, 500);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

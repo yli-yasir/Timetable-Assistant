@@ -6,27 +6,33 @@
 <?import javafx.scene.layout.BorderPane?>
 
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
 <BorderPane fx:controller="sample.Controller"
             xmlns:fx="http://javafx.com/fxml"
-            >
+>
 
 
     <top>
-    <Label text="Please select a file."/>
+        <Label fx:id="instructionLabel" text="Please select a file."/>
     </top>
 
     <left>
         <GridPane fx:id="tableSample"
-        style="-fx-background-color: black"
-        hgap="5"
-        vgap="5"
+                  style="-fx-background-color: black"
+                  hgap="5"
+                  vgap="5"
         />
     </left>
 
-    <right>
-        <VBox fx:id="exampleVBox" spacing="5">
-
+    <center>
+        <VBox fx:id="tableSampleControlVBox" spacing="5">
         </VBox>
+    </center>
+
+    <right>
+        <GridPane fx:id="courseSelectionGrid">
+        </GridPane>
     </right>
 
     <bottom>
