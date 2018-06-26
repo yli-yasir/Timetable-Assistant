@@ -1,11 +1,15 @@
 package sample;
 
+import javafx.collections.ObservableList;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 class TableUtils {
     //Unpacks all merged cells in the sheet.
@@ -48,21 +52,23 @@ class TableUtils {
         return new int[]{col, row};
     }
 
-    static String search(Sheet sheet, String courseName) {
-        if (sheet!=null) {
-            for (Row row : sheet) {
+    static void search(Sheet searchSheet,ObservableList<String> resultList, String searchQuery) {
+        if (searchSheet!=null) {
+            HashSet<String> results = new HashSet<>();
+            for (Row row : searchSheet) {
                 for (Cell cell : row) {
-
-                    String currentCourseName = cell == null ? "" : cell.toString()
+                    String currentText = cell == null ? "" : cell.toString()
                             .replace(" ", "").toLowerCase();
 
-                    if (currentCourseName.contains(courseName.toLowerCase())) {
+                    if (currentText.contains(searchQuery.toLowerCase())) {
+                        results.add(currentText);
                     }
-
                 }
             }
+            resultList.setAll(results);
+            Collections.sort(resultList);
+
         }
-        return null;
     }
 
 

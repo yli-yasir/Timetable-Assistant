@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -14,6 +15,7 @@ import org.apache.poi.ss.usermodel.*;
 import javafx.collections.FXCollections;
 
 import java.io.File;
+import java.util.Arrays;
 
 
 public class Controller {
@@ -42,39 +44,44 @@ public class Controller {
     @FXML
     private void initialize() {
         initCourseSelectionGrid();
-        initTableSampleControlVBox(tableSampleControlVBox);
+        initTableSampleControlVBox();
         initBrowseButton();
     }
 
 
+    //Initializes controls that are related to selecting and adding courses.
     private void initCourseSelectionGrid(){
 
         TextField field = new TextField();
         field.setFocusTraversable(false);
-        field.setPromptText("Search");
+        field.setPromptText("Course name");
+
+        Button searchButton = new Button("Search");
 
         Label availableCoursesHeader= new Label("Available:");
         ListView<String> availableCourses = new ListView<>();
-        availableCourses.setOnMouseClicked(event -> {
-            TableUtils.search(timetableSheet,field.getText());});
+        ObservableList<String> searchResultList = FXCollections.observableArrayList();
+        availableCourses.setItems(
+               searchResultList);
 
         Label addedCoursesHeader = new Label("Added:");
         ListView<String> addedCourses = new ListView<>();
 
-
-        GridPane.setColumnSpan(field,2);
+        searchButton.setOnAction(event ->
+            TableUtils.search(timetableSheet,searchResultList,field.getText()));
 
         courseSelectionGrid.add(field,0,0);
+        courseSelectionGrid.add(searchButton,1,0);
         courseSelectionGrid.add(availableCoursesHeader,0,1);
         courseSelectionGrid.add(addedCoursesHeader,1,1);
-
         courseSelectionGrid.add(availableCourses,0,2);
         courseSelectionGrid.add(addedCourses,1,2);
-
-
     }
 
-    //Initializes a GridPane to show a window same from the table.
+
+    /*Initializes a GridPane to show a small part from the timetable, in which
+    the user can select a course and it's corresponding data as an example
+    to the program.*/
     @SuppressWarnings("SameParameterValue")
     private void initTableSample(Sheet sheet, int rows, int columns){
 
@@ -114,8 +121,9 @@ public class Controller {
         }
     }
 
-    //Initializes a VBox to be used for setting example data.
-    private void initTableSampleControlVBox(VBox tableSampleControlVBox) {
+    /*Initializes a VBox with controls which will be used to choose example data
+      from the sample table*/
+    private void initTableSampleControlVBox() {
 
         for (SelectionStep step : SelectionStep.values()) {
             StepLabel label = new StepLabel(step.title(), step);
@@ -131,6 +139,10 @@ public class Controller {
     }
 
 
+    //todo handle file being null
+    //todo handle user closing browsing window (file = null?)
+    //todo preferably make the file opening process in a background thread
+    //todo display a loading bar while the file is being opened.
     //Initializes a button to be used for browsing.
     private void initBrowseButton() {
 
