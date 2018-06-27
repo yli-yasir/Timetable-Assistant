@@ -12,10 +12,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.apache.poi.ss.usermodel.*;
-import javafx.collections.FXCollections;
-
 import java.io.File;
-import java.util.Arrays;
 
 
 public class Controller {
@@ -67,15 +64,20 @@ public class Controller {
         Label addedCoursesHeader = new Label("Added:");
         ListView<String> addedCourses = new ListView<>();
 
+        Button generateButton = new Button("Generate timetable");
+
         searchButton.setOnAction(event ->
             TableUtils.search(timetableSheet,searchResultList,field.getText()));
 
+        generateButton.setOnAction(event -> TableUtils.generateTimetable());
         courseSelectionGrid.add(field,0,0);
         courseSelectionGrid.add(searchButton,1,0);
         courseSelectionGrid.add(availableCoursesHeader,0,1);
         courseSelectionGrid.add(addedCoursesHeader,1,1);
         courseSelectionGrid.add(availableCourses,0,2);
         courseSelectionGrid.add(addedCourses,1,2);
+        courseSelectionGrid.add(generateButton,0,3);
+
     }
 
 
