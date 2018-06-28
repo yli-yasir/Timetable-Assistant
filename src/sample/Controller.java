@@ -4,21 +4,20 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+
 import java.io.File;
 
 
 public class Controller {
 
-
     private Sheet timetableSheet;
+
     private StepLabel currentlySelectedLabel;
     @FXML
     private Label instructionLabel;
@@ -32,12 +31,6 @@ public class Controller {
     private VBox tableSampleControlVBox;
 
 
-    // = {column,row}
-    private int[] coursePos;
-    private int[] dayPos;
-    private int[] timePos;
-    private int[] hallPos;
-
     @FXML
     private void initialize() {
         initCourseSelectionGrid();
@@ -47,36 +40,53 @@ public class Controller {
 
 
     //Initializes controls that are related to selecting and adding courses.
-    private void initCourseSelectionGrid(){
+    private void initCourseSelectionGrid() {
 
+        //This will be used to enter a search query.
         TextField field = new TextField();
         field.setFocusTraversable(false);
         field.setPromptText("Course name");
 
-        Button searchButton = new Button("Search");
 
-        Label availableCoursesHeader= new Label("Available:");
+        /*Label and list for showing courses that have been added from
+        the list that contains available courses.*/
+        Label addedCoursesHeader = new Label("Added:");
+        ListView<String> addedCourses = new ListView<>();
+        ObservableList<String> addedCoursesList = FXCollections.observableArrayList();
+        addedCourses.setItems(addedCoursesList);
+        addedCourses.setOnMouseClicked(event ->
+                addedCoursesList
+                        .remove(addedCourses.getSelectionModel().getSelectedIndex()));
+
+        //Label and list for displaying courses that are in the table.
+        Label availableCoursesHeader = new Label("Available:");
         ListView<String> availableCourses = new ListView<>();
         ObservableList<String> searchResultList = FXCollections.observableArrayList();
         availableCourses.setItems(
-               searchResultList);
+                searchResultList);
+        availableCourses.setOnMouseClicked(event -> {
+                    String clickedItem = availableCourses.getSelectionModel().getSelectedItem();
+                    if (!addedCoursesList.contains(clickedItem)) {
+                        addedCoursesList.add(clickedItem
+                        );
+                    }
+                } );
 
-        Label addedCoursesHeader = new Label("Added:");
-        ListView<String> addedCourses = new ListView<>();
-
+        //Buttons which will be used in this pane.
+        Button searchButton = new Button("Search");
         Button generateButton = new Button("Generate timetable");
-
         searchButton.setOnAction(event ->
-            TableUtils.search(timetableSheet,searchResultList,field.getText()));
-
+                TableUtils.search(timetableSheet, searchResultList, field.getText()));
         generateButton.setOnAction(event -> TableUtils.generateTimetable());
-        courseSelectionGrid.add(field,0,0);
-        courseSelectionGrid.add(searchButton,1,0);
-        courseSelectionGrid.add(availableCoursesHeader,0,1);
-        courseSelectionGrid.add(addedCoursesHeader,1,1);
-        courseSelectionGrid.add(availableCourses,0,2);
-        courseSelectionGrid.add(addedCourses,1,2);
-        courseSelectionGrid.add(generateButton,0,3);
+
+
+        courseSelectionGrid.add(field, 0, 0);
+        courseSelectionGrid.add(searchButton, 1, 0);
+        courseSelectionGrid.add(availableCoursesHeader, 0, 1);
+        courseSelectionGrid.add(addedCoursesHeader, 1, 1);
+        courseSelectionGrid.add(availableCourses, 0, 2);
+        courseSelectionGrid.add(addedCourses, 1, 2);
+        courseSelectionGrid.add(generateButton, 0, 3);
 
     }
 
@@ -85,7 +95,7 @@ public class Controller {
     the user can select a course and it's corresponding data as an example
     to the program.*/
     @SuppressWarnings("SameParameterValue")
-    private void initTableSample(Sheet sheet, int rows, int columns){
+    private void initTableSample(Sheet sheet, int rows, int columns) {
 
         for (int i = 0; i < rows; i++) {
             Row row = sheet.getRow(i);
@@ -100,20 +110,9 @@ public class Controller {
                     if (currentlySelectedLabel != null) {
                         int columnIndex = GridPane.getColumnIndex(label);
                         int rowIndex = GridPane.getRowIndex(label);
+                        TableUtils.exampleCoords.put(currentlySelectedLabel.getStep(),
+                                new CellCoords(GridPane.getRowIndex(label),GridPane.getColumnIndex(label)));
 
-                        switch (currentlySelectedLabel.getStep()) {
-                            case SELECT_COURSE:
-                                coursePos = TableUtils.makeColRowPair(columnIndex, rowIndex);
-                                break;
-                            case SELECT_DAY:
-                                dayPos = TableUtils.makeColRowPair(columnIndex, rowIndex);
-                                break;
-                            case SELECT_TIME:
-                                timePos = TableUtils.makeColRowPair(columnIndex, rowIndex);
-                                break;
-                            case SELECT_HALL:
-                                hallPos = TableUtils.makeColRowPair(columnIndex, rowIndex);
-                        }
                         currentlySelectedLabel.setText(label.getText());
                     }
                 });
