@@ -2,7 +2,6 @@ package sample;
 
 import javafx.collections.ObservableList;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.formula.functions.Column;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -17,7 +16,7 @@ import java.util.*;
 class TableUtils {
 
 
-    static HashMap<SelectionStep,CellCoords> exampleCoords;
+    static HashMap<SelectionStep, CellCoords> exampleCoords;
 
     //Unpacks all merged cells in the sheet.
     static void unpackMergedCells(Sheet sheet) {
@@ -55,15 +54,13 @@ class TableUtils {
         return timetable;
     }
 
-    static int[] makeColRowPair(int col, int row) {
-        return new int[]{col, row};
-    }
 
-    static String makeStringValue(Cell cell) {
+    private static String makeStringValue(Cell cell) {
         return cell == null ? "" : cell.toString()
                 .replace(" ", "").toLowerCase();
     }
 
+    //Find the query and populates a list with the results.
     static void search(Sheet searchSheet, ObservableList<String> resultList, String searchQuery) {
         if (searchSheet != null) {
             HashSet<String> results = new HashSet<>();
@@ -83,9 +80,61 @@ class TableUtils {
     }
 
 
-    static String getDayString(Cell cell){
 
-        new CellCoords(cell)
+
+    /**
+    Gets a string for a cell, that corresponds to a selection step for any
+    by using the example data which was provided as a reference.
+
+    --------------------EXAMPLE--------------------
+
+     TLDR
+     ---
+     TYPICAL SHIFT = CellCoords(C) - CellCoords(O)
+     REFERENCE SHIFT = CellCoords(C) - CellCoords(J)
+     SHIFT = TYPICAL SHIFT - REFERENCE SHIFT
+     CellCoords(O) = CellCoords(J) - (TYPICAL SHIFT - REFERENCE SHIFT)
+     CellCoords(O) = CellCoords(J) - SHIFT
+     ---
+
+     N |O| N
+    ----------
+     N |J| N
+    ----------
+     N |C| N
+    ----------
+    In the example below:
+        O = Corresponding info cell (see comment above).
+        J = Any other cell.
+        C = Will be used as reference.
+
+       CellCoords(Row,Column)
+       CellCoords(C) = (2,1)
+       CellCoords(J) = (1,1)
+       CellCoords(O) = (0,1)
+
+       Typically to get O of C , you would have to move by the TYPICAL SHIFT from C.
+       TYPICAL SHIFT = CellCoords(C) - CellCoords(O)
+
+       So to confirm what was just said above:
+       TYPICAL SHIFT = (2,1) - (0,1) = (2,0)
+
+       CellCoords(C) - TYPICAL SHIFT = CellCoords(O)
+       (2,1)         - (2,0)         = (0,1)        = CellCoords(O)
+
+       REFERENCE SHIFT is how much you have to move to get from C to J.
+
+       REFERENCE SHIFT = CellCoords(C) - CellCoords(J)
+       REFERENCE SHIFT = (2,1)         - (1,1)         = (1,0)
+
+       To find O of J (or any other cell):
+
+       CellCoords(J) - (TYPICAL SHIFT - REFERENCE SHIFT) = CellCoords(O)
+
+       (1,1)         - ( (2,0)        - (1,0)          ) =  ...
+       (1,1)         - (1,0)                             = (0,1) = CellCoords(O)
+       */
+    static Cell getCorrespondingInfoCell(SelectionStep correspondingStep,Cell cell){
         return null;
     }
 

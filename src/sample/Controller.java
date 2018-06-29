@@ -108,11 +108,8 @@ public class Controller {
                 label.setOnMouseClicked(event -> {
 
                     if (currentlySelectedLabel != null) {
-                        int columnIndex = GridPane.getColumnIndex(label);
-                        int rowIndex = GridPane.getRowIndex(label);
                         TableUtils.exampleCoords.put(currentlySelectedLabel.getStep(),
                                 new CellCoords(GridPane.getRowIndex(label),GridPane.getColumnIndex(label)));
-
                         currentlySelectedLabel.setText(label.getText());
                     }
                 });
