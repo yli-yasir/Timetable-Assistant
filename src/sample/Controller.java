@@ -65,19 +65,19 @@ public class Controller {
         availableCourses.setItems(
                 searchResultList);
         availableCourses.setOnMouseClicked(event -> {
-                    String clickedItem = availableCourses.getSelectionModel().getSelectedItem();
-                    if (!addedCoursesList.contains(clickedItem)) {
-                        addedCoursesList.add(clickedItem
-                        );
-                    }
-                } );
+            String clickedItem = availableCourses.getSelectionModel().getSelectedItem();
+            if (!addedCoursesList.contains(clickedItem)) {
+                addedCoursesList.add(clickedItem
+                );
+            }
+        });
 
         //Buttons which will be used in this pane.
         Button searchButton = new Button("Search");
         Button generateButton = new Button("Generate timetable");
         searchButton.setOnAction(event ->
                 TableUtils.search(timetableSheet, searchResultList, field.getText()));
-        generateButton.setOnAction(event -> TableUtils.generateTimetable());
+
 
 
         courseSelectionGrid.add(field, 0, 0);
@@ -108,8 +108,24 @@ public class Controller {
                 label.setOnMouseClicked(event -> {
 
                     if (currentlySelectedLabel != null) {
-                        TableUtils.exampleCoords.put(currentlySelectedLabel.getStep(),
-                                new CellCoords(GridPane.getRowIndex(label),GridPane.getColumnIndex(label)));
+                        int rowIndex = GridPane.getRowIndex(label);
+                        int columnIndex = GridPane.getColumnIndex(label);
+                        SelectionStep selectionStep = currentlySelectedLabel.getStep();
+
+                        if (selectionStep == SelectionStep.SELECT_COURSE) {
+                            SelectionMetaData.selectionMetaMap.putCourseMetaData(rowIndex);
+                        } else {
+                            try {
+                                SelectionMetaData.selectionMetaMap.putOtherMetaData(
+                                        rowIndex, columnIndex, selectionStep
+                                );
+                            } catch (ExampleCourseNotSetException e) {
+                                //todo add popup indicating whats wrong
+                                e.printStackTrace();
+                            }
+
+                        }
+
                         currentlySelectedLabel.setText(label.getText());
                     }
                 });
