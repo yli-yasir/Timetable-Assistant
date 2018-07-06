@@ -34,7 +34,7 @@ public class Controller {
     @FXML
     private void initialize() {
         initCourseSelectionGrid();
-        initTableSampleControlVBox();
+        initSelectionStepControlVBox();
         initBrowseButton();
     }
 
@@ -77,6 +77,8 @@ public class Controller {
         Button generateButton = new Button("Generate timetable");
         searchButton.setOnAction(event ->
                 TableUtils.search(timetableSheet, searchResultList, field.getText()));
+        generateButton.setOnAction(event ->
+        TableUtils.generateTimetable(timetableSheet,addedCoursesList));
 
 
 
@@ -113,10 +115,10 @@ public class Controller {
                         SelectionStep selectionStep = currentlySelectedLabel.getStep();
 
                         if (selectionStep == SelectionStep.SELECT_COURSE) {
-                            SelectionMetaData.selectionMetaMap.putCourseMetaData(rowIndex);
+                            TableUtils.selectionMetaMap.putCourseMetaData(rowIndex);
                         } else {
                             try {
-                                SelectionMetaData.selectionMetaMap.putOtherMetaData(
+                                TableUtils.selectionMetaMap.putOtherMetaData(
                                         rowIndex, columnIndex, selectionStep
                                 );
                             } catch (ExampleCourseNotSetException e) {
@@ -137,7 +139,7 @@ public class Controller {
 
     /*Initializes a VBox with controls which will be used to choose example data
       from the sample table*/
-    private void initTableSampleControlVBox() {
+    private void initSelectionStepControlVBox() {
 
         for (SelectionStep step : SelectionStep.values()) {
             StepLabel label = new StepLabel(step.title(), step);

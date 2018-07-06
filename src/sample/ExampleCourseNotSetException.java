@@ -1,6 +1,6 @@
 package sample;
 
-public class ExampleCourseNotSetException extends Exception {
+ class ExampleCourseNotSetException extends Exception {
     ExampleCourseNotSetException(String msg){
         super(msg);
     }

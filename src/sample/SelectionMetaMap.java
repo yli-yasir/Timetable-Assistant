@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 class SelectionMetaMap{
 
-    private HashMap<SelectionStep, SelectionMetaData> exampleMap;
+    private HashMap<SelectionStep, SelectionMetaData> exampleMap= new HashMap<>();
 
 
 
@@ -47,6 +47,9 @@ class SelectionMetaMap{
 
     }
 
+    SelectionMetaData get(SelectionStep key){
+         return exampleMap.get(key);
+    }
 
 
 
