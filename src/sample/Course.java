@@ -5,7 +5,7 @@ class Course {
     private String hall;
     private String time;
 
-    public Course(String name,String hall, String time) {
+     Course(String name,String hall, String time) {
         this.name=name;
         this.hall = hall;
         this.time = time;

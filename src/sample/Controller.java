@@ -3,9 +3,11 @@ package sample;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.TilePane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.apache.poi.ss.usermodel.*;
@@ -18,7 +20,7 @@ public class Controller {
 
     private Sheet timetableSheet;
 
-    private StepLabel currentlySelectedLabel;
+    private StepButton currentlySelectedButton;
     @FXML
     private Label instructionLabel;
     @FXML
@@ -28,14 +30,18 @@ public class Controller {
     @FXML
     private Button browseButton;
     @FXML
-    private VBox tableSampleControlVBox;
+    private TilePane tableSampleControls;
 
+    private ChoiceBox<Integer> fontSizeOptions;
+
+    private TextField outputFileNameField;
 
     @FXML
     private void initialize() {
         initCourseSelectionGrid();
-        initSelectionStepControlVBox();
+        initSelectionStepControlBar();
         initBrowseButton();
+
     }
 
 
@@ -79,8 +85,38 @@ public class Controller {
                 TableUtils.search(timetableSheet, searchResultList, field.getText()));
         generateButton.setOnAction(event ->
         TableUtils.generateTimetable(timetableSheet,addedCoursesList));
+        generateButton.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
 
+        //SettingsBox
+        VBox settingsBox = new VBox();
+        settingsBox.setPadding(new Insets(0,0,0,20));
+        settingsBox.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
+        Label outputFileNameLabel = new Label("File name:");
+        Label settingsLabel = new Label("Settings:");
+        Label fontSizeLabel = new Label("Font size:");
 
+        Insets  sectionHeaderMargin = new Insets(10,0,0,10);
+        Insets sectionBodyMargin =  new Insets(0,0,0,10);
+        outputFileNameField = new TextField();
+        outputFileNameField.setPromptText("eg: Student No");
+         fontSizeOptions= new ChoiceBox<>();
+        ObservableList<Integer> sizeList = FXCollections.observableArrayList();
+        for(int i = 1 ; i <=72;i++ ){
+            sizeList.add(i);
+        }
+        fontSizeOptions.setItems(sizeList);
+        fontSizeOptions.setValue(12);
+
+        VBox.setMargin(outputFileNameLabel,sectionHeaderMargin);
+        VBox.setMargin(outputFileNameField,sectionBodyMargin);
+        VBox.setMargin(fontSizeLabel,sectionHeaderMargin);
+        VBox.setMargin(fontSizeOptions,sectionBodyMargin);
+
+        settingsBox.getChildren().add(settingsLabel);
+        settingsBox.getChildren().add(outputFileNameLabel);
+        settingsBox.getChildren().add(outputFileNameField);
+        settingsBox.getChildren().add(fontSizeLabel);
+        settingsBox.getChildren().add(fontSizeOptions);
 
         courseSelectionGrid.add(field, 0, 0);
         courseSelectionGrid.add(searchButton, 1, 0);
@@ -88,7 +124,9 @@ public class Controller {
         courseSelectionGrid.add(addedCoursesHeader, 1, 1);
         courseSelectionGrid.add(availableCourses, 0, 2);
         courseSelectionGrid.add(addedCourses, 1, 2);
-        courseSelectionGrid.add(generateButton, 0, 3);
+        courseSelectionGrid.add(generateButton, 0, 3,2,1);
+        courseSelectionGrid.add(settingsBox, 2, 1,1,2);
+
 
     }
 
@@ -109,10 +147,10 @@ public class Controller {
 
                 label.setOnMouseClicked(event -> {
 
-                    if (currentlySelectedLabel != null) {
+                    if (currentlySelectedButton != null) {
                         int rowIndex = GridPane.getRowIndex(label);
                         int columnIndex = GridPane.getColumnIndex(label);
-                        SelectionStep selectionStep = currentlySelectedLabel.getStep();
+                        SelectionStep selectionStep = currentlySelectedButton.getStep();
 
                         if (selectionStep == SelectionStep.SELECT_COURSE) {
                             TableUtils.selectionMetaMap.putCourseMetaData(rowIndex);
@@ -128,7 +166,7 @@ public class Controller {
 
                         }
 
-                        currentlySelectedLabel.setText(label.getText());
+                        currentlySelectedButton.setText(label.getText());
                     }
                 });
 
@@ -139,16 +177,17 @@ public class Controller {
 
     /*Initializes a VBox with controls which will be used to choose example data
       from the sample table*/
-    private void initSelectionStepControlVBox() {
+    private void initSelectionStepControlBar() {
 
         for (SelectionStep step : SelectionStep.values()) {
-            StepLabel label = new StepLabel(step.title(), step);
-            label.setOnMouseClicked(event -> {
-                currentlySelectedLabel = label;
+            StepButton button = new StepButton(step.title(), step);
+            button.setMaxWidth(Double.MAX_VALUE);
+            button.setOnMouseClicked(event -> {
+                currentlySelectedButton = button;
                 instructionLabel.setText(step.decription());
 
             });
-            tableSampleControlVBox.getChildren().add(label);
+            tableSampleControls.getChildren().add(button);
         }
 
 
@@ -189,7 +228,7 @@ public class Controller {
 
     //Sets some properties on a label to make it suitable for the grid.
     private Label makeGridLabel(Label label) {
-        label.setStyle("-fx-background-color: #FFC107;" +
+        label.setStyle("-fx-background-color: #FFC312;" +
                 "-fx-max-width: infinity;" +
                 "-fx-max-height: infinity"
         );

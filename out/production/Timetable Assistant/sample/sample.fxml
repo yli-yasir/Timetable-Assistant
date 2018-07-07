@@ -3,42 +3,47 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.BorderPane?>
 
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.HBox?>
-<BorderPane fx:controller="sample.Controller"
-            xmlns:fx="http://javafx.com/fxml"
->
+
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.TilePane?>
+
+<VBox fx:controller="sample.Controller"
+      xmlns:fx="http://javafx.com/fxml"
+      stylesheets="@style.css">
+
+    <Label fx:id="instructionLabel" text="Please select a file!" maxWidth="Infinity"
+           styleClass="instructionLabel"
+    />
 
 
-    <top>
-        <Label fx:id="instructionLabel" text="Please select a file."/>
-    </top>
-
-    <left>
-        <GridPane fx:id="tableSample"
-                  style="-fx-background-color: black"
-                  hgap="5"
-                  vgap="5"
-        />
-    </left>
-
-    <center>
-        <VBox fx:id="tableSampleControlVBox" spacing="5">
-        </VBox>
-    </center>
-
-    <right>
-        <GridPane fx:id="courseSelectionGrid">
-        </GridPane>
-    </right>
-
-    <bottom>
+    <TilePane fx:id="tableSampleControls">
         <Button
                 fx:id="browseButton"
-                text="Browse"/>
-    </bottom>
+                text="CHOOSE FILE"
+                maxWidth="Infinity"
+        />
+    </TilePane>
 
-</BorderPane>
+            <ScrollPane
+                    maxWidth="Infinity"
+                    prefHeight="320"
+            >
+                <GridPane
+
+                        fx:id="tableSample"
+                          hgap="3"
+                          vgap="3"
+                />
+            </ScrollPane>
+
+
+
+
+    <GridPane fx:id="courseSelectionGrid"
+    styleClass="csg"/>
+
+</VBox>
+
+

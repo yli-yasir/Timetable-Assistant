@@ -1,0 +1,29 @@
+
+VBox {
+-fx-background-color:#3498db;
+}
+
+Label{
+-fx-text-fill:white;
+-fx-padding:2;
+}
+
+.instructionLabel{
+-fx-effect: dropshadow(gaussian, #000000, 10, 0, 0, 0);
+-fx-background-color:#2980b9;
+}
+
+ChoiceBox {
+-fx-background-color:#2980b9}
+
+ScrollPane{
+-fx-padding:4;
+-fx-background:#2980b9;
+-fx-border-color:#2980b9;
+}
+
+TilePane{
+-fx-padding: 8 0 0 0  }
+
+.csg{
+-fx-padding: 16 0 0 0 }
