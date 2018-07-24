@@ -1,6 +1,6 @@
 package sample;
 
-class SelectionMetaData {
+class SelectionModeData {
 
 
     static final int TYPE_ROW = 0;
@@ -20,7 +20,7 @@ class SelectionMetaData {
      */
     private int value;
 
-    SelectionMetaData(int type, int value) {
+    SelectionModeData(int type, int value) {
         this.type = type;
         this.value = value;
     }

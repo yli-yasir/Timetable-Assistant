@@ -13,7 +13,8 @@
       xmlns:fx="http://javafx.com/fxml"
       stylesheets="@style.css">
 
-    <Label fx:id="instructionLabel" text="Please select a file!" maxWidth="Infinity"
+    <Label fx:id="instructionLabel" text="Choose a file, then choose an example course
+with correct information!" maxWidth="Infinity"
            styleClass="instructionLabel"
     />
 

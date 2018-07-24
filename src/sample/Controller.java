@@ -15,12 +15,18 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
 
+//--NEED TO IMPLEMENT SORTING FIRST--
+//todo handle when user attempts generate before choosing file and completing selection
+//todo handle when user adds something that is not a course and attempts to generate
+
+//todo implement proper usage of the output file name text field
+//todo implement proper usage of the font selection field.
 
 public class Controller {
 
     private Sheet timetableSheet;
 
-    private StepButton currentlySelectedButton;
+    private SelectionModeButton currentlySelectedButton;
     @FXML
     private Label instructionLabel;
     @FXML
@@ -35,6 +41,8 @@ public class Controller {
     private ChoiceBox<Integer> fontSizeOptions;
 
     private TextField outputFileNameField;
+
+    private boolean isReadyToSearch;
 
     @FXML
     private void initialize() {
@@ -81,36 +89,45 @@ public class Controller {
         //Buttons which will be used in this pane.
         Button searchButton = new Button("Search");
         Button generateButton = new Button("Generate timetable");
-        searchButton.setOnAction(event ->
-                TableUtils.search(timetableSheet, searchResultList, field.getText()));
+
+        //todo this relates to string view
+        searchButton.setOnAction(event ->{
+            if (isReadyToSearch){
+                TableManager.search(timetableSheet, searchResultList, field.getText());}
+                else{
+                showInfoAlert("Insufficient information","Please choose required information" +
+                        " first!");
+            }
+        });
+
         generateButton.setOnAction(event ->
-        TableUtils.generateTimetable(timetableSheet,addedCoursesList));
-        generateButton.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
+                TableManager.generateTimetable(timetableSheet, addedCoursesList));
+        generateButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         //SettingsBox
         VBox settingsBox = new VBox();
-        settingsBox.setPadding(new Insets(0,0,0,20));
-        settingsBox.setMaxSize(Double.MAX_VALUE,Double.MAX_VALUE);
+        settingsBox.setPadding(new Insets(0, 0, 0, 20));
+        settingsBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         Label outputFileNameLabel = new Label("File name:");
         Label settingsLabel = new Label("Settings:");
         Label fontSizeLabel = new Label("Font size:");
 
-        Insets  sectionHeaderMargin = new Insets(10,0,0,10);
-        Insets sectionBodyMargin =  new Insets(0,0,0,10);
+        Insets sectionHeaderMargin = new Insets(10, 0, 0, 10);
+        Insets sectionBodyMargin = new Insets(0, 0, 0, 10);
         outputFileNameField = new TextField();
         outputFileNameField.setPromptText("eg: Student No");
-         fontSizeOptions= new ChoiceBox<>();
+        fontSizeOptions = new ChoiceBox<>();
         ObservableList<Integer> sizeList = FXCollections.observableArrayList();
-        for(int i = 1 ; i <=72;i++ ){
+        for (int i = 1; i <= 72; i++) {
             sizeList.add(i);
         }
         fontSizeOptions.setItems(sizeList);
         fontSizeOptions.setValue(12);
 
-        VBox.setMargin(outputFileNameLabel,sectionHeaderMargin);
-        VBox.setMargin(outputFileNameField,sectionBodyMargin);
-        VBox.setMargin(fontSizeLabel,sectionHeaderMargin);
-        VBox.setMargin(fontSizeOptions,sectionBodyMargin);
+        VBox.setMargin(outputFileNameLabel, sectionHeaderMargin);
+        VBox.setMargin(outputFileNameField, sectionBodyMargin);
+        VBox.setMargin(fontSizeLabel, sectionHeaderMargin);
+        VBox.setMargin(fontSizeOptions, sectionBodyMargin);
 
         settingsBox.getChildren().add(settingsLabel);
         settingsBox.getChildren().add(outputFileNameLabel);
@@ -124,8 +141,8 @@ public class Controller {
         courseSelectionGrid.add(addedCoursesHeader, 1, 1);
         courseSelectionGrid.add(availableCourses, 0, 2);
         courseSelectionGrid.add(addedCourses, 1, 2);
-        courseSelectionGrid.add(generateButton, 0, 3,2,1);
-        courseSelectionGrid.add(settingsBox, 2, 1,1,2);
+        courseSelectionGrid.add(generateButton, 0, 3, 2, 1);
+        courseSelectionGrid.add(settingsBox, 2, 1, 1, 2);
 
 
     }
@@ -150,23 +167,32 @@ public class Controller {
                     if (currentlySelectedButton != null) {
                         int rowIndex = GridPane.getRowIndex(label);
                         int columnIndex = GridPane.getColumnIndex(label);
-                        SelectionStep selectionStep = currentlySelectedButton.getStep();
+                        SelectionMode selectionMode = currentlySelectedButton.getStep();
 
-                        if (selectionStep == SelectionStep.SELECT_COURSE) {
-                            TableUtils.selectionMetaMap.putCourseMetaData(rowIndex);
+                        if (selectionMode == SelectionMode.SELECT_COURSE) {
+                            TableManager.selectionModeToDataMap.puSelectionModeData(rowIndex);
                         } else {
                             try {
-                                TableUtils.selectionMetaMap.putOtherMetaData(
-                                        rowIndex, columnIndex, selectionStep
+                                TableManager.selectionModeToDataMap.putCourseInfoMetaData(
+                                        rowIndex, columnIndex, selectionMode
                                 );
                             } catch (ExampleCourseNotSetException e) {
-                                //todo add popup indicating whats wrong
                                 e.printStackTrace();
                             }
+                        }
+                        //todo this is text related to view.
+                        String instruction;
 
+                        if (TableManager.selectionModeToDataMap.size() < SelectionMode.values().length) {
+                            instruction = "Please choose the remaining information...";
+                        } else {
+                            instruction = "All done! You can search for and add courses now!";
+                            isReadyToSearch=true;
                         }
 
-                        currentlySelectedButton.setText(label.getText());
+                        instructionLabel.setText(instruction);
+                        currentlySelectedButton.setText(selectionMode.prefix() + label.getText());
+                        currentlySelectedButton = null;
                     }
                 });
 
@@ -175,17 +201,29 @@ public class Controller {
         }
     }
 
-    /*Initializes a VBox with controls which will be used to choose example data
+    /*Initializes with controls which will be used to choose example data
       from the sample table*/
     private void initSelectionStepControlBar() {
 
-        for (SelectionStep step : SelectionStep.values()) {
-            StepButton button = new StepButton(step.title(), step);
+        for (SelectionMode step : SelectionMode.values()) {
+            SelectionModeButton button = new SelectionModeButton(step.title(), step);
+            //todo this style related
             button.setMaxWidth(Double.MAX_VALUE);
-            button.setOnMouseClicked(event -> {
-                currentlySelectedButton = button;
-                instructionLabel.setText(step.decription());
 
+            /*The listener merely changes the currently selected button further action
+                is handled in the table sample control that will be clicked.*/
+            button.setOnMouseClicked(event -> {
+                if (timetableSheet == null) {
+                    showInfoAlert("File not chosen yet!",
+                            "Please choose a file first!");
+                } else if (button.getStep() != SelectionMode.SELECT_COURSE &&
+                        !TableManager.selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
+                    showInfoAlert("Course not chosen yet!",
+                            "Please choose a course first!");
+                } else {
+                    currentlySelectedButton = button;
+                    instructionLabel.setText(step.decription());
+                }
             });
             tableSampleControls.getChildren().add(button);
         }
@@ -215,14 +253,14 @@ public class Controller {
              */
             File file = chooser.showOpenDialog(browseButton.getScene().getWindow());
 
-            Workbook timetable = TableUtils.readTimetable(file);
+            Workbook timetable = TableManager.readTimetable(file);
 
             if (timetable != null) {
                 timetableSheet = timetable.getSheetAt(0);
-                TableUtils.unpackMergedCells(timetableSheet);
+                TableManager.unpackMergedCells(timetableSheet);
                 initTableSample(timetableSheet, 5, 5);
+                browseButton.setText("File: " + file.getName());
             }
-
         });
     }
 
@@ -230,7 +268,7 @@ public class Controller {
     private Label makeGridLabel(Label label) {
         label.setStyle("-fx-background-color: #FFC312;" +
                 "-fx-max-width: infinity;" +
-                "-fx-max-height: infinity"
+                "-fx-max-height: infinity;"
         );
         label.setAlignment(Pos.CENTER);
         GridPane.setFillWidth(label, true);
@@ -239,5 +277,11 @@ public class Controller {
 
     }
 
-
+    private void showInfoAlert(String header, String body) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Woah there!");
+        alert.setHeaderText(header);
+        alert.setContentText(body);
+        alert.show();
+    }
 }

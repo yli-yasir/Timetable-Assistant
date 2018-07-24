@@ -14,9 +14,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-class TableUtils {
+class TableManager {
 
-    static SelectionMetaMap selectionMetaMap = new SelectionMetaMap();
+    static SelectionModeToDataMap selectionModeToDataMap = new SelectionModeToDataMap();
 
     //Unpacks all merged cells in the sheet.
     static void unpackMergedCells(Sheet sheet) {
@@ -42,15 +42,19 @@ class TableUtils {
 
     }
 
-    //WorkbookFactory.create(File f) wrapped in in try/catch.
+    /**
+     * Returns a workbook of the file you provide.
+     *
+     * @param file the file to read.
+     * @return null | Workbook containing the timetable
+     */
     static Workbook readTimetable(File file) {
         Workbook timetable = null;
         try {
             timetable = WorkbookFactory.create(file);
-        } catch (IOException | InvalidFormatException e) {
+        } catch (IOException | InvalidFormatException | NullPointerException e) {
             e.printStackTrace();
         }
-
         return timetable;
     }
 
@@ -78,21 +82,46 @@ class TableUtils {
         }
     }
 
+    /**
+     * Get corresponding information that was stored in a selection mode.
+     *
+     * @param sheet      The sheet that contains the courseCell.
+     * @param courseCell The cell that contains the course that we want information about.
+     * @param mode       The mode when the information was stored.
+     * @return String value of the requested information.
+     */
     private static String getCourseInfo(Sheet sheet, Cell courseCell
-            , SelectionStep step) {
-        SelectionMetaData data = selectionMetaMap.get(step);
+            , SelectionMode mode) {
+        //Get data about the requested information.
+        SelectionModeData data = selectionModeToDataMap.get(mode);
 
-        if (data.getType() == SelectionMetaData.TYPE_ROW)
+        /*If the requested information is in a row, then we get this certain
+        row (by using data.getValue()) then the information we want will be
+        in the same column as the column of the row.
+         */
+        if (data.getType() == SelectionModeData.TYPE_ROW)
             return sheet.getRow(data.getValue()).getCell(courseCell.getColumnIndex()).toString();
 
-        else if (data.getType() == SelectionMetaData.TYPE_COLUMN)
+        /*If the requested information is in a column, then we get the row of
+        the course first, then we get the certain column in which the information
+        was stored (by using data.getValue()). This will give us the information
+        we want.*/
+        else if (data.getType() == SelectionModeData.TYPE_COLUMN)
             return sheet.getRow(courseCell.getRowIndex()).getCell(data.getValue()).toString();
 
         else
-            return courseCell.toString();
+            return null;
     }
 
-    private static LinkedHashMap<String, ArrayList<Course>> getCourseDayMap(Sheet sheet, ObservableList<String> courses) {
+
+    /**
+     * Maps days as keys to courses as values, also sorts them in ascending order.
+     *
+     * @param sheet   The sheet you are looking for courses in.
+     * @param courses A list of the courses, that we are looking to map.
+     * @return a sorted map
+     */
+    private static LinkedHashMap<String, ArrayList<Course>> makeCourseDayMap(Sheet sheet, ObservableList<String> courses) {
         LinkedHashMap<String, ArrayList<Course>> courseMap = new LinkedHashMap<>();
 
         /*For each cell in the sheet, if it's for a course that's in the list
@@ -102,16 +131,16 @@ class TableUtils {
         for (Row row : sheet) {
             for (Cell cell : row) {
                 if (courses.contains(makeStringValue(cell))) {
-                    String day = getCourseInfo(sheet, cell, SelectionStep.SELECT_DAY);
+                    String day = getCourseInfo(sheet, cell, SelectionMode.SELECT_DAY);
 
                     //Either get the list we already have or make a new one.
                     ArrayList<Course> dayCourses = courseMap.getOrDefault(day,
                             new ArrayList<>());
 
                     //Add the course to it.
-                    dayCourses.add(new Course(cell.toString(),
-                            getCourseInfo(sheet, cell, SelectionStep.SELECT_TIME),
-                            getCourseInfo(sheet, cell, SelectionStep.SELECT_HALL)));
+                    dayCourses.add(new Course(makeStringValue(cell),
+                            getCourseInfo(sheet, cell, SelectionMode.SELECT_TIME),
+                            getCourseInfo(sheet, cell, SelectionMode.SELECT_HALL)));
 
                     courseMap.put(day, dayCourses);
 
@@ -121,18 +150,7 @@ class TableUtils {
         return courseMap;
     }
 
-    private static void drawBoundString(Graphics2D g2d,int x,int y,String s,int boundWidth){
-        FontMetrics metrics = g2d.getFontMetrics();
-        int originalSize = metrics.getFont().getSize();
-        for (int currentSize = originalSize; metrics.stringWidth(s)>boundWidth;currentSize--){
-            g2d.setFont(metrics.getFont().deriveFont((float)currentSize));
-            metrics=g2d.getFontMetrics();
-        }
-        g2d.drawString(s,x,y);
-    }
     private static void drawTable(LinkedHashMap<String, ArrayList<Course>> map) {
-
-        System.out.println("map size is "  + map.size());
 
 
         //Image dimensions
@@ -151,10 +169,9 @@ class TableUtils {
             int size = list.size();
             if (size > rowCount) rowCount = size;
         }
-        //Add an extra row that will contain the day.
-        rowCount+=1;
+        //Add an extra row that will contain the day header.
+        rowCount += 1;
         System.out.println("rows:" + rowCount);
-
 
         /*Divide the width of the image by the number of needed columns to get
          to get the width of a single column*/
@@ -185,14 +202,14 @@ class TableUtils {
         }
 
         //Draw row lines. Not using <=i is intentional.
-        for (int i = 1; i < rowCount ; i++) {
+        for (int i = 1; i < rowCount; i++) {
             System.out.println("drawing row line");
             int currentY = (i * rowHeight);
             g2d.drawLine(0, currentY, width, currentY);
         }
 
         //Draw strings
-        g2d.setFont(new Font("Courier",Font.PLAIN,12));
+        g2d.setFont(new Font("Courier", Font.PLAIN, 12));
         FontMetrics metrics = g2d.getFontMetrics();
         int fontAscent = metrics.getAscent();
 
@@ -213,7 +230,7 @@ class TableUtils {
                 paddedY += rowHeight;
             }
             //Move back to the top cell.
-            paddedY=fontAscent;
+            paddedY = fontAscent;
 
             //Move to the right one cell.
             paddedX += columnWidth;
@@ -230,7 +247,7 @@ class TableUtils {
     static void generateTimetable(Sheet sheet, ObservableList<String> courses) {
 
         LinkedHashMap<String, ArrayList<Course>> courseDayMap =
-                getCourseDayMap(sheet, courses);
+                makeCourseDayMap(sheet, courses);
 
         drawTable(courseDayMap);
 
