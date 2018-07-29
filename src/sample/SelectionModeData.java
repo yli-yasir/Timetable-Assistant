@@ -18,19 +18,19 @@ class SelectionModeData {
     different for each other cell in the row and we we should be able
     to figure it out. The same thing applies if it's part of a column.
      */
-    private int value;
+    private int index;
 
-    SelectionModeData(int type, int value) {
+    SelectionModeData(int type, int index) {
         this.type = type;
-        this.value = value;
+        this.index = index;
     }
 
      int getType() {
         return type;
     }
 
-     int getValue() {
-        return value;
+     int getIndex() {
+        return index;
     }
 
 

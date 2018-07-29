@@ -58,27 +58,51 @@ class TableManager {
         return timetable;
     }
 
-    private static String makeStringValue(Cell cell) {
-        return cell == null ? "" : cell.toString()
-                .replace(" ", "").toLowerCase();
+    /**
+     * If cell is null, returns an empty string.
+     * Otherwise, removes all white spaces and returns a lower case string.
+     *
+     * @param cell to make the String from.
+     * @return new String after performing operations.
+     */
+    private static String makeStringValue(Cell cell, boolean whiteSpace) {
+        if (cell == null) return "";
+        String string = cell.toString().toLowerCase();
+        return !whiteSpace ? string.replace(" ", "") :
+                string;
+    }
+
+    private static String makeStringValue(String string, boolean whiteSpace) {
+        if (string == null) return "";
+        String resultString = string
+                .toLowerCase();
+        return !whiteSpace ? resultString.replace(" ", "") :
+                resultString;
     }
 
     //Find the query and populates a list with the results.
     static void search(Sheet searchSheet, ObservableList<String> resultList, String searchQuery) {
+        //lower case and remove white space from search query.
+        searchQuery = makeStringValue(searchQuery,false);
         if (searchSheet != null) {
             HashSet<String> results = new HashSet<>();
             for (Row row : searchSheet) {
                 for (Cell cell : row) {
-                    String currentText = makeStringValue(cell);
+                    /*lower case and remove white space from the string of the
+                    current cell*/
+                    String currentText = makeStringValue(cell,false);
 
-                    if (currentText.contains(searchQuery.toLowerCase())) {
-                        results.add(currentText);
+                    /*Using contains because user might not have entered a completely
+                    matching search query*/
+                    if (currentText.contains(searchQuery)) {
+                        /*add what we found to the results in lower case and
+                        with white space*/
+                        results.add(makeStringValue(cell,true));
                     }
                 }
             }
             resultList.setAll(results);
             Collections.sort(resultList);
-
         }
     }
 
@@ -90,27 +114,35 @@ class TableManager {
      * @param mode       The mode when the information was stored.
      * @return String value of the requested information.
      */
-    private static String getCourseInfo(Sheet sheet, Cell courseCell
+    private static RankedString getCourseInfo(Sheet sheet, Cell courseCell
             , SelectionMode mode) {
-        //Get data about the requested information.
-        SelectionModeData data = selectionModeToDataMap.get(mode);
+        //Get selectionModeData about the requested information.
+        SelectionModeData selectionModeData = selectionModeToDataMap.get(mode);
+
 
         /*If the requested information is in a row, then we get this certain
-        row (by using data.getValue()) then the information we want will be
+        row (by using selectionModeData.getIndex()) then the information we want will be
         in the same column as the column of the row.
          */
-        if (data.getType() == SelectionModeData.TYPE_ROW)
-            return sheet.getRow(data.getValue()).getCell(courseCell.getColumnIndex()).toString();
-
+        if (selectionModeData.getType() == SelectionModeData.TYPE_ROW) {
+            Row row = sheet.getRow(selectionModeData.getIndex());
+            //The rank is equal to the index of the column.
+            int rank = courseCell.getColumnIndex();
+            String string = makeStringValue(row.getCell(rank),true);
+            return new RankedString(string, rank);
+        }
         /*If the requested information is in a column, then we get the row of
         the course first, then we get the certain column in which the information
-        was stored (by using data.getValue()). This will give us the information
+        was stored (by using selectionModeData.getIndex()). This will give us the information
         we want.*/
-        else if (data.getType() == SelectionModeData.TYPE_COLUMN)
-            return sheet.getRow(courseCell.getRowIndex()).getCell(data.getValue()).toString();
-
-        else
-            return null;
+        if (selectionModeData.getType() == SelectionModeData.TYPE_COLUMN) {
+            //The rank is equal to the index of the row.
+            int rank = courseCell.getRowIndex();
+            Row row = sheet.getRow(rank);
+            String string = makeStringValue(row.getCell(selectionModeData.getIndex()),true);
+            return new RankedString(string, rank);
+        }
+        return null;
     }
 
 
@@ -118,11 +150,11 @@ class TableManager {
      * Maps days as keys to courses as values, also sorts them in ascending order.
      *
      * @param sheet   The sheet you are looking for courses in.
-     * @param courses A list of the courses, that we are looking to map.
+     * @param addedCourses A list of the courses, that we are looking to map.
      * @return a sorted map
      */
-    private static LinkedHashMap<String, ArrayList<Course>> makeCourseDayMap(Sheet sheet, ObservableList<String> courses) {
-        LinkedHashMap<String, ArrayList<Course>> courseMap = new LinkedHashMap<>();
+    private static DayToCourseListMap makeDayToCourseListMap(Sheet sheet, ObservableList<String> addedCourses) {
+        DayToCourseListMap dayToCourseListMap = new DayToCourseListMap();
 
         /*For each cell in the sheet, if it's for a course that's in the list
         of courses that we want, then add it to the hash map , with the day
@@ -130,27 +162,28 @@ class TableManager {
          */
         for (Row row : sheet) {
             for (Cell cell : row) {
-                if (courses.contains(makeStringValue(cell))) {
-                    String day = getCourseInfo(sheet, cell, SelectionMode.SELECT_DAY);
+                if (addedCourses.contains(makeStringValue(cell,true))) {
+                    RankedString day = getCourseInfo(sheet, cell, SelectionMode.SELECT_DAY);
 
                     //Either get the list we already have or make a new one.
-                    ArrayList<Course> dayCourses = courseMap.getOrDefault(day,
+                    ArrayList<Course> dayCourses = dayToCourseListMap.getOrDefault(day,
                             new ArrayList<>());
 
                     //Add the course to it.
-                    dayCourses.add(new Course(makeStringValue(cell),
+                    dayCourses.add(new Course(makeStringValue(cell,true),
                             getCourseInfo(sheet, cell, SelectionMode.SELECT_TIME),
                             getCourseInfo(sheet, cell, SelectionMode.SELECT_HALL)));
 
-                    courseMap.put(day, dayCourses);
+                    dayToCourseListMap.put(day, dayCourses);
 
                 }
             }
         }
-        return courseMap;
+
+        return dayToCourseListMap;
     }
 
-    private static void drawTable(LinkedHashMap<String, ArrayList<Course>> map) {
+    private static void drawTable(DayToCourseListMap map) {
 
 
         //Image dimensions
@@ -209,20 +242,20 @@ class TableManager {
         }
 
         //Draw strings
-        g2d.setFont(new Font("Courier", Font.PLAIN, 12));
+        g2d.setFont(new Font(Font.MONOSPACED, Font.BOLD, 12));
         FontMetrics metrics = g2d.getFontMetrics();
         int fontAscent = metrics.getAscent();
 
         int paddedX = 2;
         int paddedY = fontAscent;
 
-        for (String day : map.keySet()) {
+        for (RankedString day : map.keySet()) {
             //Draw day string.
-            g2d.drawString(day, paddedX, paddedY);
+            g2d.drawString(day.toString(), paddedX, paddedY);
             //Move down one cell.
             paddedY += rowHeight;
             for (Course course : map.get(day)) {
-                String[] courseInfo = {course.getName(), course.getTime(), course.getHall()};
+                String[] courseInfo = {course.getName(), course.getTime().toString(), course.getHall().toString()};
                 for (int i = 0; i < courseInfo.length; i++) {
                     g2d.drawString(courseInfo[i], paddedX, paddedY + (i * lineSpacing));
                 }
@@ -246,10 +279,10 @@ class TableManager {
 
     static void generateTimetable(Sheet sheet, ObservableList<String> courses) {
 
-        LinkedHashMap<String, ArrayList<Course>> courseDayMap =
-                makeCourseDayMap(sheet, courses);
+        DayToCourseListMap dayToCourseListMap =
+                makeDayToCourseListMap(sheet, courses);
 
-        drawTable(courseDayMap);
+        drawTable(dayToCourseListMap);
 
     }
 

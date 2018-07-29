@@ -35,7 +35,7 @@ class SelectionModeToDataMap {
             If it's not on the same row then there is probably a column of that
             data to the left or right
             */
-            int type = exampleRowIndex == courseMeta.getValue()?
+            int type = exampleRowIndex == courseMeta.getIndex()?
                     SelectionModeData.TYPE_COLUMN : SelectionModeData.TYPE_ROW;
 
             /*If it's of type row then save the value for row and same
@@ -53,6 +53,7 @@ class SelectionModeToDataMap {
     int size(){
          return exampleMap.size();
     }
+
     SelectionModeData get(SelectionMode key){
          return exampleMap.get(key);
     }

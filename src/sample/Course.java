@@ -2,25 +2,25 @@ package sample;
 
 class Course {
     private String name;
-    private String hall;
-    private String time;
+    private RankedString hall;
+    private RankedString time;
 
-     Course(String name,String hall, String time) {
+     Course(String name,RankedString hall, RankedString time) {
         this.name=name;
         this.hall = hall;
         this.time = time;
     }
 
 
-    public String getName() {
+     String getName() {
         return name;
     }
 
-    public String getHall() {
+     RankedString getHall() {
         return hall;
     }
 
-    public String getTime() {
+     RankedString getTime() {
         return time;
     }
 }
