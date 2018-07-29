@@ -17,6 +17,7 @@ public class DayToCourseListMap extends TreeMap<RankedString, ArrayList<Course>>
 
                 return o1.toString().compareTo(o2.toString());
             }
-        });}
+        });
+    }
 
 }

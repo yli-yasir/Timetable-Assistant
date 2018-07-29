@@ -162,7 +162,7 @@ class TableManager {
          */
         for (Row row : sheet) {
             for (Cell cell : row) {
-                if (addedCourses.contains(makeStringValue(cell,true))) {
+                if (addedCourses.contains(makeStringValue(cell, true))) {
                     RankedString day = getCourseInfo(sheet, cell, SelectionMode.SELECT_DAY);
 
                     //Either get the list we already have or make a new one.
@@ -170,17 +170,27 @@ class TableManager {
                             new ArrayList<>());
 
                     //Add the course to it.
-                    dayCourses.add(new Course(makeStringValue(cell,true),
+                    dayCourses.add(new Course(makeStringValue(cell, true),
                             getCourseInfo(sheet, cell, SelectionMode.SELECT_TIME),
                             getCourseInfo(sheet, cell, SelectionMode.SELECT_HALL)));
 
-                    dayToCourseListMap.put(day, dayCourses);
+                    System.out.println("time rank: " +
+                            getCourseInfo(sheet, cell, SelectionMode.SELECT_TIME).getRank()
+                    );
 
+                    dayToCourseListMap.put(day, dayCourses);
                 }
             }
         }
-
+        /*Keys should be already sorted because a comparator is provided in
+        DayToCourseListMap class,Now we will sort all the array lists*/
+        for (ArrayList<Course> dayCourses : dayToCourseListMap.values()) {
+            dayCourses.sort((o1, o2) ->
+                    Integer.compare(o2.getTime().getRank(), o1.getTime().getRank())
+            );
+        }
         return dayToCourseListMap;
+
     }
 
     private static void drawTable(DayToCourseListMap map) {
