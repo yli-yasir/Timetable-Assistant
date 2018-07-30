@@ -184,7 +184,12 @@ class TableManager {
         /*Keys should be already sorted because it implements comparable
         ,Now we will sort all the array lists*/
         for (ArrayList<Course> dayCourses : dayToCourseListMap.values()) {
-            dayCourses.sort((o1,o2)->Integer.compare(o1.getTime().getRank(),o2.getTime().getRank()));
+            dayCourses.sort((o1,o2)->{
+                if (o1.equals(o2)) return 0;
+                int result = Integer.compare(o1.getTime().getRank(),o2.getTime().getRank());
+                //To keep it consistent with equals, we can't permit to get a 0 for having similar time.
+                return result == 0 ? 1 : result;
+            });
         }
         return dayToCourseListMap;
 

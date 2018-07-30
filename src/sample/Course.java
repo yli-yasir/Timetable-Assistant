@@ -1,5 +1,7 @@
 package sample;
 
+import java.util.Objects;
+
 class Course {
     private String name;
     private RankedString hall;
@@ -11,8 +13,22 @@ class Course {
         this.time = time;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Course course = (Course) o;
+        return Objects.equals(name, course.name) &&
+                Objects.equals(hall, course.hall) &&
+                Objects.equals(time, course.time);
+    }
 
-     String getName() {
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, hall, time);
+    }
+
+    String getName() {
         return name;
     }
 
