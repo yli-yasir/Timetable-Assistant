@@ -83,21 +83,21 @@ class TableManager {
     //Find the query and populates a list with the results.
     static void search(Sheet searchSheet, ObservableList<String> resultList, String searchQuery) {
         //lower case and remove white space from search query.
-        searchQuery = makeStringValue(searchQuery,false);
+        searchQuery = makeStringValue(searchQuery, false);
         if (searchSheet != null) {
             HashSet<String> results = new HashSet<>();
             for (Row row : searchSheet) {
                 for (Cell cell : row) {
                     /*lower case and remove white space from the string of the
                     current cell*/
-                    String currentText = makeStringValue(cell,false);
+                    String currentText = makeStringValue(cell, false);
 
                     /*Using contains because user might not have entered a completely
                     matching search query*/
                     if (currentText.contains(searchQuery)) {
                         /*add what we found to the results in lower case and
                         with white space*/
-                        results.add(makeStringValue(cell,true));
+                        results.add(makeStringValue(cell, true));
                     }
                 }
             }
@@ -119,17 +119,18 @@ class TableManager {
         //Get selectionModeData about the requested information.
         SelectionModeData selectionModeData = selectionModeToDataMap.get(mode);
 
-
         /*If the requested information is in a row, then we get this certain
         row (by using selectionModeData.getIndex()) then the information we want will be
         in the same column as the column of the row.
          */
         if (selectionModeData.getType() == SelectionModeData.TYPE_ROW) {
+
             Row row = sheet.getRow(selectionModeData.getIndex());
             //The rank is equal to the index of the column.
             int rank = courseCell.getColumnIndex();
-            String string = makeStringValue(row.getCell(rank),true);
+            String string = makeStringValue(row.getCell(rank), true);
             return new RankedString(string, rank);
+
         }
         /*If the requested information is in a column, then we get the row of
         the course first, then we get the certain column in which the information
@@ -139,7 +140,7 @@ class TableManager {
             //The rank is equal to the index of the row.
             int rank = courseCell.getRowIndex();
             Row row = sheet.getRow(rank);
-            String string = makeStringValue(row.getCell(selectionModeData.getIndex()),true);
+            String string = makeStringValue(row.getCell(selectionModeData.getIndex()), true);
             return new RankedString(string, rank);
         }
         return null;
@@ -149,7 +150,7 @@ class TableManager {
     /**
      * Maps days as keys to courses as values, also sorts them in ascending order.
      *
-     * @param sheet   The sheet you are looking for courses in.
+     * @param sheet        The sheet you are looking for courses in.
      * @param addedCourses A list of the courses, that we are looking to map.
      * @return a sorted map
      */
@@ -171,23 +172,19 @@ class TableManager {
 
                     //Add the course to it.
                     dayCourses.add(new Course(makeStringValue(cell, true),
-                            getCourseInfo(sheet, cell, SelectionMode.SELECT_TIME),
-                            getCourseInfo(sheet, cell, SelectionMode.SELECT_HALL)));
-
-                    System.out.println("time rank: " +
-                            getCourseInfo(sheet, cell, SelectionMode.SELECT_TIME).getRank()
+                            getCourseInfo(sheet, cell, SelectionMode.SELECT_HALL),
+                            getCourseInfo(sheet, cell, SelectionMode.SELECT_TIME))
                     );
+
 
                     dayToCourseListMap.put(day, dayCourses);
                 }
             }
         }
-        /*Keys should be already sorted because a comparator is provided in
-        DayToCourseListMap class,Now we will sort all the array lists*/
+        /*Keys should be already sorted because it implements comparable
+        ,Now we will sort all the array lists*/
         for (ArrayList<Course> dayCourses : dayToCourseListMap.values()) {
-            dayCourses.sort((o1, o2) ->
-                    Integer.compare(o2.getTime().getRank(), o1.getTime().getRank())
-            );
+            dayCourses.sort((o1,o2)->Integer.compare(o1.getTime().getRank(),o2.getTime().getRank()));
         }
         return dayToCourseListMap;
 
@@ -214,7 +211,6 @@ class TableManager {
         }
         //Add an extra row that will contain the day header.
         rowCount += 1;
-        System.out.println("rows:" + rowCount);
 
         /*Divide the width of the image by the number of needed columns to get
          to get the width of a single column*/
@@ -239,14 +235,12 @@ class TableManager {
 
         //Draw column lines. Not using <=i is intentional.
         for (int i = 1; i < columnCount; i++) {
-            System.out.println("drawing col line");
             int currentX = (i * columnWidth);
             g2d.drawLine(currentX, 0, currentX, height);
         }
 
         //Draw row lines. Not using <=i is intentional.
         for (int i = 1; i < rowCount; i++) {
-            System.out.println("drawing row line");
             int currentY = (i * rowHeight);
             g2d.drawLine(0, currentY, width, currentY);
         }

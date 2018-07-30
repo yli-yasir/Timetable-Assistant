@@ -6,7 +6,7 @@ import java.util.Objects;
     typically be the index of a column or a row. This will be used for sorting.
     For instance, say you have a row in which times are stored in different cells.
     The lower the index the earlier the time.*/
-public class RankedString {
+public class RankedString implements Comparable<RankedString> {
     private String string;
     private int rank;
 
@@ -15,7 +15,7 @@ public class RankedString {
         this.rank = rank;
     }
 
-    public int getRank() {
+     int getRank() {
         return rank;
     }
 
@@ -26,6 +26,8 @@ public class RankedString {
         RankedString that = (RankedString) o;
         return Objects.equals(string, that.string);
     }
+
+
 
     @Override
     public int hashCode() {
@@ -38,5 +40,14 @@ public class RankedString {
     @Override
     public String toString() {
         return string;
+    }
+
+
+    @Override
+    public int compareTo(RankedString o) {
+        if (equals(o)) return 0;
+        if (rank>o.getRank()) return 1;
+        if (rank<o.getRank()) return -1;
+        return 1;
     }
 }
