@@ -8,7 +8,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -50,10 +49,12 @@ class TableManager {
      */
     static Workbook readTimetable(File file) {
         Workbook timetable = null;
-        try {
-            timetable = WorkbookFactory.create(file);
-        } catch (IOException | InvalidFormatException | NullPointerException e) {
-            e.printStackTrace();
+        if (file!=null) {
+            try {
+                timetable = WorkbookFactory.create(file);
+            } catch (IOException | InvalidFormatException e) {
+                e.printStackTrace();
+            }
         }
         return timetable;
     }
@@ -67,15 +68,14 @@ class TableManager {
      */
     private static String makeStringValue(Cell cell, boolean whiteSpace) {
         if (cell == null) return "";
-        String string = cell.toString().toLowerCase();
-        return !whiteSpace ? string.replace(" ", "") :
-                string;
+        String string = cell.toString();
+        return makeStringValue(string,whiteSpace);
     }
 
     private static String makeStringValue(String string, boolean whiteSpace) {
-        if (string == null) return "";
+        if (string == null || string.isEmpty()) return "";
         String resultString = string
-                .toLowerCase();
+                .toLowerCase().trim();
         return !whiteSpace ? resultString.replace(" ", "") :
                 resultString;
     }
@@ -195,8 +195,7 @@ class TableManager {
 
     }
 
-    private static void drawTable(DayToCourseListMap map) {
-
+    private static void drawTable(DayToCourseListMap map,float fontSize,String fileName) {
 
         //Image dimensions
         int width = 842;
@@ -251,7 +250,8 @@ class TableManager {
         }
 
         //Draw strings
-        g2d.setFont(new Font(Font.MONOSPACED, Font.BOLD, 12));
+        g2d.setFont(g2d.getFont().deriveFont(fontSize));
+        System.out.println(g2d.getFont().getSize());
         FontMetrics metrics = g2d.getFontMetrics();
         int fontAscent = metrics.getAscent();
 
@@ -280,18 +280,16 @@ class TableManager {
 
 
         try {
-            ImageIO.write(image, "png", new File("f.png"));
+            ImageIO.write(image, "png", new File(fileName+".png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    static void generateTimetable(Sheet sheet, ObservableList<String> courses) {
-
+    static void generateTimetable(Sheet sheet, ObservableList<String> courses,float fontSize,String fileName) {
         DayToCourseListMap dayToCourseListMap =
                 makeDayToCourseListMap(sheet, courses);
-
-        drawTable(dayToCourseListMap);
+        drawTable(dayToCourseListMap,fontSize,fileName);
 
     }
 

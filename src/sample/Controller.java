@@ -15,12 +15,10 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
 
-//--NEED TO IMPLEMENT SORTING FIRST--
-//todo handle when user attempts generate before choosing file and completing selection
-//todo handle when user adds something that is not a course and attempts to generate
+//todo center text in table cell
+//todo invesitgate log when file is null after file browse
 
-//todo implement proper usage of the output file name text field
-//todo implement proper usage of the font selection field.
+
 
 public class Controller {
 
@@ -68,9 +66,12 @@ public class Controller {
         ListView<String> addedCourses = new ListView<>();
         ObservableList<String> addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
-        addedCourses.setOnMouseClicked(event ->
+        addedCourses.setOnMouseClicked(event ->{
+            MultipleSelectionModel<String> sModel = addedCourses.getSelectionModel();
+            String string = sModel.getSelectedItem();
+        if (string !=null)
                 addedCoursesList
-                        .remove(addedCourses.getSelectionModel().getSelectedIndex()));
+                        .remove(sModel.getSelectedIndex());});
 
         //Label and list for displaying courses that are in the table.
         Label availableCoursesHeader = new Label("Available:");
@@ -80,7 +81,7 @@ public class Controller {
                 searchResultList);
         availableCourses.setOnMouseClicked(event -> {
             String clickedItem = availableCourses.getSelectionModel().getSelectedItem();
-            if (!addedCoursesList.contains(clickedItem)) {
+            if (!addedCoursesList.contains(clickedItem) && clickedItem!=null) {
                 addedCoursesList.add(clickedItem
                 );
             }
@@ -100,8 +101,14 @@ public class Controller {
             }
         });
 
-        generateButton.setOnAction(event ->
-                TableManager.generateTimetable(timetableSheet, addedCoursesList));
+        generateButton.setOnAction(event ->{
+            String fileName = outputFileNameField.getText();
+            if (!addedCoursesList.isEmpty() && fileName!=null &&
+                    !fileName.isEmpty() )
+            TableManager.generateTimetable(timetableSheet, addedCoursesList,fontSizeOptions.getValue(),fileName);
+                else showInfoAlert("Something is wrong!","Did you add courses and specify " +
+                    "the output file name?!");});
+        //todo this is related to style
         generateButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         //SettingsBox
@@ -232,7 +239,6 @@ public class Controller {
     }
 
 
-    //todo handle file being null
     //todo handle user closing browsing window (file = null?)
     //todo preferably make the file opening process in a background thread
     //todo display a loading bar while the file is being opened.
