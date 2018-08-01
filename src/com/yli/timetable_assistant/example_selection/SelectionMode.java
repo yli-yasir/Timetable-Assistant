@@ -1,4 +1,4 @@
-package sample;
+package com.yli.timetable_assistant.example_selection;
 
 public enum SelectionMode {
 
@@ -17,13 +17,13 @@ public enum SelectionMode {
         this.description = description;
     }
 
-    String decription() {
+    public String decription() {
         return description;
     }
 
-     String title(){return title;}
+     public String title(){return title;}
 
-     String prefix(){
+     public String prefix(){
         return prefix;
      }
 }

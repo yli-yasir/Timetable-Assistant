@@ -1,4 +1,4 @@
-package sample;
+package com.yli.timetable_assistant;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

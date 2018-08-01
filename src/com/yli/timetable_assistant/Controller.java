@@ -1,5 +1,8 @@
-package sample;
+package com.yli.timetable_assistant;
 
+import com.yli.timetable_assistant.example_selection.ExampleCourseNotSetException;
+import com.yli.timetable_assistant.example_selection.SelectionMode;
+import com.yli.timetable_assistant.example_selection.SelectionModeButton;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -15,10 +18,13 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
 
+//todo separate strings in view from code.
+//todo separate style of views from code.
+//todo separate classes into proper packages.
+
 //todo center text in table cell
-//todo invesitgate log when file is null after file browse
 
-
+import com.yli.timetable_assistant.example_selection.*;
 
 public class Controller {
 
@@ -174,9 +180,9 @@ public class Controller {
                     if (currentlySelectedButton != null) {
                         int rowIndex = GridPane.getRowIndex(label);
                         int columnIndex = GridPane.getColumnIndex(label);
-                        SelectionMode selectionMode = currentlySelectedButton.getStep();
+                        com.yli.timetable_assistant.example_selection.SelectionMode selectionMode = currentlySelectedButton.getStep();
 
-                        if (selectionMode == SelectionMode.SELECT_COURSE) {
+                        if (selectionMode == com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE) {
                             TableManager.selectionModeToDataMap.puSelectionModeData(rowIndex);
                         } else {
                             try {
@@ -190,7 +196,7 @@ public class Controller {
                         //todo this is text related to view.
                         String instruction;
 
-                        if (TableManager.selectionModeToDataMap.size() < SelectionMode.values().length) {
+                        if (TableManager.selectionModeToDataMap.size() < com.yli.timetable_assistant.example_selection.SelectionMode.values().length) {
                             instruction = "Please choose the remaining information...";
                         } else {
                             instruction = "All done! You can search for and add courses now!";
@@ -212,7 +218,7 @@ public class Controller {
       from the sample table*/
     private void initSelectionStepControlBar() {
 
-        for (SelectionMode step : SelectionMode.values()) {
+        for (com.yli.timetable_assistant.example_selection.SelectionMode step : com.yli.timetable_assistant.example_selection.SelectionMode.values()) {
             SelectionModeButton button = new SelectionModeButton(step.title(), step);
             //todo this style related
             button.setMaxWidth(Double.MAX_VALUE);
@@ -223,7 +229,7 @@ public class Controller {
                 if (timetableSheet == null) {
                     showInfoAlert("File not chosen yet!",
                             "Please choose a file first!");
-                } else if (button.getStep() != SelectionMode.SELECT_COURSE &&
+                } else if (button.getStep() != com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE &&
                         !TableManager.selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
                     showInfoAlert("Course not chosen yet!",
                             "Please choose a course first!");

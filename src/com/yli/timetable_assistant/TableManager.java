@@ -1,5 +1,8 @@
-package sample;
+package com.yli.timetable_assistant;
 
+import com.yli.timetable_assistant.example_selection.SelectionMode;
+import com.yli.timetable_assistant.example_selection.SelectionModeData;
+import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
 import javafx.collections.ObservableList;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;

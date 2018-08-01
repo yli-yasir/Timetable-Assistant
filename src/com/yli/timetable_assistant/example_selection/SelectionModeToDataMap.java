@@ -1,9 +1,9 @@
-package sample;
+package com.yli.timetable_assistant.example_selection;
 
 import java.util.HashMap;
 
 //encapsulates a certain kind of HashMap and provides utility methods.
-class SelectionModeToDataMap {
+public class SelectionModeToDataMap {
 
     private HashMap<SelectionMode, SelectionModeData> exampleMap = new HashMap<>();
 
@@ -13,14 +13,14 @@ class SelectionModeToDataMap {
     a course cell isn't part of a row or column that contains the same sort
     of data we pass -1 as the type.
      */
-    final void puSelectionModeData(int exampleRowIndex) {
+    public final void puSelectionModeData(int exampleRowIndex) {
         exampleMap.put(SelectionMode.SELECT_COURSE,
                 new SelectionModeData(-1, exampleRowIndex));
     }
 
     /*Compares it against the example course and decides how to properly make
       meta data.*/
-     final void putCourseInfoMetaData(int exampleRowIndex, int exampleColumnIndex, SelectionMode step) throws ExampleCourseNotSetException {
+     public final void putCourseInfoMetaData(int exampleRowIndex, int exampleColumnIndex, SelectionMode step) throws ExampleCourseNotSetException {
          //If puSelectionModeData has not been called first...
         if (!exampleMap.containsKey(SelectionMode.SELECT_COURSE)) {
             throw new ExampleCourseNotSetException("Example course was not set!");
@@ -50,15 +50,15 @@ class SelectionModeToDataMap {
 
     }
 
-    int size(){
+    public int size(){
          return exampleMap.size();
     }
 
-    SelectionModeData get(SelectionMode key){
+    public SelectionModeData get(SelectionMode key){
          return exampleMap.get(key);
     }
 
-    boolean containsKey(SelectionMode step){
+    public boolean containsKey(SelectionMode step){
          return exampleMap.containsKey(step);
     }
 

@@ -1,10 +1,10 @@
-package sample;
+package com.yli.timetable_assistant.example_selection;
 
-class SelectionModeData {
+public class SelectionModeData {
 
 
-    static final int TYPE_ROW = 0;
-    static final int TYPE_COLUMN = 1;
+    public static final int TYPE_ROW = 0;
+    public static final int TYPE_COLUMN = 1;
 
     /*The cell that was selected with the example data, is either
     part of a row or a column that contains the same sort of data.
@@ -20,16 +20,16 @@ class SelectionModeData {
      */
     private int index;
 
-    SelectionModeData(int type, int index) {
+     SelectionModeData(int type, int index) {
         this.type = type;
         this.index = index;
     }
 
-     int getType() {
+     public int getType() {
         return type;
     }
 
-     int getIndex() {
+     public int getIndex() {
         return index;
     }
 

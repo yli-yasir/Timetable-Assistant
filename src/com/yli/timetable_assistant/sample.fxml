@@ -9,7 +9,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.TilePane?>
 
-<VBox fx:controller="sample.Controller"
+<VBox fx:controller="com.yli.timetable_assistant.Controller"
       xmlns:fx="http://javafx.com/fxml"
       stylesheets="@style.css">
 
