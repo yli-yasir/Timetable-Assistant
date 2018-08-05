@@ -58,7 +58,7 @@ public class Controller {
     private void initialize() {
         //populateBrowseBar();
         populateExampleSelectionControlBar();
-        initCourseSelectionGrid();
+        populateCourseSelectionGrid();
     }
 
 
@@ -112,20 +112,21 @@ public class Controller {
     }
 
     //Initializes controls that are related to selecting and adding courses.
-    private void initCourseSelectionGrid() {
+    private void populateCourseSelectionGrid() {
 
         //This will be used to enter a search query.
         TextField field = new TextField();
-        field.setFocusTraversable(false);
-        field.setPromptText("Course name");
-
+        field.setPromptText(bundle.getString("searchFieldPrompt"));
 
         /*Label and list for showing courses that have been added from
         the list that contains available courses.*/
-        Label addedCoursesHeader = new Label("Added:");
+        Label addedCoursesHeader = new Label(bundle.getString("addedCoursesHeader"));
+        addedCoursesHeader.getStyleClass().add("Header");
+
         ListView<String> addedCourses = new ListView<>();
         ObservableList<String> addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
+
         addedCourses.setOnMouseClicked(event ->{
             MultipleSelectionModel<String> sModel = addedCourses.getSelectionModel();
             String string = sModel.getSelectedItem();
@@ -134,11 +135,13 @@ public class Controller {
                         .remove(sModel.getSelectedIndex());});
 
         //Label and list for displaying courses that are in the table.
-        Label availableCoursesHeader = new Label("Available:");
+        Label availableCoursesHeader = new Label(bundle.getString("availableCoursesHeader"));
+        availableCoursesHeader.getStyleClass().add("Header");
         ListView<String> availableCourses = new ListView<>();
         ObservableList<String> searchResultList = FXCollections.observableArrayList();
         availableCourses.setItems(
                 searchResultList);
+
         availableCourses.setOnMouseClicked(event -> {
             String clickedItem = availableCourses.getSelectionModel().getSelectedItem();
             if (!addedCoursesList.contains(clickedItem) && clickedItem!=null) {
@@ -148,16 +151,14 @@ public class Controller {
         });
 
         //Buttons which will be used in this pane.
-        Button searchButton = new Button("Search");
-        Button generateButton = new Button("Generate timetable");
+        Button searchButton = new Button(bundle.getString("searchButton"));
+        Button generateButton = new Button(bundle.getString("generateButton"));
 
-        //todo this relates to string view
         searchButton.setOnAction(event ->{
             if (isReadyToSearch){
                 TableManager.search(timetableSheet, searchResultList, field.getText());}
                 else{
-                showInfoAlert("Insufficient information","Please choose required information" +
-                        " first!");
+                showInfoAlert(bundle.getString("insufficientInfoHeader"),bundle.getString("insufficientInfoBody"));
             }
         });
 
@@ -166,41 +167,35 @@ public class Controller {
             if (!addedCoursesList.isEmpty() && fileName!=null &&
                     !fileName.isEmpty() )
             TableManager.generateTimetable(timetableSheet, addedCoursesList,fontSizeOptions.getValue(),fileName);
-                else showInfoAlert("Something is wrong!","Did you add courses and specify " +
-                    "the output file name?!");});
-        //todo this is related to style
-        generateButton.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+                else
+                    showInfoAlert(bundle.getString("notReadyToSearchHeader"),bundle.getString("notReadyToSearchBody"));});
+
 
         //SettingsBox
-        VBox settingsBox = new VBox();
-        settingsBox.setPadding(new Insets(0, 0, 0, 20));
-        settingsBox.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        Label outputFileNameLabel = new Label("File name:");
-        Label settingsLabel = new Label("Settings:");
-        Label fontSizeLabel = new Label("Font size:");
+        Label settingsHeader = new Label(bundle.getString("settingsHeader"));
+        settingsHeader.getStyleClass().add("Header");
 
-        Insets sectionHeaderMargin = new Insets(10, 0, 0, 10);
-        Insets sectionBodyMargin = new Insets(0, 0, 0, 10);
+
+        VBox settingsBox = new VBox();
+        settingsBox.getStyleClass().add("SettingsBox");
+        GridPane.setHgrow(settingsBox,Priority.ALWAYS);
+
+        Label outputFileNameLabel = new Label(bundle.getString("outputFileName"));
         outputFileNameField = new TextField();
-        outputFileNameField.setPromptText("eg: Student No");
+        outputFileNameField.setPromptText(bundle.getString("outputFileNameFieldPrompt"));
+
+        Label fontSizeLabel = new Label(bundle.getString("fontSize"));
         fontSizeOptions = new ChoiceBox<>();
         ObservableList<Integer> sizeList = FXCollections.observableArrayList();
-        for (int i = 1; i <= 72; i++) {
-            sizeList.add(i);
-        }
+        for (int i = 1; i <= 72; i++) sizeList.add(i);
         fontSizeOptions.setItems(sizeList);
         fontSizeOptions.setValue(12);
 
-        VBox.setMargin(outputFileNameLabel, sectionHeaderMargin);
-        VBox.setMargin(outputFileNameField, sectionBodyMargin);
-        VBox.setMargin(fontSizeLabel, sectionHeaderMargin);
-        VBox.setMargin(fontSizeOptions, sectionBodyMargin);
+        settingsBox.getChildren().addAll(outputFileNameLabel,
+                outputFileNameField,
+                fontSizeLabel,
+                fontSizeOptions);
 
-        settingsBox.getChildren().add(settingsLabel);
-        settingsBox.getChildren().add(outputFileNameLabel);
-        settingsBox.getChildren().add(outputFileNameField);
-        settingsBox.getChildren().add(fontSizeLabel);
-        settingsBox.getChildren().add(fontSizeOptions);
 
         courseSelectionGrid.add(field, 0, 0);
         courseSelectionGrid.add(searchButton, 1, 0);
@@ -208,9 +203,9 @@ public class Controller {
         courseSelectionGrid.add(addedCoursesHeader, 1, 1);
         courseSelectionGrid.add(availableCourses, 0, 2);
         courseSelectionGrid.add(addedCourses, 1, 2);
-        courseSelectionGrid.add(generateButton, 0, 3, 2, 1);
-        courseSelectionGrid.add(settingsBox, 2, 1, 1, 2);
-
+        courseSelectionGrid.add(generateButton, 0, 3,3,1);
+        courseSelectionGrid.add(settingsHeader,2,1);
+        courseSelectionGrid.add(settingsBox, 2, 2);
 
     }
 
@@ -268,7 +263,7 @@ public class Controller {
         }
     }
 
-    /*Initializes with controls which will be used to choose example data
+    /*populates with controls which will be used to choose example data
       from the sample table*/
     private void populateExampleSelectionControlBar() {
 
@@ -290,7 +285,7 @@ public class Controller {
                             "Please choose a course first!");
                 } else {
                     currentlySelectedButton = button;
-                    instructionLabel.setText(step.decription());
+                    instructionLabel.setText(step.description());
                 }
             });
             children.add(button);

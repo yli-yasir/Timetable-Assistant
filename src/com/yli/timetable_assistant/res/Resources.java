@@ -13,7 +13,19 @@ public class Resources extends ResourceBundle {
         res.put("welcomeString","Please choose a file, then proceed to enter required information.");
         res.put("windowSize","Example window size:");
         res.put("browseButton","CHOOSE FILE");
-
+        res.put("searchFieldPrompt","Course name");
+        res.put("availableCoursesHeader","Available:");
+        res.put("addedCoursesHeader","Added:");
+        res.put("searchButton","Search cells");
+        res.put("generateButton","Generate");
+        res.put("insufficientInfoHeader","Insufficient information!");
+        res.put("insufficientInfoBody","Please choose required information first!");
+        res.put("notReadyToSearchHeader","Not ready to search yet!");
+        res.put("notReadyToSearchBody","Have you added courses and specified output file name?");
+        res.put("settingsHeader","Settings:");
+        res.put("outputFileName","Output file name:");
+        res.put("fontSize","Font size:");
+        res.put("outputFileNameFieldPrompt","Student No");
     }
 
     @Override

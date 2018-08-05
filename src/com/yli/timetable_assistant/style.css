@@ -1,33 +1,45 @@
 VBox {
 -fx-background-color:#009688;
+-fx-font-weight:bold;
 }
 
 HBox{
 -fx-padding: 8 0 0 0  }
 
+Button{
+-fx-max-width: infinity}
 SelectionModeButton{
 -fx-max-width: infinity}
 
+.SettingsBox{
+-fx-max-width: infinity;
+-fx-background-color: #00796B;
+-fx-padding: 0 10 0 10;
+}
 
 Label{
 -fx-text-fill:white;
 -fx-padding:2;
 }
 
-.instructionLabel{
+.Header{
+-fx-font-style: italic}
+
+.InstructionLabel{
 -fx-pref-width: infinity;
 -fx-effect: dropshadow(gaussian, #004D40, 10, 0, 2, 2);
 -fx-background-color:#00897B;
 }
 
 ChoiceBox {
--fx-background-color:#004D40;
+-fx-background-color:#00695C;
 }
 
 ScrollPane{
 -fx-padding:4;
--fx-background:#2980b9;
--fx-border-color:#2980b9;
+-fx-background:#00796B;
+-fx-border-color: #00796B;
+-fx-effect: dropshadow(gaussian, #004D40, 10, 0, 1, 1);
 }
 
 

@@ -1,13 +1,10 @@
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.GridPane?>
 
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 
 <?import javafx.scene.layout.VBox?>
 
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.TilePane?>
 
 <!--This is the root container-->
 <?import javafx.scene.layout.HBox?>
@@ -17,7 +14,7 @@
 
     <!--A label to show instructions-->
     <Label fx:id="instructionLabel" text="%welcomeString"
-           styleClass="instructionLabel"
+           styleClass="Header,InstructionLabel"
     />
 
     <HBox fx:id="browseBar"/>
@@ -27,10 +24,8 @@
 
             <ScrollPane
                     maxWidth="Infinity"
-                    prefHeight="320"
-            >
+                    prefHeight="320">
                 <GridPane
-
                         fx:id="tableSample"
                           hgap="3"
                           vgap="3"

@@ -17,7 +17,7 @@ public enum SelectionMode {
         this.description = description;
     }
 
-    public String decription() {
+    public String description() {
         return description;
     }
 
