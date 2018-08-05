@@ -8,15 +8,15 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.TilePane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
+import java.util.ResourceBundle;
 
 //todo separate strings in view from code.
 //todo separate style of views from code.
@@ -24,38 +24,92 @@ import java.io.File;
 
 //todo center text in table cell
 
-import com.yli.timetable_assistant.example_selection.*;
 
 public class Controller {
 
     private Sheet timetableSheet;
 
     private SelectionModeButton currentlySelectedButton;
+
+    @FXML
+    private HBox browseBar;
     @FXML
     private Label instructionLabel;
     @FXML
     private GridPane tableSample;
     @FXML
     private GridPane courseSelectionGrid;
+
+
     @FXML
-    private Button browseButton;
-    @FXML
-    private TilePane tableSampleControls;
+    private HBox exampleSelectionBar;
 
     private ChoiceBox<Integer> fontSizeOptions;
+
+
 
     private TextField outputFileNameField;
 
     private boolean isReadyToSearch;
 
+    private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.Resources");
+
     @FXML
     private void initialize() {
+        //populateBrowseBar();
+        populateExampleSelectionControlBar();
         initCourseSelectionGrid();
-        initSelectionStepControlBar();
-        initBrowseButton();
-
     }
 
+
+    //Populates the browse bar with appropriate controls.
+    private void populateBrowseBar(){
+        Label label = new Label(bundle.getString("windowSize"));
+        Label x = new Label("X");
+        ChoiceBox<Integer> exampleWindowRows= new ChoiceBox<>();
+        ChoiceBox<Integer> exampleWindowColumns = new ChoiceBox<>();
+        ObservableList<Integer> choices = FXCollections.observableArrayList();
+        for (int i= 1; i < 50;i++){
+            choices.add(i);
+        }
+        exampleWindowRows.setValue(5);
+        exampleWindowColumns.setValue(5);
+        exampleWindowRows.setItems(choices);
+        exampleWindowColumns.setItems(choices);
+        Button button = new Button(bundle.getString("browseButton"));
+        initBrowseButton(button,exampleWindowRows,exampleWindowColumns);
+        browseBar.getChildren().addAll(label,exampleWindowRows,x,exampleWindowColumns,button);
+    }
+
+    //todo preferably make the file opening process in a background thread
+    //todo display a loading bar while the file is being opened.
+    //Initializes a button to be used for browsing.
+    private Button initBrowseButton(Button button,ChoiceBox<Integer> exampleWindowRows,ChoiceBox<Integer> exampleWindowColumns) {
+
+        button.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+
+            chooser.setTitle("[Timetable Assistant] Please choose a file:");
+            /*This method takes a Window object as an argument...
+             *If the parent window is passed then it will not be able to
+             * interact with it anymore.
+             *
+             * passing null is also valid however it will not produce the effect
+             * above.
+             */
+            File file = chooser.showOpenDialog(button.getScene().getWindow());
+
+            Workbook timetable = TableManager.readTimetable(file);
+
+            if (timetable != null) {
+                timetableSheet = timetable.getSheetAt(0);
+                TableManager.unpackMergedCells(timetableSheet);
+                initTableSample(timetableSheet, 5, 5);
+                button.setText("File: " + file.getName());
+            }
+        });
+        return button;
+    }
 
     //Initializes controls that are related to selecting and adding courses.
     private void initCourseSelectionGrid() {
@@ -216,13 +270,14 @@ public class Controller {
 
     /*Initializes with controls which will be used to choose example data
       from the sample table*/
-    private void initSelectionStepControlBar() {
+    private void populateExampleSelectionControlBar() {
 
-        for (com.yli.timetable_assistant.example_selection.SelectionMode step : com.yli.timetable_assistant.example_selection.SelectionMode.values()) {
+        ObservableList<Node> children = exampleSelectionBar.getChildren();
+
+
+        for (SelectionMode step : SelectionMode.values()) {
             SelectionModeButton button = new SelectionModeButton(step.title(), step);
-            //todo this style related
-            button.setMaxWidth(Double.MAX_VALUE);
-
+            HBox.setHgrow(button,Priority.ALWAYS);
             /*The listener merely changes the currently selected button further action
                 is handled in the table sample control that will be clicked.*/
             button.setOnMouseClicked(event -> {
@@ -238,43 +293,12 @@ public class Controller {
                     instructionLabel.setText(step.decription());
                 }
             });
-            tableSampleControls.getChildren().add(button);
+            children.add(button);
         }
-
-
     }
 
 
-    //todo handle user closing browsing window (file = null?)
-    //todo preferably make the file opening process in a background thread
-    //todo display a loading bar while the file is being opened.
-    //Initializes a button to be used for browsing.
-    private void initBrowseButton() {
 
-        browseButton.setOnAction(event -> {
-
-            FileChooser chooser = new FileChooser();
-
-            chooser.setTitle("[Timetable Assistant] Please choose a file:");
-            /*This method takes a Window object as an argument...
-             *If the parent window is passed then it will not be able to
-             * interact with it anymore.
-             *
-             * passing null is also valid however it will not produce the effect
-             * above.
-             */
-            File file = chooser.showOpenDialog(browseButton.getScene().getWindow());
-
-            Workbook timetable = TableManager.readTimetable(file);
-
-            if (timetable != null) {
-                timetableSheet = timetable.getSheetAt(0);
-                TableManager.unpackMergedCells(timetableSheet);
-                initTableSample(timetableSheet, 5, 5);
-                browseButton.setText("File: " + file.getName());
-            }
-        });
-    }
 
     //Sets some properties on a label to make it suitable for the grid.
     private Label makeGridLabel(Label label) {

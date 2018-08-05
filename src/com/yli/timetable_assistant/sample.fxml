@@ -9,23 +9,21 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.TilePane?>
 
+<!--This is the root container-->
+<?import javafx.scene.layout.HBox?>
 <VBox fx:controller="com.yli.timetable_assistant.Controller"
       xmlns:fx="http://javafx.com/fxml"
       stylesheets="@style.css">
 
-    <Label fx:id="instructionLabel" text="Choose a file, then choose an example course
-with correct information!" maxWidth="Infinity"
+    <!--A label to show instructions-->
+    <Label fx:id="instructionLabel" text="%welcomeString"
            styleClass="instructionLabel"
     />
 
+    <HBox fx:id="browseBar"/>
 
-    <TilePane fx:id="tableSampleControls">
-        <Button
-                fx:id="browseButton"
-                text="CHOOSE FILE"
-                maxWidth="Infinity"
-        />
-    </TilePane>
+    <HBox fx:id="exampleSelectionBar"/>
+
 
             <ScrollPane
                     maxWidth="Infinity"
