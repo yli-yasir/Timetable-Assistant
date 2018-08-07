@@ -12,7 +12,7 @@ public class Resources extends ResourceBundle {
     public Resources(){
         res.put("welcomeString","Please choose a file, then proceed to enter required information.");
         res.put("windowSize","Example window size:");
-        res.put("browseButton","CHOOSE FILE");
+        res.put("WindowViewerBrowseButton","CHOOSE FILE");
         res.put("searchFieldPrompt","Course name");
         res.put("availableCoursesHeader","Available:");
         res.put("addedCoursesHeader","Added:");
@@ -26,6 +26,8 @@ public class Resources extends ResourceBundle {
         res.put("outputFileName","Output file name:");
         res.put("fontSize","Font size:");
         res.put("outputFileNameFieldPrompt","Student No");
+        res.put("exampleWindowSize","Example window size:");
+
     }
 
     @Override

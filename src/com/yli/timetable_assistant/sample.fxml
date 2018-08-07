@@ -17,9 +17,8 @@
            styleClass="Header,InstructionLabel"
     />
 
-    <HBox fx:id="browseBar"/>
-
-    <HBox fx:id="exampleSelectionBar"/>
+    <HBox fx:id="exampleSelectionBar"
+    styleClass="exampleSelectionBar"/>
 
 
             <ScrollPane

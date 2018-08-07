@@ -1,12 +1,13 @@
 package com.yli.timetable_assistant;
 
+import com.yli.timetable_assistant.buttons.browse.WindowViewable;
+import com.yli.timetable_assistant.buttons.browse.WindowViewerBrowseButton;
 import com.yli.timetable_assistant.example_selection.ExampleCourseNotSetException;
 import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.example_selection.SelectionModeButton;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -25,28 +26,24 @@ import java.util.ResourceBundle;
 //todo center text in table cell
 
 
-public class Controller {
+public class Controller implements WindowViewable {
 
     private Sheet timetableSheet;
 
     private SelectionModeButton currentlySelectedButton;
 
     @FXML
-    private HBox browseBar;
-    @FXML
     private Label instructionLabel;
     @FXML
     private GridPane tableSample;
     @FXML
     private GridPane courseSelectionGrid;
-
-
     @FXML
     private HBox exampleSelectionBar;
 
-    private ChoiceBox<Integer> fontSizeOptions;
-
-
+    private ChoiceBox<Integer> fontSizeChoiceBox;
+    private ChoiceBox<Integer> windowRowsChoiceBox = new ChoiceBox<>();
+    private ChoiceBox<Integer> windowColumnsChoiceBox = new ChoiceBox<>();
 
     private TextField outputFileNameField;
 
@@ -62,29 +59,50 @@ public class Controller {
     }
 
 
-    //Populates the browse bar with appropriate controls.
-    private void populateBrowseBar(){
-        Label label = new Label(bundle.getString("windowSize"));
-        Label x = new Label("X");
-        ChoiceBox<Integer> exampleWindowRows= new ChoiceBox<>();
-        ChoiceBox<Integer> exampleWindowColumns = new ChoiceBox<>();
-        ObservableList<Integer> choices = FXCollections.observableArrayList();
-        for (int i= 1; i < 50;i++){
-            choices.add(i);
+    /*populates with controls which will be used to choose example data
+  from the sample table*/
+    private void populateExampleSelectionControlBar() {
+
+        ObservableList<Node> children = exampleSelectionBar.getChildren();
+
+        //Set up and add browse button...
+        WindowViewerBrowseButton browseButton = new WindowViewerBrowseButton(bundle.getString("WindowViewerBrowseButton"),
+                this);
+        initBrowseButton(browseButton);
+        HBox.setHgrow(browseButton,Priority.ALWAYS);
+        children.add(browseButton);
+
+        //Add as many buttons as needed for selection modes, in here I am making
+        //a button for each mode.
+        for (SelectionMode mode : SelectionMode.values()) {
+            SelectionModeButton button = new SelectionModeButton(mode.title(), mode);
+            HBox.setHgrow(button,Priority.ALWAYS);
+            /*The listener merely changes the currently selected button further action
+                is handled in the table sample control that will be clicked.*/
+            button.setOnMouseClicked(event -> {
+                if (timetableSheet == null) {
+                    showInfoAlert("File not chosen yet!",
+                            "Please choose a file first!");
+                } else if (button.getStep() != com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE &&
+                        !TableManager.selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
+                    showInfoAlert("Course not chosen yet!",
+                            "Please choose a course first!");
+                } else {
+                    currentlySelectedButton = button;
+                    instructionLabel.setText(mode.description());
+                }
+            });
+            children.add(button);
         }
-        exampleWindowRows.setValue(5);
-        exampleWindowColumns.setValue(5);
-        exampleWindowRows.setItems(choices);
-        exampleWindowColumns.setItems(choices);
-        Button button = new Button(bundle.getString("browseButton"));
-        initBrowseButton(button,exampleWindowRows,exampleWindowColumns);
-        browseBar.getChildren().addAll(label,exampleWindowRows,x,exampleWindowColumns,button);
     }
 
+    //todo make the table reload automatically if the window size is changed.
+    //todo need to remove all children of grid if there are already children loaded
     //todo preferably make the file opening process in a background thread
     //todo display a loading bar while the file is being opened.
+
     //Initializes a button to be used for browsing.
-    private Button initBrowseButton(Button button,ChoiceBox<Integer> exampleWindowRows,ChoiceBox<Integer> exampleWindowColumns) {
+    private void initBrowseButton(WindowViewerBrowseButton button) {
 
         button.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
@@ -104,13 +122,72 @@ public class Controller {
             if (timetable != null) {
                 timetableSheet = timetable.getSheetAt(0);
                 TableManager.unpackMergedCells(timetableSheet);
-                initTableSample(timetableSheet, 5, 5);
+                initTableSample(timetableSheet,button.getWindowRowCount(), button.getWindowColumnCount());
                 button.setText("File: " + file.getName());
             }
         });
-        return button;
     }
 
+    /**
+     * Initializes a GridPane to show a small part from the timetable, in which
+     * the user can select a course and it's corresponding data as an example
+     * to the program.
+     *
+     * @param sheet Sheet to open window from.
+     * @param rows Number of rows in the window.
+     * @param columns Number of columns in the window.
+     */
+    @SuppressWarnings("SameParameterValue")
+    private void initTableSample(Sheet sheet, int rows, int columns) {
+
+        for (int i = 0; i < rows; i++) {
+            Row row = sheet.getRow(i);
+            for (int j = 0; j < columns; j++) {
+                Cell cell = row.getCell(j);
+                String data = cell == null ? "" : cell.toString();
+                Label label = new Label(data);
+                GridPane.setFillWidth(label, true);
+                GridPane.setFillHeight(label, true);
+                label.getStyleClass().add("tableSampleLabel");
+                tableSample.add(label, j, i);
+                label.setOnMouseClicked(event -> {
+
+                    if (currentlySelectedButton != null) {
+                        int rowIndex = GridPane.getRowIndex(label);
+                        int columnIndex = GridPane.getColumnIndex(label);
+                        com.yli.timetable_assistant.example_selection.SelectionMode selectionMode = currentlySelectedButton.getStep();
+
+                        if (selectionMode == com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE) {
+                            TableManager.selectionModeToDataMap.puSelectionModeData(rowIndex);
+                        } else {
+                            try {
+                                TableManager.selectionModeToDataMap.putCourseInfoMetaData(
+                                        rowIndex, columnIndex, selectionMode
+                                );
+                            } catch (ExampleCourseNotSetException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        //todo this is text related to view.
+                        String instruction;
+
+                        if (TableManager.selectionModeToDataMap.size() < com.yli.timetable_assistant.example_selection.SelectionMode.values().length) {
+                            instruction = "Please choose the remaining information...";
+                        } else {
+                            instruction = "All done! You can search for and add courses now!";
+                            isReadyToSearch=true;
+                        }
+
+                        instructionLabel.setText(instruction);
+                        currentlySelectedButton.setText(selectionMode.prefix() + label.getText());
+                        currentlySelectedButton = null;
+                    }
+                });
+
+            }
+
+        }
+    }
     //Initializes controls that are related to selecting and adding courses.
     private void populateCourseSelectionGrid() {
 
@@ -166,36 +243,54 @@ public class Controller {
             String fileName = outputFileNameField.getText();
             if (!addedCoursesList.isEmpty() && fileName!=null &&
                     !fileName.isEmpty() )
-            TableManager.generateTimetable(timetableSheet, addedCoursesList,fontSizeOptions.getValue(),fileName);
+            TableManager.generateTimetable(timetableSheet, addedCoursesList,fontSizeChoiceBox.getValue(),fileName);
                 else
                     showInfoAlert(bundle.getString("notReadyToSearchHeader"),bundle.getString("notReadyToSearchBody"));});
 
 
-        //SettingsBox
         Label settingsHeader = new Label(bundle.getString("settingsHeader"));
         settingsHeader.getStyleClass().add("Header");
 
-
+        //SettingsBox-----------------
         VBox settingsBox = new VBox();
-        settingsBox.getStyleClass().add("SettingsBox");
+        settingsBox.getStyleClass().add("settingsBox");
         GridPane.setHgrow(settingsBox,Priority.ALWAYS);
 
+
+        //example window size label and choice boxes
+        Label exampleWindowSizeLabel = new Label(bundle.getString("exampleWindowSize"));
+        HBox rowXColumn = new HBox();
+        ObservableList<Integer> rowCol= FXCollections.observableArrayList();
+        for (int i = 1; i <= 100; i++) rowCol.add(i);
+        windowRowsChoiceBox.setItems(rowCol);
+        windowColumnsChoiceBox.setItems(rowCol);
+        windowRowsChoiceBox.setValue(5);
+        windowColumnsChoiceBox.setValue(5);
+        rowXColumn.getChildren().addAll(windowRowsChoiceBox,new Label("*"),windowColumnsChoiceBox);
+
+        //output file name and text field
         Label outputFileNameLabel = new Label(bundle.getString("outputFileName"));
         outputFileNameField = new TextField();
         outputFileNameField.setPromptText(bundle.getString("outputFileNameFieldPrompt"));
 
+        //font size label and choice box...
         Label fontSizeLabel = new Label(bundle.getString("fontSize"));
-        fontSizeOptions = new ChoiceBox<>();
+        fontSizeChoiceBox = new ChoiceBox<>();
         ObservableList<Integer> sizeList = FXCollections.observableArrayList();
         for (int i = 1; i <= 72; i++) sizeList.add(i);
-        fontSizeOptions.setItems(sizeList);
-        fontSizeOptions.setValue(12);
+        fontSizeChoiceBox.setItems(sizeList);
+        fontSizeChoiceBox.setValue(12);
 
-        settingsBox.getChildren().addAll(outputFileNameLabel,
+
+
+        settingsBox.getChildren().addAll(
+                exampleWindowSizeLabel,
+                rowXColumn,
+                outputFileNameLabel,
                 outputFileNameField,
                 fontSizeLabel,
-                fontSizeOptions);
-
+                fontSizeChoiceBox);
+        //End of settings box-------------
 
         courseSelectionGrid.add(field, 0, 0);
         courseSelectionGrid.add(searchButton, 1, 0);
@@ -210,100 +305,15 @@ public class Controller {
     }
 
 
-    /*Initializes a GridPane to show a small part from the timetable, in which
-    the user can select a course and it's corresponding data as an example
-    to the program.*/
-    @SuppressWarnings("SameParameterValue")
-    private void initTableSample(Sheet sheet, int rows, int columns) {
-
-        for (int i = 0; i < rows; i++) {
-            Row row = sheet.getRow(i);
-            for (int j = 0; j < columns; j++) {
-                Cell cell = row.getCell(j);
-                String data = cell == null ? "" : cell.toString();
-                Label label = makeGridLabel(new Label(data));
-                tableSample.add(label, j, i);
-
-                label.setOnMouseClicked(event -> {
-
-                    if (currentlySelectedButton != null) {
-                        int rowIndex = GridPane.getRowIndex(label);
-                        int columnIndex = GridPane.getColumnIndex(label);
-                        com.yli.timetable_assistant.example_selection.SelectionMode selectionMode = currentlySelectedButton.getStep();
-
-                        if (selectionMode == com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE) {
-                            TableManager.selectionModeToDataMap.puSelectionModeData(rowIndex);
-                        } else {
-                            try {
-                                TableManager.selectionModeToDataMap.putCourseInfoMetaData(
-                                        rowIndex, columnIndex, selectionMode
-                                );
-                            } catch (ExampleCourseNotSetException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        //todo this is text related to view.
-                        String instruction;
-
-                        if (TableManager.selectionModeToDataMap.size() < com.yli.timetable_assistant.example_selection.SelectionMode.values().length) {
-                            instruction = "Please choose the remaining information...";
-                        } else {
-                            instruction = "All done! You can search for and add courses now!";
-                            isReadyToSearch=true;
-                        }
-
-                        instructionLabel.setText(instruction);
-                        currentlySelectedButton.setText(selectionMode.prefix() + label.getText());
-                        currentlySelectedButton = null;
-                    }
-                });
-
-            }
-
-        }
-    }
-
-    /*populates with controls which will be used to choose example data
-      from the sample table*/
-    private void populateExampleSelectionControlBar() {
-
-        ObservableList<Node> children = exampleSelectionBar.getChildren();
 
 
-        for (SelectionMode step : SelectionMode.values()) {
-            SelectionModeButton button = new SelectionModeButton(step.title(), step);
-            HBox.setHgrow(button,Priority.ALWAYS);
-            /*The listener merely changes the currently selected button further action
-                is handled in the table sample control that will be clicked.*/
-            button.setOnMouseClicked(event -> {
-                if (timetableSheet == null) {
-                    showInfoAlert("File not chosen yet!",
-                            "Please choose a file first!");
-                } else if (button.getStep() != com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE &&
-                        !TableManager.selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
-                    showInfoAlert("Course not chosen yet!",
-                            "Please choose a course first!");
-                } else {
-                    currentlySelectedButton = button;
-                    instructionLabel.setText(step.description());
-                }
-            });
-            children.add(button);
-        }
-    }
 
 
 
 
     //Sets some properties on a label to make it suitable for the grid.
     private Label makeGridLabel(Label label) {
-        label.setStyle("-fx-background-color: #FFC312;" +
-                "-fx-max-width: infinity;" +
-                "-fx-max-height: infinity;"
-        );
-        label.setAlignment(Pos.CENTER);
-        GridPane.setFillWidth(label, true);
-        GridPane.setFillHeight(label, true);
+
         return label;
 
     }
@@ -314,5 +324,15 @@ public class Controller {
         alert.setHeaderText(header);
         alert.setContentText(body);
         alert.show();
+    }
+
+    @Override
+    public ChoiceBox<Integer> getWindowRowsChoiceBox() {
+        return windowRowsChoiceBox;
+    }
+
+    @Override
+    public ChoiceBox<Integer> getWindowColumnsChoiceBox() {
+        return windowColumnsChoiceBox;
     }
 }

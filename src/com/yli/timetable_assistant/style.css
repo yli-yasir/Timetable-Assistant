@@ -3,15 +3,23 @@ VBox {
 -fx-font-weight:bold;
 }
 
-HBox{
+.exampleSelectionBar{
 -fx-padding: 8 0 0 0  }
 
-Button{
--fx-max-width: infinity}
-SelectionModeButton{
+.tableSampleLabel{
+-fx-background-color: #00695C;
+-fx-max-width: infinity;
+-fx-max-height: infinity;
+-fx-alignment: center;
+-fx-cursor: hand;
+}
+
+.button{
 -fx-max-width: infinity}
 
-.SettingsBox{
+
+.settingsBox{
+-fx-spacing: 2;
 -fx-max-width: infinity;
 -fx-background-color: #00796B;
 -fx-padding: 0 10 0 10;
@@ -41,8 +49,6 @@ ScrollPane{
 -fx-border-color: #00796B;
 -fx-effect: dropshadow(gaussian, #004D40, 10, 0, 1, 1);
 }
-
-
 
 .csg{
 -fx-padding: 16 0 0 0 }
