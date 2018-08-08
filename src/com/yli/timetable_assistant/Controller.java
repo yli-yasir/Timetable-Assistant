@@ -39,6 +39,9 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
 
     private WindowViewerBrowseButton browseButton;
 
+    @FXML
+    private ProgressIndicator progressIndicator;
+
     private ChoiceBox<Integer> fontSizeChoiceBox;
     private ChoiceBox<Integer> windowRowsChoiceBox = new ChoiceBox<>();
     private ChoiceBox<Integer> windowColumnsChoiceBox = new ChoiceBox<>();
@@ -47,7 +50,7 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
 
     private boolean isReadyToSearch;
 
-    TableReadTask tableReadTask;
+    private TableReadTask tableReadTask;
 
     private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.Resources");
 
@@ -65,17 +68,17 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         ObservableList<Node> children = exampleSelectionBar.getChildren();
 
         //Set up and add browse button...
-         browseButton = new WindowViewerBrowseButton(bundle.getString("WindowViewerBrowseButton"),
+        browseButton = new WindowViewerBrowseButton(bundle.getString("WindowViewerBrowseButton"),
                 this);
         initBrowseButton(browseButton);
-        HBox.setHgrow(browseButton,Priority.ALWAYS);
+        HBox.setHgrow(browseButton, Priority.ALWAYS);
         children.add(browseButton);
 
         //Add as many buttons as needed for selection modes, in here I am making
         //a button for each mode.
         for (SelectionMode mode : SelectionMode.values()) {
             SelectionModeButton button = new SelectionModeButton(mode.title(), mode);
-            HBox.setHgrow(button,Priority.ALWAYS);
+            HBox.setHgrow(button, Priority.ALWAYS);
             /*The listener merely changes the currently selected button further action
                 is handled in the table sample control that will be clicked.*/
             button.setOnMouseClicked(event -> {
@@ -116,12 +119,10 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
              */
             File file = chooser.showOpenDialog(button.getScene().getWindow());
             browseButton.setText("File: " + file.getName());
-            tableReadTask = new TableReadTask(this,file);
+            tableReadTask = new TableReadTask(this, file);
             Thread thread = new Thread(tableReadTask);
             thread.setDaemon(true);
             thread.start();
-
-
         });
     }
 
@@ -130,8 +131,8 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
      * the user can select a course and it's corresponding data as an example
      * to the program.
      *
-     * @param sheet Sheet to open window from.
-     * @param rows Number of rows in the window.
+     * @param sheet   Sheet to open window from.
+     * @param rows    Number of rows in the window.
      * @param columns Number of columns in the window.
      */
     private void initTableSample(Sheet sheet, int rows, int columns) {
@@ -170,7 +171,7 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
                             instruction = "Please choose the remaining information...";
                         } else {
                             instruction = "All done! You can search for and add courses now!";
-                            isReadyToSearch=true;
+                            isReadyToSearch = true;
                         }
 
                         instructionLabel.setText(instruction);
@@ -200,12 +201,13 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         ObservableList<String> addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
 
-        addedCourses.setOnMouseClicked(event ->{
+        addedCourses.setOnMouseClicked(event -> {
             MultipleSelectionModel<String> sModel = addedCourses.getSelectionModel();
             String string = sModel.getSelectedItem();
-        if (string !=null)
+            if (string != null)
                 addedCoursesList
-                        .remove(sModel.getSelectedIndex());});
+                        .remove(sModel.getSelectedIndex());
+        });
 
         //Label and list for displaying courses that are in the table.
         Label availableCoursesHeader = new Label(bundle.getString("availableCoursesHeader"));
@@ -217,7 +219,7 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
 
         availableCourses.setOnMouseClicked(event -> {
             String clickedItem = availableCourses.getSelectionModel().getSelectedItem();
-            if (!addedCoursesList.contains(clickedItem) && clickedItem!=null) {
+            if (!addedCoursesList.contains(clickedItem) && clickedItem != null) {
                 addedCoursesList.add(clickedItem
                 );
             }
@@ -227,21 +229,22 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         Button searchButton = new Button(bundle.getString("searchButton"));
         Button generateButton = new Button(bundle.getString("generateButton"));
 
-        searchButton.setOnAction(event ->{
-            if (isReadyToSearch){
-                TableManager.search(timetableSheet, searchResultList, field.getText());}
-                else{
-                showInfoAlert(bundle.getString("insufficientInfoHeader"),bundle.getString("insufficientInfoBody"));
+        searchButton.setOnAction(event -> {
+            if (isReadyToSearch) {
+                TableManager.search(timetableSheet, searchResultList, field.getText());
+            } else {
+                showInfoAlert(bundle.getString("insufficientInfoHeader"), bundle.getString("insufficientInfoBody"));
             }
         });
 
-        generateButton.setOnAction(event ->{
+        generateButton.setOnAction(event -> {
             String fileName = outputFileNameField.getText();
-            if (!addedCoursesList.isEmpty() && fileName!=null &&
-                    !fileName.isEmpty() )
-            TableManager.generateTimetable(timetableSheet, addedCoursesList,fontSizeChoiceBox.getValue(),fileName);
-                else
-                    showInfoAlert(bundle.getString("notReadyToGenerateHeader"),bundle.getString("notReadyToGenerateBody"));});
+            if (!addedCoursesList.isEmpty() && fileName != null &&
+                    !fileName.isEmpty())
+                TableManager.generateTimetable(timetableSheet, addedCoursesList, fontSizeChoiceBox.getValue(), fileName);
+            else
+                showInfoAlert(bundle.getString("notReadyToGenerateHeader"), bundle.getString("notReadyToGenerateBody"));
+        });
 
 
         Label settingsHeader = new Label(bundle.getString("settingsHeader"));
@@ -250,19 +253,19 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         //SettingsBox-----------------
         VBox settingsBox = new VBox();
         settingsBox.getStyleClass().add("settingsBox");
-        GridPane.setHgrow(settingsBox,Priority.ALWAYS);
+        GridPane.setHgrow(settingsBox, Priority.ALWAYS);
 
 
         //example window size label and choice boxes
         Label exampleWindowSizeLabel = new Label(bundle.getString("exampleWindowSize"));
         HBox rowXColumn = new HBox();
-        ObservableList<Integer> rowCol= FXCollections.observableArrayList();
+        ObservableList<Integer> rowCol = FXCollections.observableArrayList();
         for (int i = 1; i <= 100; i++) rowCol.add(i);
         windowRowsChoiceBox.setItems(rowCol);
         windowColumnsChoiceBox.setItems(rowCol);
         windowRowsChoiceBox.setValue(5);
         windowColumnsChoiceBox.setValue(5);
-        rowXColumn.getChildren().addAll(windowRowsChoiceBox,new Label("*"),windowColumnsChoiceBox);
+        rowXColumn.getChildren().addAll(windowRowsChoiceBox, new Label("*"), windowColumnsChoiceBox);
 
         //output file name and text field
         Label outputFileNameLabel = new Label(bundle.getString("outputFileName"));
@@ -276,7 +279,6 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         for (int i = 1; i <= 72; i++) sizeList.add(i);
         fontSizeChoiceBox.setItems(sizeList);
         fontSizeChoiceBox.setValue(12);
-
 
 
         settingsBox.getChildren().addAll(
@@ -294,8 +296,8 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         courseSelectionGrid.add(addedCoursesHeader, 1, 1);
         courseSelectionGrid.add(availableCourses, 0, 2);
         courseSelectionGrid.add(addedCourses, 1, 2);
-        courseSelectionGrid.add(generateButton, 0, 3,3,1);
-        courseSelectionGrid.add(settingsHeader,2,1);
+        courseSelectionGrid.add(generateButton, 0, 3, 3, 1);
+        courseSelectionGrid.add(settingsHeader, 2, 1);
         courseSelectionGrid.add(settingsBox, 2, 2);
 
     }
@@ -320,16 +322,23 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
 
     @Override
     public void onLoading() {
+        browseButton.setDisable(true);
+        tableSample.setVisible(false);
+        progressIndicator.setVisible(true);
 
     }
 
     @Override
     public void onFinishedLoading(Workbook timetable) {
-                    if (timetable != null) {
-                timetableSheet = timetable.getSheetAt(0);
-                TableManager.unpackMergedCells(timetableSheet);
-                initTableSample(timetableSheet,browseButton.getWindowRowCount(), browseButton.getWindowColumnCount());
-            }
+        if (timetable != null) {
+            timetableSheet = timetable.getSheetAt(0);
+            TableManager.unpackMergedCells(timetableSheet);
+            initTableSample(timetableSheet, browseButton.getWindowRowCount(), browseButton.getWindowColumnCount());
+        }
+        progressIndicator.setVisible(false);
+        tableSample.setVisible(true);
+        browseButton.setDisable(false);
+
     }
 
 

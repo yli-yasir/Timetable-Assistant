@@ -14,7 +14,6 @@ public class TableReadTask extends ReadTask<Workbook> {
         super(callbacks, file);
     }
 
-
     @Override
     protected Workbook call() {
         Workbook timetable = null;

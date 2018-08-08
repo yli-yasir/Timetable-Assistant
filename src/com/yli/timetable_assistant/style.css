@@ -14,6 +14,21 @@ VBox {
 -fx-cursor: hand;
 }
 
+.tableSampleContainer{
+-fx-background: #00796B;
+}
+
+.tableSample{
+-fx-hgap: 5;
+-fx-vgap: 5}
+
+
+ProgressIndicator{
+-fx-max-height:100;
+-fx-max-width:100;
+-fx-progress-color: #A7FFEB;
+visibility:hidden
+}
 .button{
 -fx-max-width: infinity}
 
@@ -45,8 +60,7 @@ ChoiceBox {
 
 ScrollPane{
 -fx-padding:4;
--fx-background:#00796B;
--fx-border-color: #00796B;
+-fx-border-color:#00796B;
 -fx-effect: dropshadow(gaussian, #004D40, 10, 0, 1, 1);
 }
 

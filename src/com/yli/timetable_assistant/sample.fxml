@@ -8,6 +8,8 @@
 
 <!--This is the root container-->
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.layout.StackPane?>
 <VBox fx:controller="com.yli.timetable_assistant.Controller"
       xmlns:fx="http://javafx.com/fxml"
       stylesheets="@style.css">
@@ -18,24 +20,21 @@
     />
 
     <HBox fx:id="exampleSelectionBar"
-    styleClass="exampleSelectionBar"/>
+          styleClass="exampleSelectionBar"/>
 
 
-            <ScrollPane
-                    maxWidth="Infinity"
+    <StackPane styleClass="tableSampleContainer">
+        <ScrollPane maxWidth="Infinity"
                     prefHeight="320">
-                <GridPane
-                        fx:id="tableSample"
-                          hgap="3"
-                          vgap="3"
-                />
-            </ScrollPane>
-
-
+            <GridPane fx:id="tableSample"
+                      styleClass="tableSample"/>
+        </ScrollPane>
+        <ProgressIndicator fx:id="progressIndicator"/>
+    </StackPane>
 
 
     <GridPane fx:id="courseSelectionGrid"
-    styleClass="csg"/>
+              styleClass="csg"/>
 
 </VBox>
 

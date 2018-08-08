@@ -46,15 +46,6 @@ class TableManager {
     }
 
     /**
-     * Returns a workbook of the file you provide.
-     *
-     * @param file the file to read.
-     * @return null | Workbook containing the timetable
-     */
-
-
-
-    /**
      * If cell is null, returns an empty string.
      * Otherwise, removes all white spaces and returns a lower case string.
      *
