@@ -7,8 +7,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.util.Enumeration;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 
@@ -17,7 +15,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        ResourceBundle bundle= ResourceBundle.getBundle(Resources.path);
+        ResourceBundle bundle= ResourceBundle.getBundle(Resources.PATH);
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"),bundle);
         primaryStage.setTitle("Timetable Assistant");
         Scene scene = new Scene(root,700,500);

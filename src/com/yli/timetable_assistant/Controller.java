@@ -8,7 +8,6 @@ import com.yli.timetable_assistant.example_selection.SelectionModeButton;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -23,10 +22,7 @@ import java.util.ResourceBundle;
 //todo separate style of views from code.
 //todo separate classes into proper packages.
 
-//todo center text in table cell
-
-
-public class Controller implements WindowViewable {
+public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbook> {
 
     private Sheet timetableSheet;
 
@@ -41,6 +37,8 @@ public class Controller implements WindowViewable {
     @FXML
     private HBox exampleSelectionBar;
 
+    private WindowViewerBrowseButton browseButton;
+
     private ChoiceBox<Integer> fontSizeChoiceBox;
     private ChoiceBox<Integer> windowRowsChoiceBox = new ChoiceBox<>();
     private ChoiceBox<Integer> windowColumnsChoiceBox = new ChoiceBox<>();
@@ -49,11 +47,12 @@ public class Controller implements WindowViewable {
 
     private boolean isReadyToSearch;
 
+    TableReadTask tableReadTask;
+
     private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.Resources");
 
     @FXML
     private void initialize() {
-        //populateBrowseBar();
         populateExampleSelectionControlBar();
         populateCourseSelectionGrid();
     }
@@ -66,7 +65,7 @@ public class Controller implements WindowViewable {
         ObservableList<Node> children = exampleSelectionBar.getChildren();
 
         //Set up and add browse button...
-        WindowViewerBrowseButton browseButton = new WindowViewerBrowseButton(bundle.getString("WindowViewerBrowseButton"),
+         browseButton = new WindowViewerBrowseButton(bundle.getString("WindowViewerBrowseButton"),
                 this);
         initBrowseButton(browseButton);
         HBox.setHgrow(browseButton,Priority.ALWAYS);
@@ -99,7 +98,7 @@ public class Controller implements WindowViewable {
     //todo make the table reload automatically if the window size is changed.
     //todo need to remove all children of grid if there are already children loaded
     //todo preferably make the file opening process in a background thread
-    //todo display a loading bar while the file is being opened.
+    //todo display a onLoading bar while the file is being opened.
 
     //Initializes a button to be used for browsing.
     private void initBrowseButton(WindowViewerBrowseButton button) {
@@ -116,15 +115,13 @@ public class Controller implements WindowViewable {
              * above.
              */
             File file = chooser.showOpenDialog(button.getScene().getWindow());
+            browseButton.setText("File: " + file.getName());
+            tableReadTask = new TableReadTask(this,file);
+            Thread thread = new Thread(tableReadTask);
+            thread.setDaemon(true);
+            thread.start();
 
-            Workbook timetable = TableManager.readTimetable(file);
 
-            if (timetable != null) {
-                timetableSheet = timetable.getSheetAt(0);
-                TableManager.unpackMergedCells(timetableSheet);
-                initTableSample(timetableSheet,button.getWindowRowCount(), button.getWindowColumnCount());
-                button.setText("File: " + file.getName());
-            }
         });
     }
 
@@ -137,9 +134,7 @@ public class Controller implements WindowViewable {
      * @param rows Number of rows in the window.
      * @param columns Number of columns in the window.
      */
-    @SuppressWarnings("SameParameterValue")
     private void initTableSample(Sheet sheet, int rows, int columns) {
-
         for (int i = 0; i < rows; i++) {
             Row row = sheet.getRow(i);
             for (int j = 0; j < columns; j++) {
@@ -188,6 +183,7 @@ public class Controller implements WindowViewable {
 
         }
     }
+
     //Initializes controls that are related to selecting and adding courses.
     private void populateCourseSelectionGrid() {
 
@@ -245,7 +241,7 @@ public class Controller implements WindowViewable {
                     !fileName.isEmpty() )
             TableManager.generateTimetable(timetableSheet, addedCoursesList,fontSizeChoiceBox.getValue(),fileName);
                 else
-                    showInfoAlert(bundle.getString("notReadyToSearchHeader"),bundle.getString("notReadyToSearchBody"));});
+                    showInfoAlert(bundle.getString("notReadyToGenerateHeader"),bundle.getString("notReadyToGenerateBody"));});
 
 
         Label settingsHeader = new Label(bundle.getString("settingsHeader"));
@@ -304,20 +300,6 @@ public class Controller implements WindowViewable {
 
     }
 
-
-
-
-
-
-
-
-    //Sets some properties on a label to make it suitable for the grid.
-    private Label makeGridLabel(Label label) {
-
-        return label;
-
-    }
-
     private void showInfoAlert(String header, String body) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Woah there!");
@@ -335,4 +317,20 @@ public class Controller implements WindowViewable {
     public ChoiceBox<Integer> getWindowColumnsChoiceBox() {
         return windowColumnsChoiceBox;
     }
+
+    @Override
+    public void onLoading() {
+
+    }
+
+    @Override
+    public void onFinishedLoading(Workbook timetable) {
+                    if (timetable != null) {
+                timetableSheet = timetable.getSheetAt(0);
+                TableManager.unpackMergedCells(timetableSheet);
+                initTableSample(timetableSheet,browseButton.getWindowRowCount(), browseButton.getWindowColumnCount());
+            }
+    }
+
+
 }

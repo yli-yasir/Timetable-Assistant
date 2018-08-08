@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Resources extends ResourceBundle {
 
-    public static final String path = "com.yli.timetable_assistant.res.Resources";
+    public static final String PATH = "com.yli.timetable_assistant.res.Resources";
 
     private HashMap<String,Object> res = new HashMap<>();
 
@@ -20,8 +20,8 @@ public class Resources extends ResourceBundle {
         res.put("generateButton","Generate");
         res.put("insufficientInfoHeader","Insufficient information!");
         res.put("insufficientInfoBody","Please choose required information first!");
-        res.put("notReadyToSearchHeader","Not ready to search yet!");
-        res.put("notReadyToSearchBody","Have you added courses and specified output file name?");
+        res.put("notReadyToGenerateHeader","Not ready to generate yet!");
+        res.put("notReadyToGenerateBody","Have you added courses and specified output file name?");
         res.put("settingsHeader","Settings:");
         res.put("outputFileName","Output file name:");
         res.put("fontSize","Font size:");

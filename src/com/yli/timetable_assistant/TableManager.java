@@ -4,6 +4,7 @@ import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.example_selection.SelectionModeData;
 import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -50,17 +51,8 @@ class TableManager {
      * @param file the file to read.
      * @return null | Workbook containing the timetable
      */
-    static Workbook readTimetable(File file) {
-        Workbook timetable = null;
-        if (file!=null) {
-            try {
-                timetable = WorkbookFactory.create(file);
-            } catch (IOException | InvalidFormatException e) {
-                e.printStackTrace();
-            }
-        }
-        return timetable;
-    }
+
+
 
     /**
      * If cell is null, returns an empty string.
@@ -72,7 +64,7 @@ class TableManager {
     private static String makeStringValue(Cell cell, boolean whiteSpace) {
         if (cell == null) return "";
         String string = cell.toString();
-        return makeStringValue(string,whiteSpace);
+        return makeStringValue(string, whiteSpace);
     }
 
     private static String makeStringValue(String string, boolean whiteSpace) {
@@ -187,9 +179,9 @@ class TableManager {
         /*Keys should be already sorted because it implements comparable
         ,Now we will sort all the array lists*/
         for (ArrayList<Course> dayCourses : dayToCourseListMap.values()) {
-            dayCourses.sort((o1,o2)->{
+            dayCourses.sort((o1, o2) -> {
                 if (o1.equals(o2)) return 0;
-                int result = Integer.compare(o1.getTime().getRank(),o2.getTime().getRank());
+                int result = Integer.compare(o1.getTime().getRank(), o2.getTime().getRank());
                 //To keep it consistent with equals, we can't permit to get a 0 for having similar time.
                 return result == 0 ? 1 : result;
             });
@@ -198,7 +190,7 @@ class TableManager {
 
     }
 
-    private static void drawTable(DayToCourseListMap map,float fontSize,String fileName) {
+    private static void drawTable(DayToCourseListMap map, float fontSize, String fileName) {
 
         //Image dimensions
         int width = 842;
@@ -283,16 +275,16 @@ class TableManager {
 
 
         try {
-            ImageIO.write(image, "png", new File(fileName+".png"));
+            ImageIO.write(image, "png", new File(fileName + ".png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    static void generateTimetable(Sheet sheet, ObservableList<String> courses,float fontSize,String fileName) {
+    static void generateTimetable(Sheet sheet, ObservableList<String> courses, float fontSize, String fileName) {
         DayToCourseListMap dayToCourseListMap =
                 makeDayToCourseListMap(sheet, courses);
-        drawTable(dayToCourseListMap,fontSize,fileName);
+        drawTable(dayToCourseListMap, fontSize, fileName);
 
     }
 
