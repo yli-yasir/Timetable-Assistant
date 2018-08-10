@@ -5,22 +5,28 @@ import com.yli.timetable_assistant.buttons.browse.WindowViewerBrowseButton;
 import com.yli.timetable_assistant.example_selection.ExampleCourseNotSetException;
 import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.example_selection.SelectionModeButton;
+import com.yli.timetable_assistant.res.Resources;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ResourceBundle;
 
 //todo separate strings in view from code.
 //todo separate style of views from code.
 //todo separate classes into proper packages.
+//todo handle if user enters a sample window size bigger than the excel table.
 
 public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbook> {
 
@@ -98,11 +104,6 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         }
     }
 
-    //todo make the table reload automatically if the window size is changed.
-    //todo need to remove all children of grid if there are already children loaded
-    //todo preferably make the file opening process in a background thread
-    //todo display a onLoading bar while the file is being opened.
-
     //Initializes a button to be used for browsing.
     private void initBrowseButton(WindowViewerBrowseButton button) {
 
@@ -118,11 +119,13 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
              * above.
              */
             File file = chooser.showOpenDialog(button.getScene().getWindow());
-            browseButton.setText("File: " + file.getName());
-            tableReadTask = new TableReadTask(this, file);
-            Thread thread = new Thread(tableReadTask);
-            thread.setDaemon(true);
-            thread.start();
+            if (file!=null) {
+                browseButton.setText("File: " + file.getName());
+                tableReadTask = new TableReadTask(this, file);
+                Thread thread = new Thread(tableReadTask);
+                thread.setDaemon(true);
+                thread.start();
+            }
         });
     }
 
@@ -136,6 +139,7 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
      * @param columns Number of columns in the window.
      */
     private void initTableSample(Sheet sheet, int rows, int columns) {
+        tableSample.getChildren().clear();
         for (int i = 0; i < rows; i++) {
             Row row = sheet.getRow(i);
             for (int j = 0; j < columns; j++) {
@@ -185,7 +189,7 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         }
     }
 
-    //Initializes controls that are related to selecting and adding courses.
+    //Initializes controls that are related to adding courses.
     private void populateCourseSelectionGrid() {
 
         //This will be used to enter a search query.
@@ -240,8 +244,13 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         generateButton.setOnAction(event -> {
             String fileName = outputFileNameField.getText();
             if (!addedCoursesList.isEmpty() && fileName != null &&
-                    !fileName.isEmpty())
-                TableManager.generateTimetable(timetableSheet, addedCoursesList, fontSizeChoiceBox.getValue(), fileName);
+                    !fileName.isEmpty()) {
+                BufferedImage image = TableManager.generateTimetable(timetableSheet, addedCoursesList, fontSizeChoiceBox.getValue(), fileName);
+                    FXUtils.openWindow("Your timetable",new Stage(), 700, 500,
+                            getClass().getResource("generated_table.fxml"),
+                            ResourceBundle.getBundle(Resources.PATH),
+                    new GeneratedTableController(image));
+            }
             else
                 showInfoAlert(bundle.getString("notReadyToGenerateHeader"), bundle.getString("notReadyToGenerateBody"));
         });
@@ -340,6 +349,9 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         browseButton.setDisable(false);
 
     }
+
+
+
 
 
 }

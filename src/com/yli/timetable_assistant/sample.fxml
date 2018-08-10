@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.layout.StackPane?>
-<VBox fx:controller="com.yli.timetable_assistant.Controller"
+<VBox
       xmlns:fx="http://javafx.com/fxml"
       stylesheets="@style.css">
 

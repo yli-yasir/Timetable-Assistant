@@ -4,17 +4,16 @@ import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.example_selection.SelectionModeData;
 import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-import javax.imageio.ImageIO;
+
 import java.awt.*;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.util.*;
 
 class TableManager {
@@ -181,7 +180,7 @@ class TableManager {
 
     }
 
-    private static void drawTable(DayToCourseListMap map, float fontSize, String fileName) {
+    private static BufferedImage drawTable(DayToCourseListMap map, float fontSize, String fileName) {
 
         //Image dimensions
         int width = 842;
@@ -264,19 +263,13 @@ class TableManager {
             paddedX += columnWidth;
         }
 
-
-        try {
-            ImageIO.write(image, "png", new File(fileName + ".png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        return image;
     }
 
-    static void generateTimetable(Sheet sheet, ObservableList<String> courses, float fontSize, String fileName) {
+    static BufferedImage generateTimetable(Sheet sheet, ObservableList<String> courses, float fontSize, String fileName) {
         DayToCourseListMap dayToCourseListMap =
                 makeDayToCourseListMap(sheet, courses);
-        drawTable(dayToCourseListMap, fontSize, fileName);
-
+        return drawTable(dayToCourseListMap, fontSize, fileName);
     }
 
 
