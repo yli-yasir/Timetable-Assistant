@@ -29,6 +29,7 @@ ProgressIndicator{
 -fx-progress-color: #64FFDA;
 visibility:hidden
 }
+
 .button{
 -fx-max-width: infinity}
 
@@ -68,9 +69,13 @@ ScrollPane{
 -fx-padding: 16 0 0 0 }
 
 .generatedTableControlBar{
--fx-background: black;
+-fx-padding:4;
+-fx-spacing:4;
+-fx-effect: dropshadow(gaussian, #004D40, 10, 0, 2, 2);
+-fx-background-color:#00897B;
 }
 
 .generatedTableImageViewContainer{
+-fx-padding: 16 0 0 0;
 -fx-min-width: 0;
 -fx-min-height:0}

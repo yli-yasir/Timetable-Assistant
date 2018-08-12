@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -14,8 +15,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.Buffer;
 import java.util.ResourceBundle;
 
 
@@ -36,9 +42,12 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
     private ResourceBundle bundle = ResourceBundle.getBundle(Resources.PATH);
 
     private ChoiceBox<Integer> fontSizeChoiceBox;
+    private int initialFontSize = 16;
 
-    //Should research then consider using a service.
-    private TableDrawTask tableDrawTask;
+    private BufferedImage tableImage;
+
+
+
 
 
     GeneratedTableController(DayToCourseListMap dayToCourseListMap){
@@ -59,6 +68,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
         ObservableList<Integer> fontOptions = FXCollections.observableArrayList();
         for (int i=6; i<=72;i+=2) fontOptions.add(i);
         fontSizeChoiceBox.setItems(fontOptions);
+        fontSizeChoiceBox.setValue(initialFontSize);
         setDrawOnFontSizeChangedListener(fontSizeChoiceBox);
 
         Label saveImageLabel = new Label(bundle.getString("saveImage"));
@@ -72,21 +82,53 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
             populateImageView(dayToCourseListMap,fontSizeChoiceBox.getSelectionModel().getSelectedItem()));
     }
 
+
     private void initializeImageView(){
         VBox.setVgrow(generatedTableImageViewContainer,Priority.ALWAYS);
         generatedTableImageView.setSmooth(true);
         generatedTableImageView.fitWidthProperty().bind(generatedTableImageViewContainer.widthProperty());
         generatedTableImageView.fitHeightProperty().bind(generatedTableImageViewContainer.heightProperty());
-        populateImageView(dayToCourseListMap,12);
+        setSaveOnClickListener(generatedTableImageView);
+        populateImageView(dayToCourseListMap,initialFontSize);
     }
 
+    private void setSaveOnClickListener(Node node){
+        node.setOnMouseClicked(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("PNG", "*.png"));
+
+            File file = chooser.showSaveDialog(node.getScene().getWindow());
+
+            /*Since we are saving, there should be only one extension in the list, so
+            we just get the one at the first index, and extensions should be specified as
+            *.<extension> so we trim the in string starting from the second index until the end
+            to get a string extension which can be used in saving the file*/
+            String extension = chooser.getSelectedExtensionFilter().getExtensions()
+                    .get(0).substring(2);
+
+            if (file != null) {
+                saveImage(tableImage,file,extension);
+            }
+        });
+    }
+
+
+    private void saveImage(BufferedImage image,File file,String extension){
+        try{
+            ImageIO.write(image,extension,file);
+        }
+        catch(IOException e ){
+            e.printStackTrace();
+        }
+
+    }
     private void populateImageView(DayToCourseListMap dayToCourseListMap,int fontSize){
-        tableDrawTask = new TableDrawTask(this,dayToCourseListMap,fontSize);
+        TableDrawTask tableDrawTask = new TableDrawTask(this,dayToCourseListMap,fontSize);
         Thread thread = new Thread(tableDrawTask);
         thread.setDaemon(true);
         thread.start();
     }
-
 
     @Override
     public void onLoading() {
@@ -97,6 +139,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
 
     @Override
     public void onFinishedLoading(BufferedImage image) {
+        this.tableImage = image;
         WritableImage FXImage = new WritableImage(image.getWidth(),image.getHeight());
         generatedTableImageView.setImage(SwingFXUtils.toFXImage(image,FXImage));
         progressIndicator.setVisible(false);

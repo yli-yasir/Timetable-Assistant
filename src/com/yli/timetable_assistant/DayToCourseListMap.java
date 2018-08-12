@@ -5,8 +5,4 @@ import java.util.TreeMap;
 
  class DayToCourseListMap extends TreeMap<RankedString, ArrayList<Course>> {
 
-    DayToCourseListMap(){
-
-    }
-
 }

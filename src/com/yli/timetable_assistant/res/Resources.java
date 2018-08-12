@@ -30,8 +30,8 @@ public class Resources extends ResourceBundle {
 
         //Resources for generated table window, might be separated
         //from this class in the future.
-        res.put("changeFont","Please change the font as suitable");
-        res.put("saveImage","Click the table to save.");
+        res.put("changeFont","Please change the font as suitable: ");
+        res.put("saveImage","then click the table to save.");
 
 
     }
