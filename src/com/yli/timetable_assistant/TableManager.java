@@ -11,14 +11,10 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import java.awt.*;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.Buffer;
 import java.util.*;
 
 class TableManager {
 
-    static SelectionModeToDataMap selectionModeToDataMap = new SelectionModeToDataMap();
 
     //Unpacks all merged cells in the sheet.
     static void unpackMergedCells(Sheet sheet) {
@@ -100,7 +96,7 @@ class TableManager {
      * @return String value of the requested information.
      */
     private static RankedString getCourseInfo(Sheet sheet, Cell courseCell
-            , SelectionMode mode) {
+            ,SelectionModeToDataMap selectionModeToDataMap, SelectionMode mode) {
         //Get selectionModeData about the requested information.
         SelectionModeData selectionModeData = selectionModeToDataMap.get(mode);
 
@@ -139,7 +135,7 @@ class TableManager {
      * @param addedCourses A list of the courses, that we are looking to map.
      * @return a sorted map
      */
-    private static DayToCourseListMap makeDayToCourseListMap(Sheet sheet, ObservableList<String> addedCourses) {
+     static DayToCourseListMap makeDayToCourseListMap(Sheet sheet,SelectionModeToDataMap selectionModeToDataMap ,ObservableList<String> addedCourses) {
         DayToCourseListMap dayToCourseListMap = new DayToCourseListMap();
 
         /*For each cell in the sheet, if it's for a course that's in the list
@@ -149,7 +145,7 @@ class TableManager {
         for (Row row : sheet) {
             for (Cell cell : row) {
                 if (addedCourses.contains(makeStringValue(cell, true))) {
-                    RankedString day = getCourseInfo(sheet, cell, SelectionMode.SELECT_DAY);
+                    RankedString day = getCourseInfo(sheet, cell,selectionModeToDataMap ,SelectionMode.SELECT_DAY);
 
                     //Either get the list we already have or make a new one.
                     ArrayList<Course> dayCourses = dayToCourseListMap.getOrDefault(day,
@@ -157,8 +153,8 @@ class TableManager {
 
                     //Add the course to it.
                     dayCourses.add(new Course(makeStringValue(cell, true),
-                            getCourseInfo(sheet, cell, SelectionMode.SELECT_HALL),
-                            getCourseInfo(sheet, cell, SelectionMode.SELECT_TIME))
+                            getCourseInfo(sheet, cell,selectionModeToDataMap ,SelectionMode.SELECT_HALL),
+                            getCourseInfo(sheet, cell,selectionModeToDataMap ,SelectionMode.SELECT_TIME))
                     );
 
 
@@ -180,7 +176,7 @@ class TableManager {
 
     }
 
-    private static BufferedImage drawTable(DayToCourseListMap map, float fontSize, String fileName) {
+     static BufferedImage drawTable(DayToCourseListMap map, float fontSize) {
 
         //Image dimensions
         int width = 842;
@@ -266,11 +262,7 @@ class TableManager {
         return image;
     }
 
-    static BufferedImage generateTimetable(Sheet sheet, ObservableList<String> courses, float fontSize, String fileName) {
-        DayToCourseListMap dayToCourseListMap =
-                makeDayToCourseListMap(sheet, courses);
-        return drawTable(dayToCourseListMap, fontSize, fileName);
-    }
+
 
 
 }

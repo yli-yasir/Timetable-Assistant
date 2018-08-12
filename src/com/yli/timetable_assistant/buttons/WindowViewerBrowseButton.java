@@ -1,8 +1,8 @@
-package com.yli.timetable_assistant.buttons.browse;
+package com.yli.timetable_assistant.buttons;
 
 
-import com.yli.timetable_assistant.buttons.browse.WindowViewable;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 
 public class WindowViewerBrowseButton extends Button {
 
@@ -22,4 +22,8 @@ public class WindowViewerBrowseButton extends Button {
     }
 
 
+    public static interface WindowViewable {
+        ChoiceBox<Integer> getWindowRowsChoiceBox();
+        ChoiceBox<Integer> getWindowColumnsChoiceBox();
+    }
 }

@@ -28,6 +28,12 @@ public class Resources extends ResourceBundle {
         res.put("outputFileNameFieldPrompt","Student No");
         res.put("exampleWindowSize","Example window size:");
 
+        //Resources for generated table window, might be separated
+        //from this class in the future.
+        res.put("changeFont","Please change the font as suitable");
+        res.put("saveImage","Click the table to save.");
+
+
     }
 
     @Override

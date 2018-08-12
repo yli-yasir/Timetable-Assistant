@@ -1,17 +1,15 @@
 package com.yli.timetable_assistant;
 
-import com.yli.timetable_assistant.buttons.browse.WindowViewable;
-import com.yli.timetable_assistant.buttons.browse.WindowViewerBrowseButton;
+import com.yli.timetable_assistant.buttons.WindowViewerBrowseButton;
 import com.yli.timetable_assistant.example_selection.ExampleCourseNotSetException;
 import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.example_selection.SelectionModeButton;
+import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
 import com.yli.timetable_assistant.res.Resources;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
@@ -28,7 +26,7 @@ import java.util.ResourceBundle;
 //todo separate classes into proper packages.
 //todo handle if user enters a sample window size bigger than the excel table.
 
-public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbook> {
+public class Controller implements WindowViewerBrowseButton.WindowViewable, ParamTask.TaskCallbacks<Workbook> {
 
     private Sheet timetableSheet;
 
@@ -48,7 +46,6 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
     @FXML
     private ProgressIndicator progressIndicator;
 
-    private ChoiceBox<Integer> fontSizeChoiceBox;
     private ChoiceBox<Integer> windowRowsChoiceBox = new ChoiceBox<>();
     private ChoiceBox<Integer> windowColumnsChoiceBox = new ChoiceBox<>();
 
@@ -56,7 +53,8 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
 
     private boolean isReadyToSearch;
 
-    private TableReadTask tableReadTask;
+    private static SelectionModeToDataMap selectionModeToDataMap = new SelectionModeToDataMap();
+
 
     private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.Resources");
 
@@ -92,7 +90,7 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
                     showInfoAlert("File not chosen yet!",
                             "Please choose a file first!");
                 } else if (button.getStep() != com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE &&
-                        !TableManager.selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
+                        !selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
                     showInfoAlert("Course not chosen yet!",
                             "Please choose a course first!");
                 } else {
@@ -121,7 +119,7 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
             File file = chooser.showOpenDialog(button.getScene().getWindow());
             if (file!=null) {
                 browseButton.setText("File: " + file.getName());
-                tableReadTask = new TableReadTask(this, file);
+                TableReadTask tableReadTask = new TableReadTask(this, file);
                 Thread thread = new Thread(tableReadTask);
                 thread.setDaemon(true);
                 thread.start();
@@ -158,10 +156,10 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
                         com.yli.timetable_assistant.example_selection.SelectionMode selectionMode = currentlySelectedButton.getStep();
 
                         if (selectionMode == com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE) {
-                            TableManager.selectionModeToDataMap.puSelectionModeData(rowIndex);
+                            selectionModeToDataMap.puSelectionModeData(rowIndex);
                         } else {
                             try {
-                                TableManager.selectionModeToDataMap.putCourseInfoMetaData(
+                                selectionModeToDataMap.putCourseInfoMetaData(
                                         rowIndex, columnIndex, selectionMode
                                 );
                             } catch (ExampleCourseNotSetException e) {
@@ -171,7 +169,7 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
                         //todo this is text related to view.
                         String instruction;
 
-                        if (TableManager.selectionModeToDataMap.size() < com.yli.timetable_assistant.example_selection.SelectionMode.values().length) {
+                        if (selectionModeToDataMap.size() < com.yli.timetable_assistant.example_selection.SelectionMode.values().length) {
                             instruction = "Please choose the remaining information...";
                         } else {
                             instruction = "All done! You can search for and add courses now!";
@@ -245,11 +243,11 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
             String fileName = outputFileNameField.getText();
             if (!addedCoursesList.isEmpty() && fileName != null &&
                     !fileName.isEmpty()) {
-                BufferedImage image = TableManager.generateTimetable(timetableSheet, addedCoursesList, fontSizeChoiceBox.getValue(), fileName);
+                DayToCourseListMap map = TableManager.makeDayToCourseListMap(timetableSheet,selectionModeToDataMap,addedCoursesList);
                     FXUtils.openWindow("Your timetable",new Stage(), 700, 500,
                             getClass().getResource("generated_table.fxml"),
                             ResourceBundle.getBundle(Resources.PATH),
-                    new GeneratedTableController(image));
+                    new GeneratedTableController(map));
             }
             else
                 showInfoAlert(bundle.getString("notReadyToGenerateHeader"), bundle.getString("notReadyToGenerateBody"));
@@ -281,22 +279,14 @@ public class Controller implements WindowViewable, ReadTask.TaskCallbacks<Workbo
         outputFileNameField = new TextField();
         outputFileNameField.setPromptText(bundle.getString("outputFileNameFieldPrompt"));
 
-        //font size label and choice box...
-        Label fontSizeLabel = new Label(bundle.getString("fontSize"));
-        fontSizeChoiceBox = new ChoiceBox<>();
-        ObservableList<Integer> sizeList = FXCollections.observableArrayList();
-        for (int i = 1; i <= 72; i++) sizeList.add(i);
-        fontSizeChoiceBox.setItems(sizeList);
-        fontSizeChoiceBox.setValue(12);
+
 
 
         settingsBox.getChildren().addAll(
                 exampleWindowSizeLabel,
                 rowXColumn,
                 outputFileNameLabel,
-                outputFileNameField,
-                fontSizeLabel,
-                fontSizeChoiceBox);
+                outputFileNameField);
         //End of settings box-------------
 
         courseSelectionGrid.add(field, 0, 0);

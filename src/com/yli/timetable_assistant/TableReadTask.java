@@ -7,19 +7,19 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import java.io.File;
 import java.io.IOException;
 
-public class TableReadTask extends ReadTask<Workbook> {
+public class TableReadTask extends ParamTask<Workbook,File> {
 
 
     TableReadTask(TaskCallbacks<Workbook> callbacks, File file) {
-        super(callbacks, file);
+        super(callbacks,file);
     }
 
     @Override
     protected Workbook call() {
         Workbook timetable = null;
-        if (file != null) {
+        if (param != null) {
             try {
-                timetable = WorkbookFactory.create(file);
+                timetable = WorkbookFactory.create(param);
             } catch (IOException | InvalidFormatException e) {
                 e.printStackTrace();
             }

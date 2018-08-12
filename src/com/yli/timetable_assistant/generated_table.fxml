@@ -4,7 +4,6 @@
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
 <VBox xmlns:fx="http://javafx.com/javafx"
       stylesheets="@style.css">
