@@ -33,9 +33,8 @@ public class SelectionModeToDataMap {
 
 
             /*This will be used to indicate if it's in a cell or a row, using
-            the constants stored in the CourseInfoCellData class but for now it's unknown
-            so -1 is used */
-            int type = -1;
+            the constants stored in the CourseInfoCellData class but for now it's unknown */
+            int type;
 
             /*If the example data row is the same as the row of the course
             then there is probably a column of that data to the left or right

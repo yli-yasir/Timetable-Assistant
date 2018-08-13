@@ -81,7 +81,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     @FXML
     private void initialize() {
         populateExampleSelectionControlBar();
-        populateCourseSelectionGrid();
+        populateControlGrid();
     }
 
     /*populates with controls which will be used to choose example data
@@ -216,9 +216,9 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     private void setOnTableSampleLabelClickListener(Label tableSampleLabel, Label instructionLabel) {
         tableSampleLabel.setOnMouseClicked(event -> {
 
-            SelectionMode currentMode = currentSelectionModeButton.getMode();
             //A mode has to be selected or else we don't respond to any click.
-            if (currentMode != null) {
+            if (currentSelectionModeButton != null) {
+                SelectionMode currentMode = currentSelectionModeButton.getMode();
                 //Get the row and column of the label that was clicked.
                 int rowIndex = GridPane.getRowIndex(tableSampleLabel);
                 int columnIndex = GridPane.getColumnIndex(tableSampleLabel);
@@ -230,7 +230,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
                 } else {
                     try {
                         selectionModeToDataMap.putCourseInfoCellData(
-                                rowIndex, columnIndex, currentMode
+                                columnIndex, rowIndex, currentMode
                         );
                     } catch (ExampleCourseNotSetException | IncorrectExampleInfoException e) {
                         /*ExampleCourseNotSetException is unlikely to be thrown, since we are
@@ -238,15 +238,17 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
                         been selected yet,Thus the following dialog will assume that the user
                         has selected incorrect information.
                         */
-                        e.printStackTrace();
                         showInfoAlert(bundle.getString("incorrectInfoHeader"), bundle.getString("incorrectInfoBody"));
+                        return;
                     }
                 }
+                giveSelectionFeedback(currentSelectionModeButton,tableSampleLabel,instructionLabel);
 
             }
+
+
         });
 
-        giveSelectionFeedback(currentSelectionModeButton,tableSampleLabel,instructionLabel);
     }
 
     /*Changes the text of the instructionLabel and the clicked button
@@ -268,7 +270,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     }
 
     //Initializes controls that are related to adding courses.
-    private void populateCourseSelectionGrid() {
+    private void populateControlGrid() {
 
         //This will be used to enter a search query.
         TextField field = new TextField();

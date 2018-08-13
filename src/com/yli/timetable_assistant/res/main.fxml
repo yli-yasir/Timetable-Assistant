@@ -33,7 +33,7 @@
     </StackPane>
 
 
-    <GridPane fx:id="courseSelectionGrid"
+    <GridPane fx:id="controlGrid"
               styleClass="csg"/>
 
 </VBox>
