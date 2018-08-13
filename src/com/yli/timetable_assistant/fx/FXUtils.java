@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant;
+package com.yli.timetable_assistant.fx;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,7 +10,7 @@ import java.util.ResourceBundle;
 
 public class FXUtils {
 
-    static void openWindow(String windowName, Stage stage,
+    public static void openWindow(String windowName, Stage stage,
                            int width, int height,
                            URL FXMLResourceUrl, ResourceBundle bundle,
                            Object controller) {

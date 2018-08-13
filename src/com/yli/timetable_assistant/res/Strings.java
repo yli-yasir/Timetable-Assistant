@@ -2,17 +2,17 @@ package com.yli.timetable_assistant.res;
 
 import java.util.*;
 
-public class Resources extends ResourceBundle {
+public class Strings extends ResourceBundle {
 
-    public static final String PATH = "com.yli.timetable_assistant.res.Resources";
+    public static final String PATH = "com.yli.timetable_assistant.res.Strings";
 
     private HashMap<String,Object> res = new HashMap<>();
 
 
-    public Resources(){
+    public Strings(){
         res.put("welcomeString","Please choose a file, then proceed to enter required information.");
         res.put("windowSize","Example window size:");
-        res.put("WindowViewerBrowseButton","CHOOSE FILE");
+        res.put("browseButton","CHOOSE FILE");
         res.put("searchFieldPrompt","Course name");
         res.put("availableCoursesHeader","Available:");
         res.put("addedCoursesHeader","Added:");
@@ -27,8 +27,11 @@ public class Resources extends ResourceBundle {
         res.put("fontSize","Font size:");
         res.put("outputFileNameFieldPrompt","Student No");
         res.put("exampleWindowSize","Example window size:");
-
-        //Resources for generated table window, might be separated
+        res.put("incorrectInfoHeader","Incorrect Information!");
+        res.put("incorrectInfoBody","The cell you selected isn't in-line with the course cell you selected.");
+        res.put("chooseRemainingInfo","Please choose the remaining information...");
+        res.put("allDone","All done! You can search for and add courses now!");
+        //Strings for generated table window, might be separated
         //from this class in the future.
         res.put("changeFont","Please change the font as suitable: ");
         res.put("saveImage","then click the table to save.");

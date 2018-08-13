@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant;
+package com.yli.timetable_assistant.table;
 
 import java.util.Objects;
 

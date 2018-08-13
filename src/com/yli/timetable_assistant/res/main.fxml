@@ -19,7 +19,7 @@
            styleClass="Header,InstructionLabel"
     />
 
-    <HBox fx:id="exampleSelectionBar"
+    <HBox fx:id="exampleSelectionControlBar"
           styleClass="exampleSelectionBar"/>
 
 

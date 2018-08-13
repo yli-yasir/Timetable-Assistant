@@ -1,5 +1,6 @@
-package com.yli.timetable_assistant.example_selection;
+package com.yli.timetable_assistant.buttons;
 
+import com.yli.timetable_assistant.example_selection.SelectionMode;
 import javafx.scene.control.Button;
 
  public class SelectionModeButton extends Button {
@@ -12,7 +13,7 @@ import javafx.scene.control.Button;
     }
 
 
-     public SelectionMode getStep() {
+     public SelectionMode getMode() {
         return step;
     }
 

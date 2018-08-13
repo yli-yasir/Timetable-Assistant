@@ -1,13 +1,13 @@
-package com.yli.timetable_assistant;
+package com.yli.timetable_assistant.table;
 
 import java.util.Objects;
 
-class Course {
+public class Course {
     private String name;
     private RankedString hall;
     private RankedString time;
 
-     Course(String name,RankedString hall, RankedString time) {
+     public Course(String name,RankedString hall, RankedString time) {
         this.name=name;
         this.hall = hall;
         this.time = time;
@@ -28,15 +28,15 @@ class Course {
         return Objects.hash(name, hall, time);
     }
 
-    String getName() {
+    public String getName() {
         return name;
     }
 
-     RankedString getHall() {
+    public RankedString getHall() {
         return hall;
     }
 
-     RankedString getTime() {
+    public RankedString getTime() {
         return time;
     }
 }

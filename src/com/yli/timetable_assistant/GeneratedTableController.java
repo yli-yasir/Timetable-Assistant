@@ -1,6 +1,8 @@
 package com.yli.timetable_assistant;
 
-import com.yli.timetable_assistant.res.Resources;
+import com.yli.timetable_assistant.res.Strings;
+import com.yli.timetable_assistant.table.DayToCourseListMap;
+import com.yli.timetable_assistant.tasks.TableDrawTask;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -21,12 +23,13 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.util.ResourceBundle;
 
 
 
 public class GeneratedTableController implements TableDrawTask.TaskCallbacks<BufferedImage> {
+
+    static final String FXML_PATH = "/com/yli/timetable_assistant/res/generatedTable.fxml";
 
     @FXML
     private HBox generatedTableControlBar;
@@ -39,7 +42,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
 
     private DayToCourseListMap dayToCourseListMap;
 
-    private ResourceBundle bundle = ResourceBundle.getBundle(Resources.PATH);
+    private ResourceBundle bundle = ResourceBundle.getBundle(Strings.PATH);
 
     private ChoiceBox<Integer> fontSizeChoiceBox;
     private int initialFontSize = 16;
@@ -94,6 +97,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
 
     private void setSaveOnClickListener(Node node){
         node.setOnMouseClicked(event -> {
+
             FileChooser chooser = new FileChooser();
             chooser.getExtensionFilters().add(
                     new FileChooser.ExtensionFilter("PNG", "*.png"));
@@ -104,10 +108,11 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
             we just get the one at the first index, and extensions should be specified as
             *.<extension> so we trim the in string starting from the second index until the end
             to get a string extension which can be used in saving the file*/
-            String extension = chooser.getSelectedExtensionFilter().getExtensions()
-                    .get(0).substring(2);
+
 
             if (file != null) {
+                String extension = chooser.getSelectedExtensionFilter().getExtensions()
+                        .get(0).substring(2);
                 saveImage(tableImage,file,extension);
             }
         });

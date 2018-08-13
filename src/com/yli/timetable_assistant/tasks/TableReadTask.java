@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant;
+package com.yli.timetable_assistant.tasks;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -10,7 +10,7 @@ import java.io.IOException;
 public class TableReadTask extends ParamTask<Workbook,File> {
 
 
-    TableReadTask(TaskCallbacks<Workbook> callbacks, File file) {
+    public TableReadTask(TaskCallbacks<Workbook> callbacks, File file) {
         super(callbacks,file);
     }
 
