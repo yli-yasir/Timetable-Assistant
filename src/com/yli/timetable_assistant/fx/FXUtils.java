@@ -3,6 +3,7 @@ package com.yli.timetable_assistant.fx;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -26,6 +27,15 @@ public class FXUtils {
         catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+
+    public static void showInfoAlert(String header, String body) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Woah there!");
+        alert.setHeaderText(header);
+        alert.setContentText(body);
+        alert.show();
     }
 
 }

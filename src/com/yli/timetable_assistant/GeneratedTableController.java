@@ -42,7 +42,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
 
     private DayToCourseListMap dayToCourseListMap;
 
-    private ResourceBundle bundle = ResourceBundle.getBundle(Strings.PATH);
+    private ResourceBundle bundle = ResourceBundle.getBundle(Strings.class.getCanonicalName());
 
     private ChoiceBox<Integer> fontSizeChoiceBox;
     private int initialFontSize = 16;

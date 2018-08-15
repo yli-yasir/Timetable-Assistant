@@ -2,6 +2,7 @@ package com.yli.timetable_assistant;
 
 import com.yli.timetable_assistant.example_selection.IncorrectExampleInfoException;
 import com.yli.timetable_assistant.fx.FXUtils;
+import com.yli.timetable_assistant.res.Integers;
 import com.yli.timetable_assistant.table.DayToCourseListMap;
 import com.yli.timetable_assistant.table.TableUtils;
 import com.yli.timetable_assistant.tasks.TableReadTask;
@@ -23,6 +24,9 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
 import java.util.ResourceBundle;
+
+import static com.yli.timetable_assistant.fx.FXUtils.showInfoAlert;
+
 
 //todo handle if user enters a sample window size bigger than the excel table.
 
@@ -254,7 +258,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     /*Changes the text of the instructionLabel and the clicked button
     , and if all required info has been selected sets isReadyToSearch
      to true*/
-    private void giveSelectionFeedback(SelectionModeButton button,Label tableSampleLabel,Label instuctionLabel) {
+    private void giveSelectionFeedback(SelectionModeButton button,Label tableSampleLabel,Label instructionLabel) {
         String instruction;
 
         if (selectionModeToDataMap.size() < com.yli.timetable_assistant.example_selection.SelectionMode.values().length) {
@@ -272,12 +276,9 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     //Initializes controls that are related to adding courses.
     private void populateControlGrid() {
 
-        //This will be used to enter a search query.
-        TextField field = new TextField();
-        field.setPromptText(bundle.getString("searchFieldPrompt"));
-
+        //-----------------------------------------------------------
         /*Label and list for showing courses that have been added from
-        the list that contains available courses.*/
+        the list that contains available courses*/
         Label addedCoursesHeader = new Label(bundle.getString("addedCoursesHeader"));
         addedCoursesHeader.getStyleClass().add("Header");
 
@@ -285,15 +286,12 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         ObservableList<String> addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
 
-        addedCourses.setOnMouseClicked(event -> {
-            MultipleSelectionModel<String> sModel = addedCourses.getSelectionModel();
-            String string = sModel.getSelectedItem();
-            if (string != null)
-                addedCoursesList
-                        .remove(sModel.getSelectedIndex());
-        });
+        setRemoveItemOnClickListener(addedCourses);
+        //--------------------------------------------------------
 
-        //Label and list for displaying courses that are in the table.
+
+        //----------------------------------------------------------
+        //Label and list for displaying courses that are available in the sheet.
         Label availableCoursesHeader = new Label(bundle.getString("availableCoursesHeader"));
         availableCoursesHeader.getStyleClass().add("Header");
         ListView<String> availableCourses = new ListView<>();
@@ -301,46 +299,52 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         availableCourses.setItems(
                 searchResultList);
 
-        availableCourses.setOnMouseClicked(event -> {
-            String clickedItem = availableCourses.getSelectionModel().getSelectedItem();
-            if (!addedCoursesList.contains(clickedItem) && clickedItem != null) {
-                addedCoursesList.add(clickedItem
-                );
-            }
-        });
+        setAddItemOnClickListener(availableCourses,addedCoursesList);
+        //------------------------------------------------------------
 
-        //Buttons which will be used in this pane.
+
+        //------------------------------------------------------------
+        //Controls for searching
+        TextField searchField = new TextField();
+        searchField.setPromptText(bundle.getString("searchFieldPrompt"));
         Button searchButton = new Button(bundle.getString("searchButton"));
+        setSearchOnClickListener(searchButton,searchResultList,searchField);
+        //--------------------------------------------------
+
+
+        //-----------------------------------------------------------
+        //generate table button
         Button generateButton = new Button(bundle.getString("generateButton"));
 
-        searchButton.setOnAction(event -> {
-            if (isReadyToSearch) {
-                TableUtils.search(timetableSheet, searchResultList, field.getText());
-            } else {
-                showInfoAlert(bundle.getString("insufficientInfoHeader"), bundle.getString("insufficientInfoBody"));
-            }
-        });
-
-        generateButton.setOnAction(event -> {
-            if (!addedCoursesList.isEmpty()) {
-                DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, addedCoursesList);
-                FXUtils.openWindow("Your timetable", new Stage(), 700, 500,
-                        GeneratedTableController.class.getResource(GeneratedTableController.FXML_PATH),
-                        ResourceBundle.getBundle(Strings.PATH),
-                        new GeneratedTableController(map));
-            } else
-                showInfoAlert(bundle.getString("notReadyToGenerateHeader"), bundle.getString("notReadyToGenerateBody"));
-        });
+        setGenerateOnClickListener(generateButton,addedCoursesList);
+        //------------------------------------------------------------
 
 
+        //settings Box-------------------------------------
         Label settingsHeader = new Label(bundle.getString("settingsHeader"));
         settingsHeader.getStyleClass().add("Header");
 
-        //SettingsBox-----------------
+        VBox settingsBox =  makeSettingsBox();
+        //---------------------------------------------
+
+        //Adding controls to grid
+        controlGrid.add(searchField, 0, 0);
+        controlGrid.add(searchButton, 1, 0);
+        controlGrid.add(availableCoursesHeader, 0, 1);
+        controlGrid.add(addedCoursesHeader, 1, 1);
+        controlGrid.add(availableCourses, 0, 2);
+        controlGrid.add(addedCourses, 1, 2);
+        controlGrid.add(generateButton, 0, 3, 3, 1);
+        controlGrid.add(settingsHeader, 2, 1);
+        controlGrid.add(settingsBox, 2, 2);
+
+    }
+
+
+    private VBox makeSettingsBox(){
         VBox settingsBox = new VBox();
         settingsBox.getStyleClass().add("settingsBox");
         GridPane.setHgrow(settingsBox, Priority.ALWAYS);
-
 
         //example window size label and choice boxes
         Label exampleWindowSizeLabel = new Label(bundle.getString("exampleWindowSize"));
@@ -353,32 +357,61 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         windowColumnsChoiceBox.setValue(5);
         rowXColumn.getChildren().addAll(windowRowsChoiceBox, new Label("*"), windowColumnsChoiceBox);
 
-
         settingsBox.getChildren().addAll(
                 exampleWindowSizeLabel,
                 rowXColumn
+        );
+        return settingsBox;
+    }
+
+    private void setGenerateOnClickListener(Button generateButton,ObservableList<String> generateFrom){
+        Integers intBundle = (Integers)ResourceBundle.getBundle(Integers.class.getCanonicalName());
+        generateButton.setOnAction(event -> {
+            if (!generateFrom.isEmpty()) {
+                DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
+                FXUtils.openWindow(bundle.getString("yourTimetable"), new Stage(),
+                        intBundle.getInteger("windowWidth"), intBundle.getInteger("windowHeight"),
+                        GeneratedTableController.class.getResource(GeneratedTableController.FXML_PATH),
+                        ResourceBundle.getBundle(Strings.class.getCanonicalName()),
+                        new GeneratedTableController(map));
+            } else
+                showInfoAlert(bundle.getString("notReadyToGenerateHeader"), bundle.getString("notReadyToGenerateBody"));
+        });
+    }
+
+    private void setSearchOnClickListener(Button searchButton,ObservableList<String> searchResultList,TextField searchField){
+        searchButton.setOnAction(event -> {
+            if (isReadyToSearch) {
+                TableUtils.search(timetableSheet, searchResultList, searchField.getText());
+
+            } else {
+                showInfoAlert(bundle.getString("insufficientInfoHeader"), bundle.getString("insufficientInfoBody"));
+            }
+        });
+    }
+
+    private void setRemoveItemOnClickListener(ListView<String> removingFrom){
+        removingFrom.setOnMouseClicked(event -> {
+            MultipleSelectionModel<String> sModel = removingFrom.getSelectionModel();
+            String string = sModel.getSelectedItem();
+            if (string != null)
+                removingFrom.getItems()
+                        .remove(sModel.getSelectedIndex());
+        });
+    }
+
+    private void setAddItemOnClickListener(ListView<String> addingFrom, ObservableList<String> addingTo){
+        addingFrom.setOnMouseClicked(event -> {
+            String clickedItem = addingFrom.getSelectionModel().getSelectedItem();
+            if (!addingTo.contains(clickedItem) && clickedItem != null) {
+                addingTo.add(clickedItem
                 );
-        //End of settings box-------------
-
-        controlGrid.add(field, 0, 0);
-        controlGrid.add(searchButton, 1, 0);
-        controlGrid.add(availableCoursesHeader, 0, 1);
-        controlGrid.add(addedCoursesHeader, 1, 1);
-        controlGrid.add(availableCourses, 0, 2);
-        controlGrid.add(addedCourses, 1, 2);
-        controlGrid.add(generateButton, 0, 3, 3, 1);
-        controlGrid.add(settingsHeader, 2, 1);
-        controlGrid.add(settingsBox, 2, 2);
+            }
+        });
 
     }
 
-    private void showInfoAlert(String header, String body) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Woah there!");
-        alert.setHeaderText(header);
-        alert.setContentText(body);
-        alert.show();
-    }
+
 
 
     @Override

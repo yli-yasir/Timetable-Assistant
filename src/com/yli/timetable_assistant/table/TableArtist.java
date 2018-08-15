@@ -1,12 +1,15 @@
 package com.yli.timetable_assistant.table;
 
+import sun.font.TrueTypeFont;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 
  public class TableArtist {
 
-
+        //todo refactor this
     public static BufferedImage drawTable(DayToCourseListMap map, float fontSize) {
         //Image dimensions
         int width = 1754;

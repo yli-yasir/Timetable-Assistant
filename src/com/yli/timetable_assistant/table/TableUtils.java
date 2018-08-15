@@ -63,6 +63,7 @@ public class TableUtils {
     public static void search(Sheet searchSheet, ObservableList<String> resultList, String searchQuery) {
         //lower case and remove white space from search query.
         searchQuery = makeStringValue(searchQuery, false);
+
         if (searchSheet != null) {
             HashSet<String> results = new HashSet<>();
             for (Row row : searchSheet) {
