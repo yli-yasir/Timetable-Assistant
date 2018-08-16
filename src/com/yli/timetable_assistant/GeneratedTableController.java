@@ -1,6 +1,7 @@
 package com.yli.timetable_assistant;
 
-import com.yli.timetable_assistant.res.Strings;
+import com.yli.timetable_assistant.res.IntsBundle;
+import com.yli.timetable_assistant.res.StringsBundle;
 import com.yli.timetable_assistant.table.DayToCourseListMap;
 import com.yli.timetable_assistant.tasks.TableDrawTask;
 import javafx.collections.FXCollections;
@@ -31,8 +32,13 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
 
     static final String FXML_PATH = "/com/yli/timetable_assistant/res/generatedTable.fxml";
 
+    //Will have some instructions and choicebox for changing font.
     @FXML
     private HBox generatedTableControlBar;
+
+    private ChoiceBox<Integer> fontSizeChoiceBox;
+
+    //Will hold the progress indicator and the image view.
     @FXML
     private StackPane generatedTableImageViewContainer;
     @FXML
@@ -40,13 +46,16 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
     @FXML
     private ProgressIndicator progressIndicator;
 
+    //The map we are going to draw the table from.
     private DayToCourseListMap dayToCourseListMap;
 
-    private ResourceBundle bundle = ResourceBundle.getBundle(Strings.class.getCanonicalName());
+    private ResourceBundle stringsBundle = ResourceBundle.getBundle(StringsBundle.class.getCanonicalName());
 
-    private ChoiceBox<Integer> fontSizeChoiceBox;
-    private int initialFontSize = 16;
+    private IntsBundle intsBundle =  (IntsBundle) ResourceBundle.getBundle(IntsBundle.class.getCanonicalName());
 
+    private int initialFontSize = intsBundle.getInteger("initialFontSize");
+
+    //Drawn image that might be saved later.
     private BufferedImage tableImage;
 
 
@@ -65,7 +74,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
     }
 
     private void populateGeneratedTableControlBar(){
-        Label changeFontLabel =  new Label(bundle.getString("changeFont"));
+        Label changeFontLabel =  new Label(stringsBundle.getString("changeFont"));
 
         fontSizeChoiceBox = new ChoiceBox<>();
         ObservableList<Integer> fontOptions = FXCollections.observableArrayList();
@@ -74,7 +83,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
         fontSizeChoiceBox.setValue(initialFontSize);
         setDrawOnFontSizeChangedListener(fontSizeChoiceBox);
 
-        Label saveImageLabel = new Label(bundle.getString("saveImage"));
+        Label saveImageLabel = new Label(stringsBundle.getString("saveImage"));
 
         generatedTableControlBar.getChildren().addAll(changeFontLabel,
                 fontSizeChoiceBox,saveImageLabel);
@@ -108,8 +117,6 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
             we just get the one at the first index, and extensions should be specified as
             *.<extension> so we trim the in string starting from the second index until the end
             to get a string extension which can be used in saving the file*/
-
-
             if (file != null) {
                 String extension = chooser.getSelectedExtensionFilter().getExtensions()
                         .get(0).substring(2);
@@ -128,6 +135,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
         }
 
     }
+
     private void populateImageView(DayToCourseListMap dayToCourseListMap,int fontSize){
         TableDrawTask tableDrawTask = new TableDrawTask(this,dayToCourseListMap,fontSize);
         Thread thread = new Thread(tableDrawTask);

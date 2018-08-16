@@ -1,21 +1,27 @@
 package com.yli.timetable_assistant.table;
 
+import com.yli.timetable_assistant.res.IntsBundle;
 import sun.font.TrueTypeFont;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.ResourceBundle;
 
- public class TableArtist {
+public class TableArtist {
+
+     public static final int BASE_WIDTH=842;
+     public static final int BASE_HEIGHT=595;
+
+     public static final int DEFAULT_WIDTH=1754;
+     public static final int DEFAULT_HEIGHT=1240;
 
         //todo refactor this
-    public static BufferedImage drawTable(DayToCourseListMap map, float fontSize) {
-        //Image dimensions
-        int width = 1754;
-        int height = 1240;
+    public static BufferedImage drawTable(DayToCourseListMap map,int width, int height, float fontSize) {
 
-        int sizeMagnification = 2;
+
+        int sizeMagnification = width /BASE_WIDTH;
 
         fontSize = fontSize * sizeMagnification;
 

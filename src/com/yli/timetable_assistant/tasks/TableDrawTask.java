@@ -17,6 +17,8 @@ public class TableDrawTask extends ParamTask<BufferedImage,DayToCourseListMap> {
 
     @Override
     protected BufferedImage call() {
-        return TableArtist.drawTable(param,fontSize);
+        return TableArtist.drawTable(param,
+                TableArtist.DEFAULT_WIDTH,TableArtist.DEFAULT_HEIGHT
+                ,fontSize);
     }
 }

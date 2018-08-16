@@ -2,7 +2,8 @@ package com.yli.timetable_assistant;
 
 import com.yli.timetable_assistant.example_selection.IncorrectExampleInfoException;
 import com.yli.timetable_assistant.fx.FXUtils;
-import com.yli.timetable_assistant.res.Integers;
+import com.yli.timetable_assistant.res.IntsBundle;
+import com.yli.timetable_assistant.res.StringsBundle;
 import com.yli.timetable_assistant.table.DayToCourseListMap;
 import com.yli.timetable_assistant.table.TableUtils;
 import com.yli.timetable_assistant.tasks.TableReadTask;
@@ -10,7 +11,6 @@ import com.yli.timetable_assistant.example_selection.ExampleCourseNotSetExceptio
 import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.buttons.SelectionModeButton;
 import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
-import com.yli.timetable_assistant.res.Strings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -23,6 +23,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import static com.yli.timetable_assistant.fx.FXUtils.showInfoAlert;
@@ -78,7 +79,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     private static SelectionModeToDataMap selectionModeToDataMap = new SelectionModeToDataMap();
 
     //Bundle which has string resources that will be used in the GUI.
-    private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.Strings");
+    private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.StringsBundle");
 
     /*This will be automatically called after injecting the variables above
     with their values*/
@@ -114,8 +115,14 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     private void addSelectionModeButtons(ObservableList<Node> children) {
         //Add as many buttons as needed for selection modes, in here I am making
         //a button for each mode.
+        HashMap<SelectionMode,String> modeToName = new HashMap<>();
+        modeToName.put(SelectionMode.SELECT_COURSE,bundle.getString("selectCourseModeName"));
+        modeToName.put(SelectionMode.SELECT_TIME,bundle.getString("selectTimeModeName"));
+        modeToName.put(SelectionMode.SELECT_HALL,bundle.getString("selectHallModeName"));
+        modeToName.put(SelectionMode.SELECT_DAY,bundle.getString("selectDayModeName"));
+
         for (SelectionMode mode : SelectionMode.values()) {
-            SelectionModeButton button = new SelectionModeButton(mode.title(), mode);
+            SelectionModeButton button = new SelectionModeButton(mode,modeToName.get(mode));
             HBox.setHgrow(button, Priority.ALWAYS);
             /*The listener merely changes the currently selected button further action
                 is handled in the table sample control that will be clicked.*/
@@ -133,9 +140,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
 
             //New file chooser obj.
             FileChooser chooser = new FileChooser();
-
-            //Set the title of its window.
-            chooser.setTitle("[Timetable Assistant] Please choose a file:");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLSX","*.xlsx"));
 
             /*This method takes a Window object as an argument...
              *If the parent window is passed then it will not be able to
@@ -179,7 +184,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
                 //When a button is clicked under proper conditions.
             } else {
                 currentSelectionModeButton = button;
-                instructionLabel.setText(currentSelectionModeButton.getMode().description());
+                instructionLabel.setText(currentSelectionModeButton.getInstruction());
             }
         });
 
@@ -269,7 +274,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         }
 
         instructionLabel.setText(instruction);
-        button.setText(button.getMode().prefix() + tableSampleLabel.getText());
+        button.setText(button.getCurrentlySelectedPrefix(tableSampleLabel.getText()));
         currentSelectionModeButton = null;
     }
 
@@ -341,6 +346,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     }
 
 
+    //Returns a vbox containing some pref controls...
     private VBox makeSettingsBox(){
         VBox settingsBox = new VBox();
         settingsBox.getStyleClass().add("settingsBox");
@@ -364,21 +370,23 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         return settingsBox;
     }
 
+    //Handle clicking generate..
     private void setGenerateOnClickListener(Button generateButton,ObservableList<String> generateFrom){
-        Integers intBundle = (Integers)ResourceBundle.getBundle(Integers.class.getCanonicalName());
+        IntsBundle intBundle = (IntsBundle)ResourceBundle.getBundle(IntsBundle.class.getCanonicalName());
         generateButton.setOnAction(event -> {
             if (!generateFrom.isEmpty()) {
                 DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
                 FXUtils.openWindow(bundle.getString("yourTimetable"), new Stage(),
                         intBundle.getInteger("windowWidth"), intBundle.getInteger("windowHeight"),
                         GeneratedTableController.class.getResource(GeneratedTableController.FXML_PATH),
-                        ResourceBundle.getBundle(Strings.class.getCanonicalName()),
+                        ResourceBundle.getBundle(StringsBundle.class.getCanonicalName()),
                         new GeneratedTableController(map));
             } else
                 showInfoAlert(bundle.getString("notReadyToGenerateHeader"), bundle.getString("notReadyToGenerateBody"));
         });
     }
 
+    //Handle clicking search...
     private void setSearchOnClickListener(Button searchButton,ObservableList<String> searchResultList,TextField searchField){
         searchButton.setOnAction(event -> {
             if (isReadyToSearch) {
@@ -390,6 +398,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         });
     }
 
+    //Handle removing an item from a list view.
     private void setRemoveItemOnClickListener(ListView<String> removingFrom){
         removingFrom.setOnMouseClicked(event -> {
             MultipleSelectionModel<String> sModel = removingFrom.getSelectionModel();
@@ -400,6 +409,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         });
     }
 
+    //Handle adding an item from a list view to a list of another.
     private void setAddItemOnClickListener(ListView<String> addingFrom, ObservableList<String> addingTo){
         addingFrom.setOnMouseClicked(event -> {
             String clickedItem = addingFrom.getSelectionModel().getSelectedItem();
@@ -410,8 +420,6 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         });
 
     }
-
-
 
 
     @Override
