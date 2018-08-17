@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
 
 public class SelectionModeButton extends Button {
 
-    private static ResourceBundle StringsBundle = ResourceBundle.getBundle(StringsBundle.class.getCanonicalName());
+    private static ResourceBundle stringsBundle = ResourceBundle.getBundle(StringsBundle.class.getCanonicalName());
 
     private SelectionMode mode;
 
@@ -16,25 +16,29 @@ public class SelectionModeButton extends Button {
     //ex: "hall"  , "time"  etc...
     private String modeName;
 
-    private static String titlePrefix = StringsBundle.getString("titlePrefix");
+    private String title;
 
-    private static String instructionPrefix = StringsBundle.getString("instructionPrefix");
+    private String instruction;
 
+    public SelectionModeButton(SelectionMode mode) {
+        super(stringsBundle.getString("titlePrefix") + stringsBundle.getString(mode.modeNameKey()));
+        this.mode=mode;
+        modeName = stringsBundle.getString(mode.modeNameKey());
+        //example: titlePrefix = Choose , modeName = Day
+        title = stringsBundle.getString("titlePrefix") + modeName;
+        instruction = stringsBundle.getString("instructionPrefix") + modeName;
 
-    public SelectionModeButton(SelectionMode mode, String modeName) {
-        super(titlePrefix+modeName);
-        this.mode = mode;
-        this.modeName = modeName;
     }
 
-    public String getTitle(){
-        return titlePrefix+ modeName;
+    public String getTitle() {
+        return title;
     }
+
     public String getInstruction() {
-        return instructionPrefix + modeName;
+        return instruction;
     }
 
-    public String getCurrentlySelectedPrefix(String postfix){
+    public String getCurrentlySelectedPrefix(String postfix) {
         return modeName + " : " + postfix;
     }
 

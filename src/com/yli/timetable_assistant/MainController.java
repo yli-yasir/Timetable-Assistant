@@ -115,19 +115,12 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     private void addSelectionModeButtons(ObservableList<Node> children) {
         //Add as many buttons as needed for selection modes, in here I am making
         //a button for each mode.
-        HashMap<SelectionMode,String> modeToName = new HashMap<>();
-        modeToName.put(SelectionMode.SELECT_COURSE,bundle.getString("selectCourseModeName"));
-        modeToName.put(SelectionMode.SELECT_TIME,bundle.getString("selectTimeModeName"));
-        modeToName.put(SelectionMode.SELECT_HALL,bundle.getString("selectHallModeName"));
-        modeToName.put(SelectionMode.SELECT_DAY,bundle.getString("selectDayModeName"));
-
         for (SelectionMode mode : SelectionMode.values()) {
-            SelectionModeButton button = new SelectionModeButton(mode,modeToName.get(mode));
+            SelectionModeButton button = new SelectionModeButton(mode);
             HBox.setHgrow(button, Priority.ALWAYS);
             /*The listener merely changes the currently selected button further action
                 is handled in the table sample control that will be clicked.*/
             setChangeModeOnActionListener(button);
-
             children.add(button);
         }
     }
@@ -176,7 +169,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
                 //------------------------
 
                 //When a button other than the course button is clicked before the course button.
-            } else if (button.getMode() != com.yli.timetable_assistant.example_selection.SelectionMode.SELECT_COURSE &&
+            } else if (button.getMode() != SelectionMode.SELECT_COURSE &&
                     !selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
                 showInfoAlert("Course not chosen yet!",
                         "Please choose a course first!");

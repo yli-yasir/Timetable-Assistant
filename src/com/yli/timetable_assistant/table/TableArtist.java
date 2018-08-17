@@ -17,7 +17,8 @@ public class TableArtist {
      public static final int DEFAULT_WIDTH=1754;
      public static final int DEFAULT_HEIGHT=1240;
 
-        //todo refactor this
+     //Might want to consider allowing to only pass the width and then
+    //calculate the height in order to maintain a specific aspect ratio...
     public static BufferedImage drawTable(DayToCourseListMap map,int width, int height, float fontSize) {
 
 

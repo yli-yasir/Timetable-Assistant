@@ -6,9 +6,22 @@ import java.util.ResourceBundle;
 
 public enum SelectionMode {
 
-    SELECT_COURSE,
-    SELECT_DAY,
-    SELECT_TIME,
-    SELECT_HALL
+    /*Modes and their string key for getting the localized string of what
+    they represent from the StringsBundle resource bundle class,
+    there is critical use of this key in SelectionModeButton class.*/
+    SELECT_COURSE("selectCourseModeName"),
+    SELECT_DAY("selectDayModeName"),
+    SELECT_TIME("selectTimeModeName"),
+    SELECT_HALL("selectHallModeName");
+
+    private String modeNameKey;
+
+    SelectionMode(String modeNameKey){
+        this.modeNameKey=modeNameKey;
+    }
+
+    public String modeNameKey(){
+        return modeNameKey;
+    }
 
 }
