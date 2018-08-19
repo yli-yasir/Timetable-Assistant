@@ -150,8 +150,15 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
         progressIndicator.setVisible(true);
     }
 
+
+
     @Override
-    public void onFinishedLoading(BufferedImage image) {
+    public void onFailed(Throwable failureType) {
+
+    }
+
+    @Override
+    public void onSucceeded(BufferedImage image) {
         this.tableImage = image;
         WritableImage FXImage = new WritableImage(image.getWidth(),image.getHeight());
         generatedTableImageView.setImage(SwingFXUtils.toFXImage(image,FXImage));

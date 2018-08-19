@@ -6,6 +6,8 @@ import com.yli.timetable_assistant.res.IntsBundle;
 import com.yli.timetable_assistant.res.StringsBundle;
 import com.yli.timetable_assistant.table.DayToCourseListMap;
 import com.yli.timetable_assistant.table.TableUtils;
+import com.yli.timetable_assistant.tasks.CallbackTask;
+import com.yli.timetable_assistant.tasks.FetchOnlineFileTask;
 import com.yli.timetable_assistant.tasks.TableReadTask;
 import com.yli.timetable_assistant.example_selection.ExampleCourseNotSetException;
 import com.yli.timetable_assistant.example_selection.SelectionMode;
@@ -13,9 +15,14 @@ import com.yli.timetable_assistant.buttons.SelectionModeButton;
 import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -23,15 +30,14 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.ResourceBundle;
 
-import static com.yli.timetable_assistant.fx.FXUtils.showInfoAlert;
+import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
 
 //todo handle if user enters a sample window size bigger than the excel table.
 
-public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
+public class MainController {
 
     //Relative path for the FXML for this controller.
     static final String FXML_PATH = "/com/yli/timetable_assistant/res/main.fxml";
@@ -50,7 +56,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     @FXML
     private HBox exampleSelectionControlBar;
 
-    private Button browseButton;
+    private Button chooseFileButton;
 
     /*A grid which will be populated with labels which represent cells
     from the sheet*/
@@ -81,6 +87,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     //Bundle which has string resources that will be used in the GUI.
     private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.StringsBundle");
 
+
     /*This will be automatically called after injecting the variables above
     with their values*/
     @FXML
@@ -88,6 +95,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         populateExampleSelectionControlBar();
         populateControlGrid();
     }
+
 
     /*populates with controls which will be used to choose example data
   from the sample table*/
@@ -97,18 +105,18 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         ObservableList<Node> children = exampleSelectionControlBar.getChildren();
 
         //Add the browse button first.
-        addBrowseButton(children);
+        addChooseFileButton(children);
 
         //Add the selection mode buttons.
         addSelectionModeButtons(children);
     }
 
     //Set up and add browse button.
-    private void addBrowseButton(ObservableList<Node> children) {
-        browseButton = new Button(bundle.getString("browseButton"));
-        setBrowseOnActionListener(browseButton);
-        HBox.setHgrow(browseButton, Priority.ALWAYS);
-        children.add(browseButton);
+    private void addChooseFileButton(ObservableList<Node> children) {
+        chooseFileButton = new Button(bundle.getString("chooseFileButton"));
+        setShowMenuOnChooseFileListener(chooseFileButton);
+        HBox.setHgrow(chooseFileButton, Priority.ALWAYS);
+        children.add(chooseFileButton);
     }
 
     //Set up and add the selection mode buttons.
@@ -125,15 +133,40 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         }
     }
 
+    private void setShowMenuOnChooseFileListener(Button chooseFileButton) {
+        //Build a context menu to show.
+        ContextMenu menu = new ContextMenu();
+        MenuItem loadFromURLMenuItem = new MenuItem(bundle.getString("loadFromCloud"));
+        setLoadFromURLOnActionListener(loadFromURLMenuItem);
+        MenuItem loadFromComputerMenuItem = new MenuItem(bundle.getString("loadFromComputer"));
+        setBrowseOnActionListener(loadFromComputerMenuItem);
+        menu.getItems().addAll(loadFromURLMenuItem, loadFromComputerMenuItem);
+
+        //Event handler---------------
+        chooseFileButton.setOnAction(e ->
+                menu.show(chooseFileButton, Side.BOTTOM, 0, 0)
+        );
+        //---------------------------
+    }
+
+    private void setLoadFromURLOnActionListener(MenuItem item){
+        //todo continue work here
+        item.setOnAction(e->{
+            File tmpFile = new File("TA_TMP.xlsx");
+            //todo make the file delete on exit
+            FetchOnlineFileTask fetchOnlineFileTask = new FetchOnlineFileTask(new FetchOnlineFileCallbacks(),
+                    "http://docs.neu.edu.tr/library/timetable.xlsx",tmpFile);
+            startTask(fetchOnlineFileTask);
+
+        });
+    }
 
     //Handle action for browse button.
-    private void setBrowseOnActionListener(Button button) {
-
-        button.setOnAction(event -> {
-
+    private void setBrowseOnActionListener(MenuItem item) {
+        item.setOnAction(event -> {
             //New file chooser obj.
             FileChooser chooser = new FileChooser();
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLSX","*.xlsx"));
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLSX", "*.xlsx"));
 
             /*This method takes a Window object as an argument...
              *If the parent window is passed then it will not be able to
@@ -142,18 +175,15 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
              * passing null is also valid however it will not produce the effect
              * above.
              */
-            File file = chooser.showOpenDialog(button.getScene().getWindow());
+            //todo replace the null
+            File file = chooser.showOpenDialog(item.getParentPopup().getOwnerWindow());
 
             //If a file was indeed chosen.
             if (file != null) {
-                //Change the text of the button.
-                button.setText("File: " + file.getName());
-
+                //todo make the button reflect the change and not the item
                 //Read the table in the background.
-                TableReadTask tableReadTask = new TableReadTask(this, file);
-                Thread thread = new Thread(tableReadTask);
-                thread.setDaemon(true);
-                thread.start();
+                TableReadTask tableReadTask = new TableReadTask(new ReadTableCallbacks(),file);
+                startTask(tableReadTask);
             }
         });
     }
@@ -164,15 +194,15 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
 
             //If the table hasn't been selected yet----
             if (timetableSheet == null) {
-                showInfoAlert("File not chosen yet!",
-                        "Please choose a file first!");
+                showAlert(bundle,"fileNotChosenHeader",
+                        "fileNotChosenBody");
                 //------------------------
 
                 //When a button other than the course button is clicked before the course button.
             } else if (button.getMode() != SelectionMode.SELECT_COURSE &&
                     !selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
-                showInfoAlert("Course not chosen yet!",
-                        "Please choose a course first!");
+                showAlert(bundle,"courseNotChosenHeader",
+                        "courseNotChosenBody!");
 
                 //When a button is clicked under proper conditions.
             } else {
@@ -208,7 +238,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
                 GridPane.setFillHeight(label, true);
                 label.getStyleClass().add("tableSampleLabel");
                 tableSample.add(label, j, i);
-                setOnTableSampleLabelClickListener(label,instructionLabel);
+                setOnTableSampleLabelClickListener(label, instructionLabel);
             }
 
         }
@@ -240,11 +270,11 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
                         been selected yet,Thus the following dialog will assume that the user
                         has selected incorrect information.
                         */
-                        showInfoAlert(bundle.getString("incorrectInfoHeader"), bundle.getString("incorrectInfoBody"));
+                        showAlert(bundle,"incorrectInfoHeader", "incorrectInfoBody");
                         return;
                     }
                 }
-                giveSelectionFeedback(currentSelectionModeButton,tableSampleLabel,instructionLabel);
+                giveSelectionFeedback(currentSelectionModeButton, tableSampleLabel, instructionLabel);
 
             }
 
@@ -256,13 +286,13 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     /*Changes the text of the instructionLabel and the clicked button
     , and if all required info has been selected sets isReadyToSearch
      to true*/
-    private void giveSelectionFeedback(SelectionModeButton button,Label tableSampleLabel,Label instructionLabel) {
+    private void giveSelectionFeedback(SelectionModeButton button, Label tableSampleLabel, Label instructionLabel) {
         String instruction;
 
         if (selectionModeToDataMap.size() < com.yli.timetable_assistant.example_selection.SelectionMode.values().length) {
             instruction = bundle.getString("chooseRemainingInfo");
         } else {
-            instruction = bundle.getString("allDone") ;
+            instruction = bundle.getString("allDone");
             isReadyToSearch = true;
         }
 
@@ -297,7 +327,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         availableCourses.setItems(
                 searchResultList);
 
-        setAddItemOnClickListener(availableCourses,addedCoursesList);
+        setAddItemOnClickListener(availableCourses, addedCoursesList);
         //------------------------------------------------------------
 
 
@@ -306,7 +336,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         TextField searchField = new TextField();
         searchField.setPromptText(bundle.getString("searchFieldPrompt"));
         Button searchButton = new Button(bundle.getString("searchButton"));
-        setSearchOnClickListener(searchButton,searchResultList,searchField);
+        setSearchOnClickListener(searchButton, searchResultList, searchField);
         //--------------------------------------------------
 
 
@@ -314,15 +344,15 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         //generate table button
         Button generateButton = new Button(bundle.getString("generateButton"));
 
-        setGenerateOnClickListener(generateButton,addedCoursesList);
+        setGenerateOnClickListener(generateButton, addedCoursesList);
         //------------------------------------------------------------
 
 
-        //settings Box-------------------------------------
-        Label settingsHeader = new Label(bundle.getString("settingsHeader"));
+        //extra Box-------------------------------------
+        Label settingsHeader = new Label(bundle.getString("extraBoxHeader"));
         settingsHeader.getStyleClass().add("Header");
 
-        VBox settingsBox =  makeSettingsBox();
+        VBox settingsBox = makeExtraBox();
         //---------------------------------------------
 
         //Adding controls to grid
@@ -339,14 +369,13 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     }
 
 
-    //Returns a vbox containing some pref controls...
-    private VBox makeSettingsBox(){
-        VBox settingsBox = new VBox();
-        settingsBox.getStyleClass().add("settingsBox");
-        GridPane.setHgrow(settingsBox, Priority.ALWAYS);
+    //Returns a v box containing some pref controls...
+    private VBox makeExtraBox() {
+        VBox extraBox = new VBox();
+        extraBox.getStyleClass().add("extraBox");
+        GridPane.setHgrow(extraBox, Priority.ALWAYS);
 
-        //example window size label and choice boxes
-        Label exampleWindowSizeLabel = new Label(bundle.getString("exampleWindowSize"));
+        //Row * Columns choice boxes
         HBox rowXColumn = new HBox();
         ObservableList<Integer> rowCol = FXCollections.observableArrayList();
         for (int i = 1; i <= 100; i++) rowCol.add(i);
@@ -356,16 +385,12 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
         windowColumnsChoiceBox.setValue(5);
         rowXColumn.getChildren().addAll(windowRowsChoiceBox, new Label("*"), windowColumnsChoiceBox);
 
-        settingsBox.getChildren().addAll(
-                exampleWindowSizeLabel,
-                rowXColumn
-        );
-        return settingsBox;
+        return extraBox;
     }
 
     //Handle clicking generate..
-    private void setGenerateOnClickListener(Button generateButton,ObservableList<String> generateFrom){
-        IntsBundle intBundle = (IntsBundle)ResourceBundle.getBundle(IntsBundle.class.getCanonicalName());
+    private void setGenerateOnClickListener(Button generateButton, ObservableList<String> generateFrom) {
+        IntsBundle intBundle = (IntsBundle) ResourceBundle.getBundle(IntsBundle.class.getCanonicalName());
         generateButton.setOnAction(event -> {
             if (!generateFrom.isEmpty()) {
                 DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
@@ -375,24 +400,24 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
                         ResourceBundle.getBundle(StringsBundle.class.getCanonicalName()),
                         new GeneratedTableController(map));
             } else
-                showInfoAlert(bundle.getString("notReadyToGenerateHeader"), bundle.getString("notReadyToGenerateBody"));
+                showAlert(bundle,"notReadyToGenerateHeader", "notReadyToGenerateBody");
         });
     }
 
     //Handle clicking search...
-    private void setSearchOnClickListener(Button searchButton,ObservableList<String> searchResultList,TextField searchField){
+    private void setSearchOnClickListener(Button searchButton, ObservableList<String> searchResultList, TextField searchField) {
         searchButton.setOnAction(event -> {
             if (isReadyToSearch) {
                 TableUtils.search(timetableSheet, searchResultList, searchField.getText());
 
             } else {
-                showInfoAlert(bundle.getString("insufficientInfoHeader"), bundle.getString("insufficientInfoBody"));
+                showAlert(bundle,"insufficientInfoHeader", "insufficientInfoBody");
             }
         });
     }
 
     //Handle removing an item from a list view.
-    private void setRemoveItemOnClickListener(ListView<String> removingFrom){
+    private void setRemoveItemOnClickListener(ListView<String> removingFrom) {
         removingFrom.setOnMouseClicked(event -> {
             MultipleSelectionModel<String> sModel = removingFrom.getSelectionModel();
             String string = sModel.getSelectedItem();
@@ -403,7 +428,7 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
     }
 
     //Handle adding an item from a list view to a list of another.
-    private void setAddItemOnClickListener(ListView<String> addingFrom, ObservableList<String> addingTo){
+    private void setAddItemOnClickListener(ListView<String> addingFrom, ObservableList<String> addingTo) {
         addingFrom.setOnMouseClicked(event -> {
             String clickedItem = addingFrom.getSelectionModel().getSelectedItem();
             if (!addingTo.contains(clickedItem) && clickedItem != null) {
@@ -414,26 +439,65 @@ public class MainController implements TableReadTask.TaskCallbacks<Workbook> {
 
     }
 
-
-    @Override
-    public void onLoading() {
-        browseButton.setDisable(true);
-        tableSample.setVisible(false);
-        progressIndicator.setVisible(true);
+    private void startTask(Task task ){
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
 
     }
 
-    @Override
-    public void onFinishedLoading(Workbook timetable) {
-        if (timetable != null) {
-            timetableSheet = timetable.getSheetAt(0);
-            TableUtils.unpackMergedCells(timetableSheet);
-            initTableSample(timetableSheet, windowRowsChoiceBox.getValue(), windowColumnsChoiceBox.getValue());
-        }
-        progressIndicator.setVisible(false);
-        tableSample.setVisible(true);
-        browseButton.setDisable(false);
+    private void loadingMode(){
+        chooseFileButton.setDisable(true);
+        tableSample.setVisible(false);
+        progressIndicator.setVisible(true);
+    }
 
+    private class ReadTableCallbacks implements CallbackTask.TaskCallbacks<Workbook>{
+        @Override
+        public void onLoading() {
+            loadingMode();
+        }
+
+        @Override
+        public void onSucceeded(Workbook timetable) {
+            if (timetable != null) {
+                timetableSheet = timetable.getSheetAt(0);
+                TableUtils.unpackMergedCells(timetableSheet);
+                initTableSample(timetableSheet, windowRowsChoiceBox.getValue(), windowColumnsChoiceBox.getValue());
+            }
+            progressIndicator.setVisible(false);
+            tableSample.setVisible(true);
+            chooseFileButton.setDisable(false);
+
+        }
+
+        @Override
+        public void onFailed(Throwable e) {
+
+        }
+
+    }
+
+    private class FetchOnlineFileCallbacks implements CallbackTask.TaskCallbacks<File>{
+
+        @Override
+        public void onLoading() {
+            loadingMode();
+        }
+
+        @Override
+        public void onSucceeded(File result) {
+            TableReadTask readTask = new TableReadTask(new ReadTableCallbacks(),result);
+            startTask(readTask);
+        }
+
+        @Override
+        public void onFailed(Throwable e) {
+            FXUtils.showAlert(bundle,"badNetworkIOHeader","badNetworkIOBody");
+            chooseFileButton.setDisable(false);
+            progressIndicator.setVisible(false);
+            tableSample.setVisible(true);
+        }
     }
 
 

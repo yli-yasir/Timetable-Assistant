@@ -17,6 +17,7 @@
     <!--A label to show instructions-->
     <Label fx:id="instructionLabel" text="%welcomeString"
            styleClass="Header,InstructionLabel"
+
     />
 
     <HBox fx:id="exampleSelectionControlBar"

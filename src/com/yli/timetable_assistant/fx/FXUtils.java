@@ -30,11 +30,11 @@ public class FXUtils {
     }
 
 
-    public static void showInfoAlert(String header, String body) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Woah there!");
-        alert.setHeaderText(header);
-        alert.setContentText(body);
+    public static void showAlert(ResourceBundle stringBundle,String headerKey, String bodyKey) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(stringBundle.getString("genericAlertTitle"));
+        alert.setHeaderText(stringBundle.getString(headerKey));
+        alert.setContentText(stringBundle.getString(bodyKey));
         alert.show();
     }
 

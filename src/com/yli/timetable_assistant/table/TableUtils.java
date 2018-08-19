@@ -112,6 +112,10 @@ public class TableUtils {
                 //The rank is equal to the index of the column.
                 int rank = courseCell.getColumnIndex();
                 String string = makeStringValue(row.getCell(rank), true);
+                //todo reconsider this line, it's used to replace blank info with "???"
+                if (string.replace(" ","").isEmpty()){
+                    string="???";
+                }
                 return new RankedString(string, rank);
 
             }
