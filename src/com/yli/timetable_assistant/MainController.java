@@ -26,18 +26,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
+//todo reset the controls when the file is changed...
 
-//todo handle if user enters a sample window size bigger than the excel table.
-
-public class MainController {
+ class MainController {
 
     //Relative path for the FXML for this controller.
     static final String FXML_PATH = "/com/yli/timetable_assistant/res/main.fxml";
@@ -71,11 +72,6 @@ public class MainController {
     //Progress indicator which will be shown or hidden at loading.
     @FXML
     private ProgressIndicator progressIndicator;
-
-    /*Choice boxes to select the number of cols and rows which will be
-    shown in the table sample grid.*/
-    private ChoiceBox<Integer> windowRowsChoiceBox = new ChoiceBox<>();
-    private ChoiceBox<Integer> windowColumnsChoiceBox = new ChoiceBox<>();
 
     /*Used to check if the user has completed providing example info before
     searching*/
@@ -136,9 +132,9 @@ public class MainController {
     private void setShowMenuOnChooseFileListener(Button chooseFileButton) {
         //Build a context menu to show.
         ContextMenu menu = new ContextMenu();
-        MenuItem loadFromURLMenuItem = new MenuItem(bundle.getString("loadFromCloud"));
+        MenuItem loadFromURLMenuItem = new MenuItem(bundle.getString("loadFromInternet"));
         setLoadFromURLOnActionListener(loadFromURLMenuItem);
-        MenuItem loadFromComputerMenuItem = new MenuItem(bundle.getString("loadFromComputer"));
+        MenuItem loadFromComputerMenuItem = new MenuItem(bundle.getString("loadFromPC"));
         setBrowseOnActionListener(loadFromComputerMenuItem);
         menu.getItems().addAll(loadFromURLMenuItem, loadFromComputerMenuItem);
 
@@ -150,10 +146,10 @@ public class MainController {
     }
 
     private void setLoadFromURLOnActionListener(MenuItem item){
-        //todo continue work here
         item.setOnAction(e->{
+            chooseFileButton.setText(bundle.getString("filePrefix") + " " + bundle.getString("loadFromInternet"));
             File tmpFile = new File("TA_TMP.xlsx");
-            //todo make the file delete on exit
+            tmpFile.deleteOnExit();
             FetchOnlineFileTask fetchOnlineFileTask = new FetchOnlineFileTask(new FetchOnlineFileCallbacks(),
                     "http://docs.neu.edu.tr/library/timetable.xlsx",tmpFile);
             startTask(fetchOnlineFileTask);
@@ -175,12 +171,12 @@ public class MainController {
              * passing null is also valid however it will not produce the effect
              * above.
              */
-            //todo replace the null
             File file = chooser.showOpenDialog(item.getParentPopup().getOwnerWindow());
 
             //If a file was indeed chosen.
             if (file != null) {
-                //todo make the button reflect the change and not the item
+                chooseFileButton.setText(bundle.getString("filePrefix") + " " +
+                        bundle.getString("loadFromPC"));
                 //Read the table in the background.
                 TableReadTask tableReadTask = new TableReadTask(new ReadTableCallbacks(),file);
                 startTask(tableReadTask);
@@ -349,10 +345,10 @@ public class MainController {
 
 
         //extra Box-------------------------------------
-        Label settingsHeader = new Label(bundle.getString("extraBoxHeader"));
-        settingsHeader.getStyleClass().add("Header");
-
-        VBox settingsBox = makeExtraBox();
+        //todo Might add option to change course details in this box.
+        Label extrasBoxHeader = new Label("");
+        //extrasBoxHeader.getStyleClass().add("Header");
+        VBox extrasBox = makeExtrasBox();
         //---------------------------------------------
 
         //Adding controls to grid
@@ -363,28 +359,18 @@ public class MainController {
         controlGrid.add(availableCourses, 0, 2);
         controlGrid.add(addedCourses, 1, 2);
         controlGrid.add(generateButton, 0, 3, 3, 1);
-        controlGrid.add(settingsHeader, 2, 1);
-        controlGrid.add(settingsBox, 2, 2);
+        controlGrid.add(extrasBoxHeader, 2, 1);
+        controlGrid.add(extrasBox, 2, 2);
 
     }
 
 
     //Returns a v box containing some pref controls...
-    private VBox makeExtraBox() {
+    //todo allow editing course details in a future version
+    private VBox makeExtrasBox() {
         VBox extraBox = new VBox();
-        extraBox.getStyleClass().add("extraBox");
-        GridPane.setHgrow(extraBox, Priority.ALWAYS);
-
-        //Row * Columns choice boxes
-        HBox rowXColumn = new HBox();
-        ObservableList<Integer> rowCol = FXCollections.observableArrayList();
-        for (int i = 1; i <= 100; i++) rowCol.add(i);
-        windowRowsChoiceBox.setItems(rowCol);
-        windowColumnsChoiceBox.setItems(rowCol);
-        windowRowsChoiceBox.setValue(5);
-        windowColumnsChoiceBox.setValue(5);
-        rowXColumn.getChildren().addAll(windowRowsChoiceBox, new Label("*"), windowColumnsChoiceBox);
-
+       extraBox.getStyleClass().add("extrasBox");
+       GridPane.setHgrow(extraBox,Priority.ALWAYS);
         return extraBox;
     }
 
@@ -452,6 +438,15 @@ public class MainController {
         progressIndicator.setVisible(true);
     }
 
+    private void loadingFailed(){
+        chooseFileButton.setDisable(false);
+        progressIndicator.setVisible(false);
+        tableSample.setVisible(true);
+        tableSample.getChildren().clear();
+        timetableSheet=null;
+        chooseFileButton.setText(bundle.getString("chooseFileButton"));
+    }
+
     private class ReadTableCallbacks implements CallbackTask.TaskCallbacks<Workbook>{
         @Override
         public void onLoading() {
@@ -463,7 +458,8 @@ public class MainController {
             if (timetable != null) {
                 timetableSheet = timetable.getSheetAt(0);
                 TableUtils.unpackMergedCells(timetableSheet);
-                initTableSample(timetableSheet, windowRowsChoiceBox.getValue(), windowColumnsChoiceBox.getValue());
+                //todo in a future version, allow the user to row and col count
+                initTableSample(timetableSheet, 5, 5);
             }
             progressIndicator.setVisible(false);
             tableSample.setVisible(true);
@@ -473,7 +469,8 @@ public class MainController {
 
         @Override
         public void onFailed(Throwable e) {
-
+            FXUtils.showAlert(bundle,"badIOHeader","badIOBody");
+            loadingFailed();
         }
 
     }
@@ -494,9 +491,8 @@ public class MainController {
         @Override
         public void onFailed(Throwable e) {
             FXUtils.showAlert(bundle,"badNetworkIOHeader","badNetworkIOBody");
-            chooseFileButton.setDisable(false);
-            progressIndicator.setVisible(false);
-            tableSample.setVisible(true);
+            loadingFailed();
+
         }
     }
 

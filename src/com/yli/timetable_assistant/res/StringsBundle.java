@@ -18,7 +18,6 @@ public class StringsBundle extends MapResourceBundle<String> {
         map.put("insufficientInfoBody","Please choose required information first!");
         map.put("notReadyToGenerateHeader","Not ready to generate yet!");
         map.put("notReadyToGenerateBody","Have you added courses?");
-        map.put("extraBoxHeader","Misc:");
         map.put("outputFileName","Output file name:");
         map.put("fontSize","Font size:");
         map.put("outputFileNameFieldPrompt","Student No");
@@ -33,18 +32,21 @@ public class StringsBundle extends MapResourceBundle<String> {
         map.put("selectDayModeName","Day");
         map.put("selectTimeModeName","Time");
         map.put("selectHallModeName","Hall");
-        map.put("loadFromCloud","From the Cloud");
-        map.put("loadFromComputer","From your PC");
+        map.put("loadFromInternet","From Internet");
+        map.put("loadFromPC","From PC");
         map.put("genericAlertTitle","Something went wrong!");
         map.put("badNetworkIOHeader","Connectivity problem");
         map.put("badNetworkIOBody","Something went wrong while trying to download the file from the URL...\n\nPlease check" +
                 " the URL and your internet connection for any problems.\n\nIf the problem persists, " +
                 "try to download the file manually.");
+        map.put("badIOHeader","Problem opening file");
+        map.put("badIOBody","Something went wrong while trying to open that file");
         map.put("courseNotChosenHeader","Course not chosen yet!");
         map.put("courseNotChosenBody","Please choose a course first...");
         map.put("fileNotChosenHeader","File not chosen yet!");
         map.put("fileNotChosenBody","Please choose a file first...");
         map.put("filePrefix","File:");
+
 
         //StringsBundle for generated table window, might be separated
         //from this class in the future.

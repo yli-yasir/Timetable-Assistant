@@ -9,11 +9,22 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
 
 public class TableUtils {
 
 
+    public static Workbook readTable(File file) throws Exception{
+        //The file that's passed must never be null!
+        if (file==null){
+            throw new IllegalArgumentException("File to readTable passed must never be null");
+        }
+
+        //Using input stream to allow deletion of file (If file was tmp) on exit.
+        return WorkbookFactory.create(new FileInputStream(file));
+    }
     //Unpacks all merged cells in the sheet.
     public static void unpackMergedCells(Sheet sheet) {
         //For each merged region...
