@@ -12,11 +12,11 @@ This program was made as practice with Java FX 8. The aim is to assist students 
     
 <img src="https://i.imgur.com/6zC6uNr.gif" height="400" width="500"/>
 
-4. Provide exmaple information. Start by selecting a course from the table, then select the day, time and hall for that course. It's critical that you provide correct information or you will get inocorrect results when you generate your own timetable.
+4. Provide exmaple information. Start by selecting a course from the table, then select the day, time and hall for that course. It's critical that you provide correct information or you will get incorrect results when you generate your own timetable.
 
 <img src="https://i.imgur.com/D3xy4LL.gif" height="400" width="500"/>
 
-5. Searching will show you courses that are available in the timetable, click a course to add it, if you see two identical courses in the table, make sure to add them both.
+5. Searching will show you courses that are available in the timetable, click a course to add it. If you see two identical courses in the table (You normally shouldn't see that), make sure to add them both.
 
 <img src="https://i.imgur.com/2F5vUJq.gif" height="400" width="500"/>
 
@@ -24,6 +24,12 @@ This program was made as practice with Java FX 8. The aim is to assist students 
 
 <img src="https://i.imgur.com/dNRmUXh.gif" height="400" width="500"/>
 
+## Known Issues
 
+* You might see two of the same course when you are searching, make sure to add them both. This is because one of the courses name might be written in English letters while the others might be written in Turkish letters. (You will not see any difference while using the program, but you will see it in the original .XLSX file.)
+
+* Information in the program (Selected exmaple info, search results...) persist even when you change the .XLSX file.
+
+* Loading a file from the internet will not work if the program is located in a USB drive.
 
 
