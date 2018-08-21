@@ -1,7 +1,9 @@
 # Timetable Assistant
-This program was made as practice with Java FX 8. The aim is to assist students of NEU with making _their own_ printable timetables from the huge Microsoft Excel (.XLSX) which is a hall timetable.
+This program was made as practice with Java FX 8. The aim is to assist students of NEU with making **their own** printable timetables from the huge Microsoft Excel (.XLSX) which is a hall timetable.
 
 ## End User Guide
+**Use this at your own risk, I am in no way responsible for any damages. This software still has to undergo a lot of testing.**
+
 1. [Click here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) to Download Java 8, If you don't already have it.
 
 2. [Click here](https://github.com/yli-yasir/Timetable-Assistant/releases/download/0.9-beta/Timetable.Assistant.jar) to download the program.
@@ -24,12 +26,23 @@ This program was made as practice with Java FX 8. The aim is to assist students 
 
 <img src="https://i.imgur.com/dNRmUXh.gif" height="400" width="500"/>
 
+
+## Developer Guide
+Clone the repo, and get the [Apache POI 3.17](https://poi.apache.org/download.html#POI-3.17) and the [Apache Commons IO 2.6](https://commons.apache.org/proper/commons-io/download_io.cgi) libraries.
+
+
 ## Known Issues
 
 * You might see two of the same course when you are searching, make sure to add them both. This is because one of the courses name might be written in English letters while the others might be written in Turkish letters. (You will not see any difference while using the program, but you will see it in the original .XLSX file.)
 
-* Information in the program (Selected exmaple info, search results...) persist even when you change the .XLSX file.
+* Information in the program (Selected example info, search results...) persist even when you change the .XLSX file.
 
 * Loading a file from the internet will not work if the program is located in a USB drive.
+
+## TODO
+* Reset information when a new file is loaded.
+* Add ability to alter course details.
+
+    
 
 
