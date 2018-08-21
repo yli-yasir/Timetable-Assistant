@@ -20,7 +20,7 @@ This program was made as practice with Java FX 8. The aim is to assist students 
 
 <img src="https://i.imgur.com/2F5vUJq.gif" height="400" width="500"/>
 
-6. Clicking generate will generate an image of an oraganized timetable for you, which is based on the courses that you have added. You can change the font size as suitable.
+6. Clicking generate will generate an image of an oraganized timetable for you, which is based on the courses that you have added. You can change the font size as suitable, then click the image to save it.
 
 <img src="https://i.imgur.com/dNRmUXh.gif" height="400" width="500"/>
 
