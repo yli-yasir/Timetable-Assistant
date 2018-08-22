@@ -1,12 +1,14 @@
 # Timetable Assistant
-This program was made as practice with Java FX 8. The aim is to assist students of NEU with making **their own** printable timetables from the huge Microsoft Excel (.XLSX) which is a hall timetable.
+This program was made as practice with Java FX 8. The aim is to assist students of NEU with making _**their own**_ printable timetables from the huge Microsoft Excel (.XLSX) which is a hall timetable.
+
+* For this to work properly, each piece of course information needs to be located in at most one column/row. For example, this wouldn't work if the time of courses was located in two different columns.
 
 ## End User Guide
 **Use this at your own risk, I am in no way responsible for any damages. This software still has to undergo a lot of testing.**
 
 1. [Click here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) to Download Java 8, If you don't already have it.
 
-2. [Click here](https://github.com/yli-yasir/Timetable-Assistant/releases/download/0.9-beta/Timetable.Assistant.jar) to download the program.
+2. [Click here](https://github.com/yli-yasir/Timetable-Assistant/releases/download/v0.91-beta/Timetable.Assistant.jar) to download the program.
 
 3. Open the program, and click choose file. You will have two options:
     1. From Internet: This option grabs the latest timetable from the internet automatically for you.
@@ -14,7 +16,7 @@ This program was made as practice with Java FX 8. The aim is to assist students 
     
 <img src="https://i.imgur.com/6zC6uNr.gif" height="400" width="500"/>
 
-4. Provide exmaple information. Start by selecting a course from the table, then select the day, time and hall for that course. It's critical that you provide correct information or you will get incorrect results when you generate your own timetable.
+4. Provide example information. Start by selecting a course from the table, then select the day, time and hall for that course. It's critical that you provide correct information or you will get incorrect results when you generate your own timetable.
 
 <img src="https://i.imgur.com/D3xy4LL.gif" height="400" width="500"/>
 
@@ -37,10 +39,9 @@ Clone the repo, and get the [Apache POI 3.17](https://poi.apache.org/download.ht
 
 * Information in the program (Selected example info, search results...) persist even when you change the .XLSX file.
 
-* Loading a file from the internet will not work if the program is located in a USB drive.
+* Loading a file from the internet might not work, if the program is being started from some locations. This should be fixed later. For now, try moving the program to your desktop and check if the problem persists.
 
 ## TODO
-* Reset information when a new file is loaded.
 * Add ability to alter course details.
 
     
