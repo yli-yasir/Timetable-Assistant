@@ -34,8 +34,8 @@
     </StackPane>
 
 
-    <GridPane fx:id="controlGrid"
-              styleClass="csg"/>
+    <GridPane fx:id="courseOperationsGrid"
+              styleClass="courseOperationsGrid"/>
 
 </VBox>
 

@@ -5,7 +5,7 @@ import java.util.*;
 public class StringsBundle extends MapResourceBundle<String> {
 
     public StringsBundle(){
-        map.put("appName","Timetable assistant");
+        map.put("appName","Timetable Assistant");
         map.put("welcomeString","Please choose a file, then provide an example of a course with correct information.");
         map.put("windowSize","Example window size:");
         map.put("chooseFileButton","Choose File");

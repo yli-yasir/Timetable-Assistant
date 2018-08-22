@@ -26,28 +26,24 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
 //todo reset the controls when the file is changed...
 
- class MainController {
+class MainController {
 
     //Relative path for the FXML for this controller.
     static final String FXML_PATH = "/com/yli/timetable_assistant/res/main.fxml";
 
     //The sheet that contains the timetable.
     private Sheet timetableSheet;
-
-    //The selection mode button that's currently selected.
-    private SelectionModeButton currentSelectionModeButton;
 
     //A label to guide the user through the example selection process.
     @FXML
@@ -59,6 +55,12 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
     private Button chooseFileButton;
 
+    //Contains the selection mode buttons, will be used for clearing them.
+    private ArrayList<SelectionModeButton> selectionModeButtons = new ArrayList<>();
+
+    //The selection mode button that's currently selected.
+    private SelectionModeButton currentSelectionModeButton;
+
     /*A grid which will be populated with labels which represent cells
     from the sheet*/
     @FXML
@@ -67,7 +69,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
     /*A grid which contains all controls other than the ones
      that have to do with example selection.*/
     @FXML
-    private GridPane controlGrid;
+    private GridPane courseOperationsGrid;
 
     //Progress indicator which will be shown or hidden at loading.
     @FXML
@@ -80,6 +82,15 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
     //This will hold data selected in a certain mode
     private static SelectionModeToDataMap selectionModeToDataMap = new SelectionModeToDataMap();
 
+    //search query field.
+    private TextField searchField;
+
+    private ObservableList<String> searchResultList;
+
+    private ObservableList<String> addedCoursesList;
+
+
+
     //Bundle which has string resources that will be used in the GUI.
     private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.StringsBundle");
 
@@ -89,7 +100,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
     @FXML
     private void initialize() {
         populateExampleSelectionControlBar();
-        populateControlGrid();
+        populateCourseOperationsGrid();
     }
 
 
@@ -119,14 +130,44 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
     private void addSelectionModeButtons(ObservableList<Node> children) {
         //Add as many buttons as needed for selection modes, in here I am making
         //a button for each mode.
+
         for (SelectionMode mode : SelectionMode.values()) {
             SelectionModeButton button = new SelectionModeButton(mode);
             HBox.setHgrow(button, Priority.ALWAYS);
             /*The listener merely changes the currently selected button further action
                 is handled in the table sample control that will be clicked.*/
             setChangeModeOnActionListener(button);
+            selectionModeButtons.add(button);
             children.add(button);
         }
+    }
+
+    //Clears selected example info.
+    private void clearExampleSelection() {
+        /*Clear the map. If other course information was already selected,
+         that information was built in reference to this certain course.
+         Which you might be changing now. Thus the old information is now incorrect*/
+        selectionModeToDataMap.clear();
+
+        //reset the buttons
+        for (SelectionModeButton button : selectionModeButtons) button.setText(button.getTitle());
+
+        //We don't have sufficient info anymore so
+        isReadyToSearch= false;
+    }
+
+    //Clears information in the course operations grid.
+    private void clearCourseOperationsGrid(){
+        searchField.clear();
+        searchResultList.clear();
+        addedCoursesList.clear();
+    }
+
+    //Clears outdated form info.
+    private void clearForm(){
+        instructionLabel.setText(bundle.getString("welcomeString"));
+        clearExampleSelection();
+        clearCourseOperationsGrid();
     }
 
     private void setShowMenuOnChooseFileListener(Button chooseFileButton) {
@@ -145,13 +186,13 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
         //---------------------------
     }
 
-    private void setLoadFromURLOnActionListener(MenuItem item){
-        item.setOnAction(e->{
+    private void setLoadFromURLOnActionListener(MenuItem item) {
+        item.setOnAction(e -> {
             chooseFileButton.setText(bundle.getString("filePrefix") + " " + bundle.getString("loadFromInternet"));
             File tmpFile = new File("TA_TMP.xlsx");
             tmpFile.deleteOnExit();
             FetchOnlineFileTask fetchOnlineFileTask = new FetchOnlineFileTask(new FetchOnlineFileCallbacks(),
-                    "http://docs.neu.edu.tr/library/timetable.xlsx",tmpFile);
+                    "http://docs.neu.edu.tr/library/timetable.xlsx", tmpFile);
             startTask(fetchOnlineFileTask);
 
         });
@@ -178,7 +219,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
                 chooseFileButton.setText(bundle.getString("filePrefix") + " " +
                         bundle.getString("loadFromPC"));
                 //Read the table in the background.
-                TableReadTask tableReadTask = new TableReadTask(new ReadTableCallbacks(),file);
+                TableReadTask tableReadTask = new TableReadTask(new ReadTableCallbacks(), file);
                 startTask(tableReadTask);
             }
         });
@@ -190,14 +231,14 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
             //If the table hasn't been selected yet----
             if (timetableSheet == null) {
-                showAlert(bundle,"fileNotChosenHeader",
+                showAlert(bundle, "fileNotChosenHeader",
                         "fileNotChosenBody");
                 //------------------------
 
                 //When a button other than the course button is clicked before the course button.
             } else if (button.getMode() != SelectionMode.SELECT_COURSE &&
                     !selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
-                showAlert(bundle,"courseNotChosenHeader",
+                showAlert(bundle, "courseNotChosenHeader",
                         "courseNotChosenBody!");
 
                 //When a button is clicked under proper conditions.
@@ -253,8 +294,12 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
                 //If the currently selected mode is for course cell selection.
                 if (currentMode == SelectionMode.SELECT_COURSE) {
+                    /*Clear the form. If other course information was already selected,
+         that information was built in reference to this certain course.
+         Which you might be changing now. Thus the old information is now incorrect*/
+                    clearForm();
                     selectionModeToDataMap.putCourseCellData(columnIndex, rowIndex);
-                    //If it's for course info selection.
+                    //If it's for course info cell selection.
                 } else {
                     try {
                         selectionModeToDataMap.putCourseInfoCellData(
@@ -266,7 +311,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
                         been selected yet,Thus the following dialog will assume that the user
                         has selected incorrect information.
                         */
-                        showAlert(bundle,"incorrectInfoHeader", "incorrectInfoBody");
+                        showAlert(bundle, "incorrectInfoHeader", "incorrectInfoBody");
                         return;
                     }
                 }
@@ -298,7 +343,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
     }
 
     //Initializes controls that are related to adding courses.
-    private void populateControlGrid() {
+    private void populateCourseOperationsGrid() {
 
         //-----------------------------------------------------------
         /*Label and list for showing courses that have been added from
@@ -307,7 +352,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
         addedCoursesHeader.getStyleClass().add("Header");
 
         ListView<String> addedCourses = new ListView<>();
-        ObservableList<String> addedCoursesList = FXCollections.observableArrayList();
+        addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
 
         setRemoveItemOnClickListener(addedCourses);
@@ -319,7 +364,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
         Label availableCoursesHeader = new Label(bundle.getString("availableCoursesHeader"));
         availableCoursesHeader.getStyleClass().add("Header");
         ListView<String> availableCourses = new ListView<>();
-        ObservableList<String> searchResultList = FXCollections.observableArrayList();
+        searchResultList = FXCollections.observableArrayList();
         availableCourses.setItems(
                 searchResultList);
 
@@ -329,7 +374,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
         //------------------------------------------------------------
         //Controls for searching
-        TextField searchField = new TextField();
+        searchField = new TextField();
         searchField.setPromptText(bundle.getString("searchFieldPrompt"));
         Button searchButton = new Button(bundle.getString("searchButton"));
         setSearchOnClickListener(searchButton, searchResultList, searchField);
@@ -352,15 +397,15 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
         //---------------------------------------------
 
         //Adding controls to grid
-        controlGrid.add(searchField, 0, 0);
-        controlGrid.add(searchButton, 1, 0);
-        controlGrid.add(availableCoursesHeader, 0, 1);
-        controlGrid.add(addedCoursesHeader, 1, 1);
-        controlGrid.add(availableCourses, 0, 2);
-        controlGrid.add(addedCourses, 1, 2);
-        controlGrid.add(generateButton, 0, 3, 3, 1);
-        controlGrid.add(extrasBoxHeader, 2, 1);
-        controlGrid.add(extrasBox, 2, 2);
+        courseOperationsGrid.add(searchField, 0, 0);
+        courseOperationsGrid.add(searchButton, 1, 0);
+        courseOperationsGrid.add(availableCoursesHeader, 0, 1);
+        courseOperationsGrid.add(addedCoursesHeader, 1, 1);
+        courseOperationsGrid.add(availableCourses, 0, 2);
+        courseOperationsGrid.add(addedCourses, 1, 2);
+        courseOperationsGrid.add(generateButton, 0, 3, 3, 1);
+        courseOperationsGrid.add(extrasBoxHeader, 2, 1);
+        courseOperationsGrid.add(extrasBox, 2, 2);
 
     }
 
@@ -369,8 +414,8 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
     //todo allow editing course details in a future version
     private VBox makeExtrasBox() {
         VBox extraBox = new VBox();
-       extraBox.getStyleClass().add("extrasBox");
-       GridPane.setHgrow(extraBox,Priority.ALWAYS);
+        extraBox.getStyleClass().add("extrasBox");
+        GridPane.setHgrow(extraBox, Priority.ALWAYS);
         return extraBox;
     }
 
@@ -386,7 +431,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
                         ResourceBundle.getBundle(StringsBundle.class.getCanonicalName()),
                         new GeneratedTableController(map));
             } else
-                showAlert(bundle,"notReadyToGenerateHeader", "notReadyToGenerateBody");
+                showAlert(bundle, "notReadyToGenerateHeader", "notReadyToGenerateBody");
         });
     }
 
@@ -397,7 +442,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
                 TableUtils.search(timetableSheet, searchResultList, searchField.getText());
 
             } else {
-                showAlert(bundle,"insufficientInfoHeader", "insufficientInfoBody");
+                showAlert(bundle, "insufficientInfoHeader", "insufficientInfoBody");
             }
         });
     }
@@ -425,29 +470,29 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
     }
 
-    private void startTask(Task task ){
+    private void startTask(Task task) {
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
 
     }
 
-    private void loadingMode(){
+    private void loadingMode() {
         chooseFileButton.setDisable(true);
         tableSample.setVisible(false);
         progressIndicator.setVisible(true);
     }
 
-    private void loadingFailed(){
+    private void loadingFailed() {
         chooseFileButton.setDisable(false);
         progressIndicator.setVisible(false);
         tableSample.setVisible(true);
         tableSample.getChildren().clear();
-        timetableSheet=null;
+        timetableSheet = null;
         chooseFileButton.setText(bundle.getString("chooseFileButton"));
     }
 
-    private class ReadTableCallbacks implements CallbackTask.TaskCallbacks<Workbook>{
+    private class ReadTableCallbacks implements CallbackTask.TaskCallbacks<Workbook> {
         @Override
         public void onLoading() {
             loadingMode();
@@ -455,6 +500,7 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
         @Override
         public void onSucceeded(Workbook timetable) {
+            clearForm();
             if (timetable != null) {
                 timetableSheet = timetable.getSheetAt(0);
                 TableUtils.unpackMergedCells(timetableSheet);
@@ -469,13 +515,13 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
         @Override
         public void onFailed(Throwable e) {
-            FXUtils.showAlert(bundle,"badIOHeader","badIOBody");
+            FXUtils.showAlert(bundle, "badIOHeader", "badIOBody");
             loadingFailed();
         }
 
     }
 
-    private class FetchOnlineFileCallbacks implements CallbackTask.TaskCallbacks<File>{
+    private class FetchOnlineFileCallbacks implements CallbackTask.TaskCallbacks<File> {
 
         @Override
         public void onLoading() {
@@ -484,13 +530,13 @@ import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
 
         @Override
         public void onSucceeded(File result) {
-            TableReadTask readTask = new TableReadTask(new ReadTableCallbacks(),result);
+            TableReadTask readTask = new TableReadTask(new ReadTableCallbacks(), result);
             startTask(readTask);
         }
 
         @Override
         public void onFailed(Throwable e) {
-            FXUtils.showAlert(bundle,"badNetworkIOHeader","badNetworkIOBody");
+            FXUtils.showAlert(bundle, "badNetworkIOHeader", "badNetworkIOBody");
             loadingFailed();
 
         }

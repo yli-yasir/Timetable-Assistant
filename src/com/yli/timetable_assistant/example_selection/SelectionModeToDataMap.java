@@ -82,5 +82,9 @@ public class SelectionModeToDataMap {
          return exampleMap.containsKey(step);
     }
 
+    public void clear(){
+         exampleMap.clear();
+    }
+
 
 }

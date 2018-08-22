@@ -65,7 +65,7 @@ ScrollPane{
 -fx-effect: dropshadow(gaussian, #004D40, 10, 0, 1, 1);
 }
 
-.csg{
+.courseOperationsGrid{
 -fx-padding: 16 0 0 0 }
 
 .generatedTableControlBar{
