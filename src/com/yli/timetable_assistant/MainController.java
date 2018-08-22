@@ -30,6 +30,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -189,13 +190,26 @@ class MainController {
     private void setLoadFromURLOnActionListener(MenuItem item) {
         item.setOnAction(e -> {
             chooseFileButton.setText(bundle.getString("filePrefix") + " " + bundle.getString("loadFromInternet"));
-            File tmpFile = new File("TA_TMP.xlsx");
-            tmpFile.deleteOnExit();
-            FetchOnlineFileTask fetchOnlineFileTask = new FetchOnlineFileTask(new FetchOnlineFileCallbacks(),
-                    "http://docs.neu.edu.tr/library/timetable.xlsx", tmpFile);
-            startTask(fetchOnlineFileTask);
-
+            File tmpFile = makeTempFile();
+            if (tmpFile!=null) {
+                FetchOnlineFileTask fetchOnlineFileTask = new FetchOnlineFileTask(new FetchOnlineFileCallbacks(),
+                        "http://docs.neu.edu.tr/library/timetable.xlsx", tmpFile);
+                startTask(fetchOnlineFileTask);
+            }
         });
+    }
+
+    private File makeTempFile(){
+        File tmpFile = null;
+        try {
+            tmpFile = File.createTempFile("TA_TMP", null);
+            tmpFile.deleteOnExit();
+            System.out.println(tmpFile.getAbsolutePath());
+        }
+        catch(IOException io){
+            FXUtils.showAlert(bundle,"badTempFileIOHeader","badTempFileIOBody");
+        }
+        return tmpFile;
     }
 
     //Handle action for browse button.

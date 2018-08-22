@@ -46,7 +46,9 @@ public class StringsBundle extends MapResourceBundle<String> {
         map.put("fileNotChosenHeader","File not chosen yet!");
         map.put("fileNotChosenBody","Please choose a file first...");
         map.put("filePrefix","File:");
-
+        map.put("badTempFileIOHeader","Temp file IO Error");
+        map.put("badTempFileIOBody","Something went wrong,please download the file manually then select it" +
+                " from your PC instead.");
 
         //StringsBundle for generated table window, might be separated
         //from this class in the future.
