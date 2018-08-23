@@ -32,6 +32,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
@@ -50,20 +52,17 @@ class MainController {
     @FXML
     private Label instructionLabel;
 
-    //Contains buttons that have to do with selecting example course info.
+    private Button chooseFileButton;
+
+    //Contains controls that have to do with selecting example course info.
     @FXML
     private HBox exampleSelectionControlBar;
 
-    private Button chooseFileButton;
-
-    //Contains the selection mode buttons, will be used for clearing them.
-    private ArrayList<SelectionModeButton> selectionModeButtons = new ArrayList<>();
-
+    //todo change name
     //The selection mode button that's currently selected.
     private SelectionModeButton currentSelectionModeButton;
 
-    /*A grid which will be populated with labels which represent cells
-    from the sheet*/
+    /*A grid which will be populated with labels which represent cells from the sheet*/
     @FXML
     private GridPane tableSample;
 
@@ -76,24 +75,19 @@ class MainController {
     @FXML
     private ProgressIndicator progressIndicator;
 
-    /*Used to check if the user has completed providing example info before
-    searching*/
-    private boolean isReadyToSearch;
-
-    //This will hold data selected in a certain mode
+    //This will hold data selected in each mode.
     private static SelectionModeToDataMap selectionModeToDataMap = new SelectionModeToDataMap();
 
     //search query field.
     private TextField searchField;
 
+    //
     private ObservableList<String> searchResultList;
 
     private ObservableList<String> addedCoursesList;
 
-
-
     //Bundle which has string resources that will be used in the GUI.
-    private ResourceBundle bundle = ResourceBundle.getBundle("com.yli.timetable_assistant.res.StringsBundle");
+    private ResourceBundle bundle = ResourceBundle.getBundle(StringsBundle.class.getCanonicalName());
 
 
     /*This will be automatically called after injecting the variables above
@@ -108,106 +102,159 @@ class MainController {
     /*populates with controls which will be used to choose example data
   from the sample table*/
     private void populateExampleSelectionControlBar() {
-
         //Get a ref to the children since we will be adding to them repeatedly.
         ObservableList<Node> children = exampleSelectionControlBar.getChildren();
 
-        //Add the browse button first.
-        addChooseFileButton(children);
+        //Add the choose file control first.
+        children.add(makeChooseFileButton());
 
         //Add the selection mode buttons.
-        addSelectionModeButtons(children);
+        children.addAll(makeSelectionModeButtons());
     }
 
-    //Set up and add browse button.
-    private void addChooseFileButton(ObservableList<Node> children) {
+    private Button makeChooseFileButton() {
         chooseFileButton = new Button(bundle.getString("chooseFileButton"));
-        setShowMenuOnChooseFileListener(chooseFileButton);
+
         HBox.setHgrow(chooseFileButton, Priority.ALWAYS);
-        children.add(chooseFileButton);
+
+        ContextMenu chooseFileContextMenu = buildChooseFileContextMenu();
+        chooseFileButton.setOnAction(e -> chooseFileContextMenu.show(chooseFileButton, Side.BOTTOM, 0, 0));
+
+        return chooseFileButton;
     }
 
-    //Set up and add the selection mode buttons.
-    private void addSelectionModeButtons(ObservableList<Node> children) {
-        //Add as many buttons as needed for selection modes, in here I am making
-        //a button for each mode.
+    //Build a context menu to show.
+    private ContextMenu buildChooseFileContextMenu() {
+        ContextMenu menu = new ContextMenu();
+        MenuItem loadFromURLMenuItem = new MenuItem(bundle.getString("loadFromInternet"));
 
-        for (SelectionMode mode : SelectionMode.values()) {
-            SelectionModeButton button = new SelectionModeButton(mode);
-            HBox.setHgrow(button, Priority.ALWAYS);
-            /*The listener merely changes the currently selected button further action
-                is handled in the table sample control that will be clicked.*/
-            setChangeModeOnActionListener(button);
-            selectionModeButtons.add(button);
-            children.add(button);
+        loadFromURLMenuItem.setOnAction(e -> {
+            chooseFileButton.setText(bundle.getString("filePrefix") + " "
+                    + bundle.getString("loadFromInternet"));
+
+            loadFromURL("http://docs.neu.edu.tr/library/timetable.xlsx", makeTempFile());
+        });
+
+        MenuItem loadFromComputerMenuItem = new MenuItem(bundle.getString("loadFromPC"));
+        setBrowseOnActionListener(loadFromComputerMenuItem);
+        menu.getItems().addAll(loadFromURLMenuItem, loadFromComputerMenuItem);
+        return menu;
+    }
+
+    //Loads Url into the file, in a background thread with a task.
+    private void loadFromURL(String url, File tmpFile) {
+        if (tmpFile != null) {
+            FetchOnlineFileTask fetchOnlineFileTask = new FetchOnlineFileTask(new FetchOnlineFileCallbacks(),
+                    url, tmpFile);
+            startTask(fetchOnlineFileTask);
         }
+    }
+
+    private Collection<SelectionModeButton> makeSelectionModeButtons() {
+
+        ArrayList<SelectionModeButton> selectionModeButtons = new ArrayList<>();
+
+        //make as many buttons as needed for selection modes, in here I am making
+        //a button for each mode.
+        for (SelectionMode mode : SelectionMode.values()) {
+
+            SelectionModeButton button = new SelectionModeButton(mode);
+
+            HBox.setHgrow(button, Priority.ALWAYS);
+
+            button.setOnAction(e -> {
+                changeCurrentlySelectedModeButton(button);
+                if(isButtonSelected()) instructionLabel.setText(currentSelectionModeButton.getInstruction());
+            });
+
+            selectionModeButtons.add(button);
+        }
+        return selectionModeButtons;
+    }
+
+    private void changeCurrentlySelectedModeButton(SelectionModeButton button) {
+
+        //Reject changes if file isn't selected yet.
+        if (!isFileSelected()) {
+            showAlert(bundle, "fileNotChosenHeader",
+                    "fileNotChosenBody");
+        }
+
+        //Reject changes when a button other than the course button is clicked and the course hasn't been selected.
+        else if (button.getMode() != SelectionMode.SELECT_COURSE && !isCourseSelected()) {
+            showAlert(bundle, "courseNotChosenHeader",
+                    "courseNotChosenBody");
+        }
+
+        else {
+            currentSelectionModeButton = button;
+        }
+
+    }
+
+    private boolean isButtonSelected(){
+        return currentSelectionModeButton!=null;
+    }
+
+    private boolean isFileSelected() {
+        return timetableSheet != null;
+    }
+
+    private boolean isCourseSelected() {
+        return selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE);
     }
 
     //Clears selected example info.
     private void clearExampleSelection() {
+
         /*Clear the map. If other course information was already selected,
          that information was built in reference to this certain course.
          Which you might be changing now. Thus the old information is now incorrect*/
         selectionModeToDataMap.clear();
 
-        //reset the buttons
-        for (SelectionModeButton button : selectionModeButtons) button.setText(button.getTitle());
+        //reset buttons
+        resetModeButtons(exampleSelectionControlBar);
 
-        //We don't have sufficient info anymore so
-        isReadyToSearch= false;
     }
 
+    //Resets all the mode buttons in a container.
+    private void resetModeButtons(Pane container){
+        List<Node> selectionModeButtons= getModeButtons(container);
+
+        for (Node node : selectionModeButtons) {
+            SelectionModeButton button = (SelectionModeButton)node;
+            button.setText(button.getTitle());
+        }
+    }
+
+    private List<Node> getModeButtons(Pane container){
+        return container.getChildren().filtered(n -> n instanceof SelectionModeButton);
+    }
+
+    //todo ------ Continue DRY and orthogonality from here -------
+
     //Clears information in the course operations grid.
-    private void clearCourseOperationsGrid(){
+    private void clearCourseOperationsGrid() {
         searchField.clear();
         searchResultList.clear();
         addedCoursesList.clear();
     }
 
     //Clears outdated form info.
-    private void clearForm(){
+    private void clearForm() {
         instructionLabel.setText(bundle.getString("welcomeString"));
         clearExampleSelection();
         clearCourseOperationsGrid();
     }
 
-    private void setShowMenuOnChooseFileListener(Button chooseFileButton) {
-        //Build a context menu to show.
-        ContextMenu menu = new ContextMenu();
-        MenuItem loadFromURLMenuItem = new MenuItem(bundle.getString("loadFromInternet"));
-        setLoadFromURLOnActionListener(loadFromURLMenuItem);
-        MenuItem loadFromComputerMenuItem = new MenuItem(bundle.getString("loadFromPC"));
-        setBrowseOnActionListener(loadFromComputerMenuItem);
-        menu.getItems().addAll(loadFromURLMenuItem, loadFromComputerMenuItem);
-
-        //Event handler---------------
-        chooseFileButton.setOnAction(e ->
-                menu.show(chooseFileButton, Side.BOTTOM, 0, 0)
-        );
-        //---------------------------
-    }
-
-    private void setLoadFromURLOnActionListener(MenuItem item) {
-        item.setOnAction(e -> {
-            chooseFileButton.setText(bundle.getString("filePrefix") + " " + bundle.getString("loadFromInternet"));
-            File tmpFile = makeTempFile();
-            if (tmpFile!=null) {
-                FetchOnlineFileTask fetchOnlineFileTask = new FetchOnlineFileTask(new FetchOnlineFileCallbacks(),
-                        "http://docs.neu.edu.tr/library/timetable.xlsx", tmpFile);
-                startTask(fetchOnlineFileTask);
-            }
-        });
-    }
-
-    private File makeTempFile(){
+    private File makeTempFile() {
         File tmpFile = null;
         try {
             tmpFile = File.createTempFile("TA_TMP", null);
             tmpFile.deleteOnExit();
             System.out.println(tmpFile.getAbsolutePath());
-        }
-        catch(IOException io){
-            FXUtils.showAlert(bundle,"badTempFileIOHeader","badTempFileIOBody");
+        } catch (IOException io) {
+            FXUtils.showAlert(bundle, "badTempFileIOHeader", "badTempFileIOBody");
         }
         return tmpFile;
     }
@@ -237,31 +284,6 @@ class MainController {
                 startTask(tableReadTask);
             }
         });
-    }
-
-    //Handle click for selection mode button.
-    private void setChangeModeOnActionListener(SelectionModeButton button) {
-        button.setOnMouseClicked(event -> {
-
-            //If the table hasn't been selected yet----
-            if (timetableSheet == null) {
-                showAlert(bundle, "fileNotChosenHeader",
-                        "fileNotChosenBody");
-                //------------------------
-
-                //When a button other than the course button is clicked before the course button.
-            } else if (button.getMode() != SelectionMode.SELECT_COURSE &&
-                    !selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE)) {
-                showAlert(bundle, "courseNotChosenHeader",
-                        "courseNotChosenBody!");
-
-                //When a button is clicked under proper conditions.
-            } else {
-                currentSelectionModeButton = button;
-                instructionLabel.setText(currentSelectionModeButton.getInstruction());
-            }
-        });
-
     }
 
 
@@ -344,16 +366,19 @@ class MainController {
     private void giveSelectionFeedback(SelectionModeButton button, Label tableSampleLabel, Label instructionLabel) {
         String instruction;
 
-        if (selectionModeToDataMap.size() < com.yli.timetable_assistant.example_selection.SelectionMode.values().length) {
+        if (selectionModeToDataMap.size() < SelectionMode.values().length) {
             instruction = bundle.getString("chooseRemainingInfo");
         } else {
             instruction = bundle.getString("allDone");
-            isReadyToSearch = true;
         }
 
         instructionLabel.setText(instruction);
         button.setText(button.getCurrentlySelectedPrefix(tableSampleLabel.getText()));
         currentSelectionModeButton = null;
+    }
+
+    private boolean isReadyToSearch() {
+        return  ! (selectionModeToDataMap.size() < getModeButtons(exampleSelectionControlBar).size());
     }
 
     //Initializes controls that are related to adding courses.
@@ -452,7 +477,7 @@ class MainController {
     //Handle clicking search...
     private void setSearchOnClickListener(Button searchButton, ObservableList<String> searchResultList, TextField searchField) {
         searchButton.setOnAction(event -> {
-            if (isReadyToSearch) {
+            if (isReadyToSearch()) {
                 TableUtils.search(timetableSheet, searchResultList, searchField.getText());
 
             } else {
