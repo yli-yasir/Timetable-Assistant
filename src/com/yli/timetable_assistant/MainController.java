@@ -26,6 +26,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
@@ -37,8 +38,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
-
-//todo reset the controls when the file is changed...
 
 class MainController {
 
@@ -75,7 +74,7 @@ class MainController {
     @FXML
     private ProgressIndicator progressIndicator;
 
-    //This will hold data selected in each mode.
+    //This will hold the data selected in each mode.
     private static SelectionModeToDataMap selectionModeToDataMap = new SelectionModeToDataMap();
 
     //search query field.
@@ -97,7 +96,6 @@ class MainController {
         populateExampleSelectionControlBar();
         populateCourseOperationsGrid();
     }
-
 
     /*populates with controls which will be used to choose example data
   from the sample table*/
@@ -136,8 +134,19 @@ class MainController {
         });
 
         MenuItem loadFromComputerMenuItem = new MenuItem(bundle.getString("loadFromPC"));
-        setBrowseOnActionListener(loadFromComputerMenuItem);
+
+        loadFromComputerMenuItem.setOnAction(e -> {
+            File file = browseFile(loadFromComputerMenuItem.getParentPopup().getOwnerWindow());
+            //If a file was indeed chosen.
+            if (file != null) {
+                chooseFileButton.setText(bundle.getString("filePrefix") + " " +
+                        bundle.getString("loadFromPC"));
+                loadFromFile(file);
+            }
+        });
+
         menu.getItems().addAll(loadFromURLMenuItem, loadFromComputerMenuItem);
+
         return menu;
     }
 
@@ -148,6 +157,12 @@ class MainController {
                     url, tmpFile);
             startTask(fetchOnlineFileTask);
         }
+    }
+
+    private void loadFromFile(File file) {
+        //Read the table in the background.
+        TableReadTask tableReadTask = new TableReadTask(new ReadTableCallbacks(), file);
+        startTask(tableReadTask);
     }
 
     private Collection<SelectionModeButton> makeSelectionModeButtons() {
@@ -164,7 +179,7 @@ class MainController {
 
             button.setOnAction(e -> {
                 changeCurrentlySelectedModeButton(button);
-                if(isButtonSelected()) instructionLabel.setText(currentSelectionModeButton.getInstruction());
+                if (isModeButtonSelected()) instructionLabel.setText(currentSelectionModeButton.getInstruction());
             });
 
             selectionModeButtons.add(button);
@@ -175,7 +190,7 @@ class MainController {
     private void changeCurrentlySelectedModeButton(SelectionModeButton button) {
 
         //Reject changes if file isn't selected yet.
-        if (!isFileSelected()) {
+        if (!isFileLoaded()) {
             showAlert(bundle, "fileNotChosenHeader",
                     "fileNotChosenBody");
         }
@@ -184,19 +199,17 @@ class MainController {
         else if (button.getMode() != SelectionMode.SELECT_COURSE && !isCourseSelected()) {
             showAlert(bundle, "courseNotChosenHeader",
                     "courseNotChosenBody");
-        }
-
-        else {
+        } else {
             currentSelectionModeButton = button;
         }
 
     }
 
-    private boolean isButtonSelected(){
-        return currentSelectionModeButton!=null;
+    private boolean isModeButtonSelected() {
+        return currentSelectionModeButton != null;
     }
 
-    private boolean isFileSelected() {
+    private boolean isFileLoaded() {
         return timetableSheet != null;
     }
 
@@ -204,47 +217,51 @@ class MainController {
         return selectionModeToDataMap.containsKey(SelectionMode.SELECT_COURSE);
     }
 
+    //Resets all the mode buttons in a container.
+    private void resetModeButtons(Pane container) {
+        List<Node> selectionModeButtons = getModeButtons(container);
+
+        for (Node node : selectionModeButtons) {
+            SelectionModeButton button = (SelectionModeButton) node;
+            button.setText(button.getTitle());
+        }
+    }
+
+    private List<Node> getModeButtons(Pane container) {
+        return container.getChildren().filtered(n -> n instanceof SelectionModeButton);
+    }
+
     //Clears selected example info.
-    private void clearExampleSelection() {
+    private void clearExampleSelection(boolean includeCurrentModeButton) {
+
+        if (includeCurrentModeButton) currentSelectionModeButton = null;
 
         /*Clear the map. If other course information was already selected,
          that information was built in reference to this certain course.
          Which you might be changing now. Thus the old information is now incorrect*/
         selectionModeToDataMap.clear();
 
-        //reset buttons
+        //reset mode buttons in the exampleSelectionControlBar.
         resetModeButtons(exampleSelectionControlBar);
 
     }
 
-    //Resets all the mode buttons in a container.
-    private void resetModeButtons(Pane container){
-        List<Node> selectionModeButtons= getModeButtons(container);
-
-        for (Node node : selectionModeButtons) {
-            SelectionModeButton button = (SelectionModeButton)node;
-            button.setText(button.getTitle());
-        }
-    }
-
-    private List<Node> getModeButtons(Pane container){
-        return container.getChildren().filtered(n -> n instanceof SelectionModeButton);
-    }
-
-    //todo ------ Continue DRY and orthogonality from here -------
-
-    //Clears information in the course operations grid.
-    private void clearCourseOperationsGrid() {
+    //Clears operations done by the user related to courses such as search query text, results, and added courses.
+    private void clearUserCourseOperations() {
         searchField.clear();
         searchResultList.clear();
         addedCoursesList.clear();
     }
 
     //Clears outdated form info.
-    private void clearForm() {
-        instructionLabel.setText(bundle.getString("welcomeString"));
-        clearExampleSelection();
-        clearCourseOperationsGrid();
+    private void clearForm(boolean includeCurrentModeButton) {
+        clearExampleSelection(includeCurrentModeButton);
+        clearUserCourseOperations();
+    }
+
+    private void resetForm(boolean includeCurrentModeButton) {
+        instructionLabel.setText(bundle.getString("chooseRemainingInfo"));
+        clearForm(includeCurrentModeButton);
     }
 
     private File makeTempFile() {
@@ -259,33 +276,15 @@ class MainController {
         return tmpFile;
     }
 
-    //Handle action for browse button.
-    private void setBrowseOnActionListener(MenuItem item) {
-        item.setOnAction(event -> {
-            //New file chooser obj.
-            FileChooser chooser = new FileChooser();
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLSX", "*.xlsx"));
+    //browse for a file.
+    private File browseFile(Window parentWindow) {
+        //New file chooser obj.
+        FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLSX", "*.xlsx"));
 
-            /*This method takes a Window object as an argument...
-             *If the parent window is passed then it will not be able to
-             * interact with it anymore.
-             *
-             * passing null is also valid however it will not produce the effect
-             * above.
-             */
-            File file = chooser.showOpenDialog(item.getParentPopup().getOwnerWindow());
+        return chooser.showOpenDialog(parentWindow);
 
-            //If a file was indeed chosen.
-            if (file != null) {
-                chooseFileButton.setText(bundle.getString("filePrefix") + " " +
-                        bundle.getString("loadFromPC"));
-                //Read the table in the background.
-                TableReadTask tableReadTask = new TableReadTask(new ReadTableCallbacks(), file);
-                startTask(tableReadTask);
-            }
-        });
     }
-
 
     /**
      * Initializes a GridPane to show a small part from the timetable, in which
@@ -296,90 +295,93 @@ class MainController {
      * @param rows    Number of rows in the window.
      * @param columns Number of columns in the window.
      */
-    private void initTableSample(Sheet sheet, int rows, int columns) {
+    private void populateTableSample(Sheet sheet, int rows, int columns) {
         //Clear the grid first since it might have been already populated with other children.
         tableSample.getChildren().clear();
 
-        //Populate and set listener.
-        for (int i = 0; i < rows; i++) {
-            Row row = sheet.getRow(i);
-            for (int j = 0; j < columns; j++) {
-                Cell cell = row.getCell(j);
-                String data = cell == null ? "" : cell.toString();
-                Label label = new Label(data);
-                GridPane.setFillWidth(label, true);
-                GridPane.setFillHeight(label, true);
-                label.getStyleClass().add("tableSampleLabel");
-                tableSample.add(label, j, i);
-                setOnTableSampleLabelClickListener(label, instructionLabel);
+        //For each row in the table
+        for (int currentRowIndex = 0; currentRowIndex < rows; currentRowIndex++) {
+            Row row = sheet.getRow(currentRowIndex);
+            //For each column in that row
+            for (int currentColumnIndex = 0; currentColumnIndex < columns; currentColumnIndex++) {
+                //Get the cell at that column
+                Cell cell = row.getCell(currentColumnIndex);
+                //Get the text from the cell
+                String text = cell == null ? "" : cell.toString();
+                //make a table sample label from the text
+                Label tableSampleLabel = makeTableSampleLabel(text);
+                //set click listener
+                tableSampleLabel.setOnMouseClicked(e -> {
+                    //ignore any clicks if a button is not selected
+                    if (isModeButtonSelected()) {
+                        putSelectedData(tableSampleLabel, currentSelectionModeButton.getMode());
+                        giveSelectionFeedback(currentSelectionModeButton, tableSampleLabel, instructionLabel);
+                        //Un-select the button
+                        currentSelectionModeButton = null;
+                    }
+                });
+
+                tableSample.add(tableSampleLabel, currentColumnIndex, currentRowIndex);
+
             }
 
         }
     }
 
+    private Label makeTableSampleLabel(String text) {
+        Label label = new Label(text);
+        GridPane.setFillWidth(label, true);
+        GridPane.setFillHeight(label, true);
+        label.getStyleClass().add("tableSampleLabel");
+        return label;
+    }
 
-    private void setOnTableSampleLabelClickListener(Label tableSampleLabel, Label instructionLabel) {
-        tableSampleLabel.setOnMouseClicked(event -> {
+    private void putSelectedData(Label tableSampleLabel, SelectionMode currentMode) {
+        //Get the row and column of the label that was clicked.
+        int rowIndex = GridPane.getRowIndex(tableSampleLabel);
+        int columnIndex = GridPane.getColumnIndex(tableSampleLabel);
 
-            //A mode has to be selected or else we don't respond to any click.
-            if (currentSelectionModeButton != null) {
-                SelectionMode currentMode = currentSelectionModeButton.getMode();
-                //Get the row and column of the label that was clicked.
-                int rowIndex = GridPane.getRowIndex(tableSampleLabel);
-                int columnIndex = GridPane.getColumnIndex(tableSampleLabel);
+        //If the currently selected mode is for course cell selection.
+        if (currentMode == SelectionMode.SELECT_COURSE) {
+                    /* If other course information was already selected,
+                    that information was built in reference to this certain course.
+                    Which you might be changing now. Thus the old information is now incorrect,
+                    this method was not called before, because resetting the form, will reset
+                    the currently selected mode button, but that's needed in giveSelectionFeedback()*
+                    */
+            resetForm(false);
 
-                //If the currently selected mode is for course cell selection.
-                if (currentMode == SelectionMode.SELECT_COURSE) {
-                    /*Clear the form. If other course information was already selected,
-         that information was built in reference to this certain course.
-         Which you might be changing now. Thus the old information is now incorrect*/
-                    clearForm();
-                    selectionModeToDataMap.putCourseCellData(columnIndex, rowIndex);
-                    //If it's for course info cell selection.
-                } else {
-                    try {
-                        selectionModeToDataMap.putCourseInfoCellData(
-                                columnIndex, rowIndex, currentMode
-                        );
-                    } catch (ExampleCourseNotSetException | IncorrectExampleInfoException e) {
+            selectionModeToDataMap.putCourseCellData(columnIndex, rowIndex);
+
+            //If it's for course info cell selection.
+        } else {
+            try {
+                selectionModeToDataMap.putCourseInfoCellData(
+                        columnIndex, rowIndex, currentMode
+                );
+            } catch (ExampleCourseNotSetException | IncorrectExampleInfoException e) {
                         /*ExampleCourseNotSetException is unlikely to be thrown, since we are
                         prevent the user from even changing to other modes if the course has not
                         been selected yet,Thus the following dialog will assume that the user
                         has selected incorrect information.
                         */
-                        showAlert(bundle, "incorrectInfoHeader", "incorrectInfoBody");
-                        return;
-                    }
-                }
-                giveSelectionFeedback(currentSelectionModeButton, tableSampleLabel, instructionLabel);
-
+                showAlert(bundle, "incorrectInfoHeader", "incorrectInfoBody");
             }
-
-
-        });
-
+        }
     }
 
-    /*Changes the text of the instructionLabel and the clicked button
-    , and if all required info has been selected sets isReadyToSearch
-     to true*/
+    /*Changes the text of the instructionLabel and the clicked button*/
     private void giveSelectionFeedback(SelectionModeButton button, Label tableSampleLabel, Label instructionLabel) {
-        String instruction;
-
-        if (selectionModeToDataMap.size() < SelectionMode.values().length) {
-            instruction = bundle.getString("chooseRemainingInfo");
-        } else {
-            instruction = bundle.getString("allDone");
-        }
-
+        String instruction = isReadyToSearch() ? bundle.getString("allDone") : bundle.getString("chooseRemainingInfo");
         instructionLabel.setText(instruction);
         button.setText(button.getCurrentlySelectedPrefix(tableSampleLabel.getText()));
-        currentSelectionModeButton = null;
     }
 
     private boolean isReadyToSearch() {
-        return  ! (selectionModeToDataMap.size() < getModeButtons(exampleSelectionControlBar).size());
+        return !(selectionModeToDataMap.size() < getModeButtons(exampleSelectionControlBar).size());
     }
+
+    //todo --- continue refactoring from here -------
 
     //Initializes controls that are related to adding courses.
     private void populateCourseOperationsGrid() {
@@ -516,13 +518,13 @@ class MainController {
 
     }
 
-    private void loadingMode() {
+    private void taskLoadingMode() {
         chooseFileButton.setDisable(true);
         tableSample.setVisible(false);
         progressIndicator.setVisible(true);
     }
 
-    private void loadingFailed() {
+    private void taskFailedMode() {
         chooseFileButton.setDisable(false);
         progressIndicator.setVisible(false);
         tableSample.setVisible(true);
@@ -534,17 +536,17 @@ class MainController {
     private class ReadTableCallbacks implements CallbackTask.TaskCallbacks<Workbook> {
         @Override
         public void onLoading() {
-            loadingMode();
+            taskLoadingMode();
         }
 
         @Override
         public void onSucceeded(Workbook timetable) {
-            clearForm();
+            resetForm(true);
             if (timetable != null) {
                 timetableSheet = timetable.getSheetAt(0);
                 TableUtils.unpackMergedCells(timetableSheet);
                 //todo in a future version, allow the user to row and col count
-                initTableSample(timetableSheet, 5, 5);
+                populateTableSample(timetableSheet, 5, 5);
             }
             progressIndicator.setVisible(false);
             tableSample.setVisible(true);
@@ -555,7 +557,7 @@ class MainController {
         @Override
         public void onFailed(Throwable e) {
             FXUtils.showAlert(bundle, "badIOHeader", "badIOBody");
-            loadingFailed();
+            taskFailedMode();
         }
 
     }
@@ -564,7 +566,7 @@ class MainController {
 
         @Override
         public void onLoading() {
-            loadingMode();
+            taskLoadingMode();
         }
 
         @Override
@@ -576,7 +578,7 @@ class MainController {
         @Override
         public void onFailed(Throwable e) {
             FXUtils.showAlert(bundle, "badNetworkIOHeader", "badNetworkIOBody");
-            loadingFailed();
+            taskFailedMode();
 
         }
     }
