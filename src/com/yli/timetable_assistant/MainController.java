@@ -80,7 +80,7 @@ class MainController {
     //search query field.
     private TextField searchField;
 
-    //
+
     private ObservableList<String> searchResultList;
 
     private ObservableList<String> addedCoursesList;
@@ -381,35 +381,55 @@ class MainController {
         return !(selectionModeToDataMap.size() < getModeButtons(exampleSelectionControlBar).size());
     }
 
-    //todo --- continue refactoring from here -------
+    private Label makeHeaderLabel(String text) {
+        Label headerLabel = new Label(text);
+        headerLabel.getStyleClass().add("Header");
+        return headerLabel;
+    }
 
-    //Initializes controls that are related to adding courses.
+    //remove an item from a list view
+    private void removeItem(ListView<String> removingFrom) {
+        MultipleSelectionModel<String> sModel = removingFrom.getSelectionModel();
+        String string = sModel.getSelectedItem();
+        if (string != null)
+            removingFrom.getItems()
+                    .remove(sModel.getSelectedIndex());
+    }
+
+    //Handle adding an item from a list view to a list of another.
+    private void addItem(ListView<String> addingFrom, ObservableList<String> addingTo) {
+        String clickedItem = addingFrom.getSelectionModel().getSelectedItem();
+        if (!addingTo.contains(clickedItem) && clickedItem != null) {
+            addingTo.add(clickedItem
+            );
+        }
+    }
+
+    //Initializes controls that are related to manipulating courses.
     private void populateCourseOperationsGrid() {
 
         //-----------------------------------------------------------
-        /*Label and list for showing courses that have been added from
+        /*Label and list view for showing courses that have been added from
         the list that contains available courses*/
-        Label addedCoursesHeader = new Label(bundle.getString("addedCoursesHeader"));
-        addedCoursesHeader.getStyleClass().add("Header");
+        Label addedCoursesHeader = makeHeaderLabel(bundle.getString("addedCoursesHeader"));
 
         ListView<String> addedCourses = new ListView<>();
         addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
 
-        setRemoveItemOnClickListener(addedCourses);
+        addedCourses.setOnMouseClicked(e -> removeItem(addedCourses));
         //--------------------------------------------------------
 
 
         //----------------------------------------------------------
         //Label and list for displaying courses that are available in the sheet.
-        Label availableCoursesHeader = new Label(bundle.getString("availableCoursesHeader"));
-        availableCoursesHeader.getStyleClass().add("Header");
+        Label availableCoursesHeader = makeHeaderLabel(bundle.getString("availableCoursesHeader"));
+
         ListView<String> availableCourses = new ListView<>();
         searchResultList = FXCollections.observableArrayList();
-        availableCourses.setItems(
-                searchResultList);
+        availableCourses.setItems(searchResultList);
 
-        setAddItemOnClickListener(availableCourses, addedCoursesList);
+        availableCourses.setOnMouseClicked( e -> addItem(availableCourses, addedCoursesList));
         //------------------------------------------------------------
 
 
@@ -417,8 +437,12 @@ class MainController {
         //Controls for searching
         searchField = new TextField();
         searchField.setPromptText(bundle.getString("searchFieldPrompt"));
+
         Button searchButton = new Button(bundle.getString("searchButton"));
-        setSearchOnClickListener(searchButton, searchResultList, searchField);
+        searchButton.setOnAction(event -> {
+            if (isReadyToSearch()) TableUtils.search(timetableSheet, searchResultList, searchField.getText());
+            else showAlert(bundle, "insufficientInfoHeader", "insufficientInfoBody");
+        });
         //--------------------------------------------------
 
 
@@ -426,18 +450,21 @@ class MainController {
         //generate table button
         Button generateButton = new Button(bundle.getString("generateButton"));
 
-        setGenerateOnClickListener(generateButton, addedCoursesList);
+        generateButton.setOnAction(event -> {
+            if (!addedCoursesList.isEmpty()) generateTable(addedCoursesList);
+            else showAlert(bundle, "notReadyToGenerateHeader", "notReadyToGenerateBody");
+        });
         //------------------------------------------------------------
 
 
         //extra Box-------------------------------------
-        //todo Might add option to change course details in this box.
+        //todo Currently this is a stub. Might add option to change course details in this box.
         Label extrasBoxHeader = new Label("");
-        //extrasBoxHeader.getStyleClass().add("Header");
+        extrasBoxHeader.getStyleClass().add("Header");
         VBox extrasBox = makeExtrasBox();
         //---------------------------------------------
 
-        //Adding controls to grid
+        //Add controls to grid
         courseOperationsGrid.add(searchField, 0, 0);
         courseOperationsGrid.add(searchButton, 1, 0);
         courseOperationsGrid.add(availableCoursesHeader, 0, 1);
@@ -450,9 +477,7 @@ class MainController {
 
     }
 
-
-    //Returns a v box containing some pref controls...
-    //todo allow editing course details in a future version
+    //todo Currently this is a stub. Might add option to change course details in this box.
     private VBox makeExtrasBox() {
         VBox extraBox = new VBox();
         extraBox.getStyleClass().add("extrasBox");
@@ -460,55 +485,17 @@ class MainController {
         return extraBox;
     }
 
-    //Handle clicking generate..
-    private void setGenerateOnClickListener(Button generateButton, ObservableList<String> generateFrom) {
+    private void generateTable(ObservableList<String> generateFrom){
+
         IntsBundle intBundle = (IntsBundle) ResourceBundle.getBundle(IntsBundle.class.getCanonicalName());
-        generateButton.setOnAction(event -> {
-            if (!generateFrom.isEmpty()) {
-                DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
-                FXUtils.openWindow(bundle.getString("yourTimetable"), new Stage(),
-                        intBundle.getInteger("windowWidth"), intBundle.getInteger("windowHeight"),
-                        GeneratedTableController.class.getResource(GeneratedTableController.FXML_PATH),
-                        ResourceBundle.getBundle(StringsBundle.class.getCanonicalName()),
-                        new GeneratedTableController(map));
-            } else
-                showAlert(bundle, "notReadyToGenerateHeader", "notReadyToGenerateBody");
-        });
-    }
 
-    //Handle clicking search...
-    private void setSearchOnClickListener(Button searchButton, ObservableList<String> searchResultList, TextField searchField) {
-        searchButton.setOnAction(event -> {
-            if (isReadyToSearch()) {
-                TableUtils.search(timetableSheet, searchResultList, searchField.getText());
+        DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
 
-            } else {
-                showAlert(bundle, "insufficientInfoHeader", "insufficientInfoBody");
-            }
-        });
-    }
-
-    //Handle removing an item from a list view.
-    private void setRemoveItemOnClickListener(ListView<String> removingFrom) {
-        removingFrom.setOnMouseClicked(event -> {
-            MultipleSelectionModel<String> sModel = removingFrom.getSelectionModel();
-            String string = sModel.getSelectedItem();
-            if (string != null)
-                removingFrom.getItems()
-                        .remove(sModel.getSelectedIndex());
-        });
-    }
-
-    //Handle adding an item from a list view to a list of another.
-    private void setAddItemOnClickListener(ListView<String> addingFrom, ObservableList<String> addingTo) {
-        addingFrom.setOnMouseClicked(event -> {
-            String clickedItem = addingFrom.getSelectionModel().getSelectedItem();
-            if (!addingTo.contains(clickedItem) && clickedItem != null) {
-                addingTo.add(clickedItem
-                );
-            }
-        });
-
+        FXUtils.openWindow(bundle.getString("yourTimetable"), new Stage(),
+                intBundle.getInteger("windowWidth"), intBundle.getInteger("windowHeight"),
+                GeneratedTableController.class.getResource(GeneratedTableController.FXML_PATH),
+                ResourceBundle.getBundle(StringsBundle.class.getCanonicalName()),
+                new GeneratedTableController(map));
     }
 
     private void startTask(Task task) {
