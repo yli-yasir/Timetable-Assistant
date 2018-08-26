@@ -32,7 +32,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
 
     static final String FXML_PATH = "/com/yli/timetable_assistant/res/generatedTable.fxml";
 
-    //Will have some instructions and choicebox for changing font.
+    //Will have some instructions and choice box for changing font.
     @FXML
     private HBox generatedTableControlBar;
 
@@ -59,13 +59,9 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
     private BufferedImage tableImage;
 
 
-
-
-
     GeneratedTableController(DayToCourseListMap dayToCourseListMap){
         this.dayToCourseListMap = dayToCourseListMap;
     }
-
 
     @FXML
     private void initialize(){
@@ -76,12 +72,7 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
     private void populateGeneratedTableControlBar(){
         Label changeFontLabel =  new Label(stringsBundle.getString("changeFont"));
 
-        fontSizeChoiceBox = new ChoiceBox<>();
-        ObservableList<Integer> fontOptions = FXCollections.observableArrayList();
-        for (int i=6; i<=72;i+=2) fontOptions.add(i);
-        fontSizeChoiceBox.setItems(fontOptions);
-        fontSizeChoiceBox.setValue(initialFontSize);
-        setDrawOnFontSizeChangedListener(fontSizeChoiceBox);
+        fontSizeChoiceBox = makeChangeFontChoiceBox();
 
         Label saveImageLabel = new Label(stringsBundle.getString("saveImage"));
 
@@ -89,42 +80,50 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
                 fontSizeChoiceBox,saveImageLabel);
     }
 
-    private void setDrawOnFontSizeChangedListener(ChoiceBox<Integer> fontSizeChoiceBox){
+    private ChoiceBox<Integer> makeChangeFontChoiceBox(){
+         ChoiceBox<Integer> fontSizeChoiceBox = new ChoiceBox<>();
+        ObservableList<Integer> fontOptions = FXCollections.observableArrayList();
+        for (int i=6; i<=72;i+=2) fontOptions.add(i);
+        fontSizeChoiceBox.setItems(fontOptions);
+        fontSizeChoiceBox.setValue(initialFontSize);
         fontSizeChoiceBox.setOnAction(event ->
-            populateImageView(dayToCourseListMap,fontSizeChoiceBox.getSelectionModel().getSelectedItem()));
+                populateImageView(dayToCourseListMap,fontSizeChoiceBox.getSelectionModel().getSelectedItem()));
+        return fontSizeChoiceBox;
     }
 
-
+    //Make image view the same size as it's container,even when window is resized.
     private void initializeImageView(){
         VBox.setVgrow(generatedTableImageViewContainer,Priority.ALWAYS);
         generatedTableImageView.setSmooth(true);
         generatedTableImageView.fitWidthProperty().bind(generatedTableImageViewContainer.widthProperty());
         generatedTableImageView.fitHeightProperty().bind(generatedTableImageViewContainer.heightProperty());
-        setSaveOnClickListener(generatedTableImageView);
+
+        generatedTableImageView.setOnMouseClicked(e->{
+            FileChooser saveDialog = makeSaveDialog();
+            File file = saveDialog.showSaveDialog(generatedTableImageView.getScene().getWindow());
+            if (file != null) saveImage(tableImage,file,getExtension(saveDialog));
+        });
+
         populateImageView(dayToCourseListMap,initialFontSize);
     }
 
-    private void setSaveOnClickListener(Node node){
-        node.setOnMouseClicked(event -> {
 
-            FileChooser chooser = new FileChooser();
-            chooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter("PNG", "*.png"));
-
-            File file = chooser.showSaveDialog(node.getScene().getWindow());
-
-            /*Since we are saving, there should be only one extension in the list, so
-            we just get the one at the first index, and extensions should be specified as
-            *.<extension> so we trim the in string starting from the second index until the end
-            to get a string extension which can be used in saving the file*/
-            if (file != null) {
-                String extension = chooser.getSelectedExtensionFilter().getExtensions()
-                        .get(0).substring(2);
-                saveImage(tableImage,file,extension);
-            }
-        });
+    private FileChooser makeSaveDialog(){
+        FileChooser saveDialog = new FileChooser();
+        saveDialog.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("PNG", "*.png"));
+        return saveDialog;
     }
 
+
+    /*Since we are saving, there should be only one extension in the list, so
+        we just get the one at the first index, and extensions should be specified as
+        *.<extension> so we trim the in string starting from the second index until the end
+        to get a string extension which can be used in saving the file*/
+    private String getExtension(FileChooser saveDialog){
+        return saveDialog.getSelectedExtensionFilter().getExtensions()
+                .get(0).substring(2);
+    }
 
     private void saveImage(BufferedImage image,File file,String extension){
         try{
@@ -149,8 +148,6 @@ public class GeneratedTableController implements TableDrawTask.TaskCallbacks<Buf
         generatedTableImageView.setVisible(false);
         progressIndicator.setVisible(true);
     }
-
-
 
     @Override
     public void onFailed(Throwable failureType) {

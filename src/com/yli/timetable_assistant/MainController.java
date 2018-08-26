@@ -11,7 +11,7 @@ import com.yli.timetable_assistant.tasks.FetchOnlineFileTask;
 import com.yli.timetable_assistant.tasks.TableReadTask;
 import com.yli.timetable_assistant.example_selection.ExampleCourseNotSetException;
 import com.yli.timetable_assistant.example_selection.SelectionMode;
-import com.yli.timetable_assistant.buttons.SelectionModeButton;
+import com.yli.timetable_assistant.example_selection.ModeButton;
 import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -59,7 +59,7 @@ class MainController {
 
     //todo change name
     //The selection mode button that's currently selected.
-    private SelectionModeButton currentSelectionModeButton;
+    private ModeButton currentModeButton;
 
     /*A grid which will be populated with labels which represent cells from the sheet*/
     @FXML
@@ -107,7 +107,7 @@ class MainController {
         children.add(makeChooseFileButton());
 
         //Add the selection mode buttons.
-        children.addAll(makeSelectionModeButtons());
+        children.addAll(makeModeButtons());
     }
 
     private Button makeChooseFileButton() {
@@ -159,35 +159,35 @@ class MainController {
         }
     }
 
+    //Read the table in the background.
     private void loadFromFile(File file) {
-        //Read the table in the background.
         TableReadTask tableReadTask = new TableReadTask(new ReadTableCallbacks(), file);
         startTask(tableReadTask);
     }
 
-    private Collection<SelectionModeButton> makeSelectionModeButtons() {
+    private Collection<ModeButton> makeModeButtons() {
 
-        ArrayList<SelectionModeButton> selectionModeButtons = new ArrayList<>();
+        ArrayList<ModeButton> modeButtons = new ArrayList<>();
 
         //make as many buttons as needed for selection modes, in here I am making
         //a button for each mode.
         for (SelectionMode mode : SelectionMode.values()) {
 
-            SelectionModeButton button = new SelectionModeButton(mode);
+            ModeButton button = new ModeButton(mode);
 
             HBox.setHgrow(button, Priority.ALWAYS);
 
             button.setOnAction(e -> {
                 changeCurrentlySelectedModeButton(button);
-                if (isModeButtonSelected()) instructionLabel.setText(currentSelectionModeButton.getInstruction());
+                if (isModeButtonSelected()) instructionLabel.setText(currentModeButton.getInstruction());
             });
 
-            selectionModeButtons.add(button);
+            modeButtons.add(button);
         }
-        return selectionModeButtons;
+        return modeButtons;
     }
 
-    private void changeCurrentlySelectedModeButton(SelectionModeButton button) {
+    private void changeCurrentlySelectedModeButton(ModeButton button) {
 
         //Reject changes if file isn't selected yet.
         if (!isFileLoaded()) {
@@ -200,13 +200,13 @@ class MainController {
             showAlert(bundle, "courseNotChosenHeader",
                     "courseNotChosenBody");
         } else {
-            currentSelectionModeButton = button;
+            currentModeButton = button;
         }
 
     }
 
     private boolean isModeButtonSelected() {
-        return currentSelectionModeButton != null;
+        return currentModeButton != null;
     }
 
     private boolean isFileLoaded() {
@@ -222,19 +222,19 @@ class MainController {
         List<Node> selectionModeButtons = getModeButtons(container);
 
         for (Node node : selectionModeButtons) {
-            SelectionModeButton button = (SelectionModeButton) node;
+            ModeButton button = (ModeButton) node;
             button.setText(button.getTitle());
         }
     }
 
     private List<Node> getModeButtons(Pane container) {
-        return container.getChildren().filtered(n -> n instanceof SelectionModeButton);
+        return container.getChildren().filtered(n -> n instanceof ModeButton);
     }
 
     //Clears selected example info.
     private void clearExampleSelection(boolean includeCurrentModeButton) {
 
-        if (includeCurrentModeButton) currentSelectionModeButton = null;
+        if (includeCurrentModeButton) currentModeButton = null;
 
         /*Clear the map. If other course information was already selected,
          that information was built in reference to this certain course.
@@ -269,7 +269,6 @@ class MainController {
         try {
             tmpFile = File.createTempFile("TA_TMP", null);
             tmpFile.deleteOnExit();
-            System.out.println(tmpFile.getAbsolutePath());
         } catch (IOException io) {
             FXUtils.showAlert(bundle, "badTempFileIOHeader", "badTempFileIOBody");
         }
@@ -314,10 +313,10 @@ class MainController {
                 tableSampleLabel.setOnMouseClicked(e -> {
                     //ignore any clicks if a button is not selected
                     if (isModeButtonSelected()) {
-                        putSelectedData(tableSampleLabel, currentSelectionModeButton.getMode());
-                        giveSelectionFeedback(currentSelectionModeButton, tableSampleLabel, instructionLabel);
+                        putSelectedData(tableSampleLabel, currentModeButton.getMode());
+                        giveSelectionFeedback(currentModeButton, tableSampleLabel, instructionLabel);
                         //Un-select the button
-                        currentSelectionModeButton = null;
+                        currentModeButton = null;
                     }
                 });
 
@@ -371,7 +370,7 @@ class MainController {
     }
 
     /*Changes the text of the instructionLabel and the clicked button*/
-    private void giveSelectionFeedback(SelectionModeButton button, Label tableSampleLabel, Label instructionLabel) {
+    private void giveSelectionFeedback(ModeButton button, Label tableSampleLabel, Label instructionLabel) {
         String instruction = isReadyToSearch() ? bundle.getString("allDone") : bundle.getString("chooseRemainingInfo");
         instructionLabel.setText(instruction);
         button.setText(button.getCurrentlySelectedPrefix(tableSampleLabel.getText()));
@@ -502,7 +501,6 @@ class MainController {
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
-
     }
 
     private void taskLoadingMode() {

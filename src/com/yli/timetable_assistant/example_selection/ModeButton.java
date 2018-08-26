@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant.buttons;
+package com.yli.timetable_assistant.example_selection;
 
 import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.res.StringsBundle;
@@ -6,7 +6,7 @@ import javafx.scene.control.Button;
 
 import java.util.ResourceBundle;
 
-public class SelectionModeButton extends Button {
+public class ModeButton extends Button {
 
     private static ResourceBundle stringsBundle = ResourceBundle.getBundle(StringsBundle.class.getCanonicalName());
 
@@ -20,7 +20,7 @@ public class SelectionModeButton extends Button {
 
     private String instruction;
 
-    public SelectionModeButton(SelectionMode mode) {
+    public ModeButton(SelectionMode mode) {
         super(stringsBundle.getString("titlePrefix") + stringsBundle.getString(mode.modeNameKey()));
         this.mode=mode;
         modeName = stringsBundle.getString(mode.modeNameKey());

@@ -7,8 +7,9 @@ import java.net.URL;
 
 public class FetchOnlineFileTask extends CallbackTask<File> {
     private final File file;
-
     private final String url;
+
+
    public FetchOnlineFileTask(TaskCallbacks<File> callbacks, String url, File file) {
         super(callbacks);
         this.file = file;

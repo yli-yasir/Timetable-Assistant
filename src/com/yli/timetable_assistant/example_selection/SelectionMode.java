@@ -8,7 +8,7 @@ public enum SelectionMode {
 
     /*Modes and their string key for getting the localized string of what
     they represent from the StringsBundle resource bundle class,
-    there is critical use of this key in SelectionModeButton class.*/
+    there is critical use of this key in ModeButton class.*/
     SELECT_COURSE("selectCourseModeName"),
     SELECT_DAY("selectDayModeName"),
     SELECT_TIME("selectTimeModeName"),
