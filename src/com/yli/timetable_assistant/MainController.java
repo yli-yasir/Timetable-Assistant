@@ -531,7 +531,7 @@ class MainController {
                 timetableSheet = timetable.getSheetAt(0);
                 TableUtils.unpackMergedCells(timetableSheet);
                 //todo in a future version, allow the user to row and col count
-                populateTableSample(timetableSheet, 5, 5);
+                populateTableSample(timetableSheet, 5, 6);
             }
             progressIndicator.setVisible(false);
             tableSample.setVisible(true);

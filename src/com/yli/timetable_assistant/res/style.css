@@ -3,7 +3,7 @@ VBox {
 -fx-font-weight:bold;
 }
 
-.exampleSelectionBar{
+#exampleSelectionControlBar{
 -fx-padding: 8 0 0 0  }
 
 .tableSampleLabel{
@@ -18,7 +18,7 @@ VBox {
 -fx-background: #00796B;
 }
 
-.tableSample{
+#tableSample{
 -fx-hgap: 5;
 -fx-vgap: 5}
 
@@ -49,7 +49,7 @@ Label{
 .Header{
 -fx-font-style: italic}
 
-.InstructionLabel{
+#instructionLabel{
 -fx-pref-width: infinity;
 -fx-effect: dropshadow(gaussian, #004D40, 10, 0, 2, 2);
 -fx-background-color:#00897B;
@@ -68,14 +68,14 @@ ScrollPane{
 #courseOperationsGrid{
 -fx-padding: 16 0 0 0 }
 
-.generatedTableControlBar{
+#generatedTableControlBar{
 -fx-padding:4;
 -fx-spacing:4;
 -fx-effect: dropshadow(gaussian, #004D40, 10, 0, 2, 2);
 -fx-background-color:#00897B;
 }
 
-.generatedTableImageViewContainer{
+#generatedTableImageViewContainer{
 -fx-padding: 16 0 0 0;
 -fx-min-width: 0;
 -fx-min-height:0}

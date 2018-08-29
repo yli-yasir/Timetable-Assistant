@@ -8,9 +8,9 @@
 <VBox xmlns:fx="http://javafx.com/javafx"
       stylesheets="@style.css">
     <HBox fx:id="generatedTableControlBar"
-    styleClass="generatedTableControlBar"/>
+    />
     <StackPane fx:id="generatedTableImageViewContainer"
-    styleClass="generatedTableImageViewContainer">
+    >
         <ImageView fx:id="generatedTableImageView"/>
         <ProgressIndicator fx:id="progressIndicator"/>
     </StackPane>

@@ -16,19 +16,19 @@
 
     <!--A label to show instructions-->
     <Label fx:id="instructionLabel" text="%welcomeString"
-           styleClass="Header,InstructionLabel"
+           styleClass="Header"
 
     />
 
     <HBox fx:id="exampleSelectionControlBar"
-          styleClass="exampleSelectionBar"/>
+          />
 
 
     <StackPane styleClass="tableSampleContainer">
         <ScrollPane maxWidth="Infinity"
                     prefHeight="320">
             <GridPane fx:id="tableSample"
-                      styleClass="tableSample"/>
+                      />
         </ScrollPane>
         <ProgressIndicator fx:id="progressIndicator"/>
     </StackPane>
