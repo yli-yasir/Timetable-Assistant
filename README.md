@@ -40,6 +40,7 @@ Clone the repo, and get the [Apache POI 3.17](https://poi.apache.org/download.ht
 * (Requires confirmation, might have been fixed.)Loading a file from the internet might not work, if the program is being started from some locations. This should be fixed later. For now, try moving the program to your desktop and check if the problem persists.
 
 ## TODO
+* Rework table drawing
 * Add ability for user to specify how many columns and rows are to be shown in the table sample.
 * Add ability to alter course details.
 
