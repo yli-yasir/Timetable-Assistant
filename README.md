@@ -14,7 +14,7 @@ This program was made as practice with Java FX 8. The aim is to assist students 
     1. From Internet: This option grabs the latest timetable from the internet automatically for you.
     1. From PC: This allows you to browse your computer for the timetable file. Which you can manually download from [here](http://library.neu.edu.tr/uploaded-files/classtimetable/index_en.html).
     
-<img src="https://i.imgur.com/6zC6uNr.gif" height="400" width="500"/>
+<img src="https://i.imgur.com/YkuR8wZ.gif" height="400" width="500"/>
 
 4. You will be shown a table sample, provide example information. Start by selecting a course from the table, then select the day, time and hall for that course. It's critical that you provide correct information or you will get incorrect results when you generate your own timetable.
 
