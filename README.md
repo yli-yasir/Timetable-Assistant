@@ -14,7 +14,7 @@ This program was made as practice with Java FX 8. The aim is to assist students 
     1. From Internet: This option grabs the latest timetable from the internet automatically for you.
     1. From PC: This allows you to browse your computer for the timetable file. Which you can manually download from [here](http://library.neu.edu.tr/uploaded-files/classtimetable/index_en.html).
     
-<img src="https://i.imgur.com/6zC6uNr.gif" height="400" width="500"/>
+<img src="https://i.imgur.com/YkuR8wZ.gif" height="400" width="500"/>
 
 4. You will be shown a table sample, provide example information. Start by selecting a course from the table, then select the day, time and hall for that course. It's critical that you provide correct information or you will get incorrect results when you generate your own timetable.
 
@@ -40,6 +40,7 @@ Clone the repo, and get the [Apache POI 3.17](https://poi.apache.org/download.ht
 * (Requires confirmation, might have been fixed.)Loading a file from the internet might not work, if the program is being started from some locations. This should be fixed later. For now, try moving the program to your desktop and check if the problem persists.
 
 ## TODO
+* Rework table drawing
 * Add ability for user to specify how many columns and rows are to be shown in the table sample.
 * Add ability to alter course details.
 
