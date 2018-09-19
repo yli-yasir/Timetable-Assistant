@@ -6,7 +6,7 @@ public class StringsBundle extends MapResourceBundle<String> {
 
     public StringsBundle(){
         map.put("appName","Timetable Assistant");
-        map.put("welcomeString","Please choose a file, then provide an example of a course with correct information.");
+        map.put("welcomeString","Please choose a file, then provide an example of a course with its day, time and hall.");
         map.put("windowSize","Example window size:");
         map.put("chooseFileButton","Choose File");
         map.put("searchFieldPrompt","Course name");
@@ -24,7 +24,7 @@ public class StringsBundle extends MapResourceBundle<String> {
         map.put("exampleWindowSize","Example window size:");
         map.put("incorrectInfoHeader","Probably incorrect Information!");
         map.put("incorrectInfoBody","The cell you selected isn't in-line with the course cell you selected.");
-        map.put("chooseRemainingInfo","Please choose the remaining information... (Your info must correspond with the course name you choose!)");
+        map.put("chooseRemainingInfo","Please choose any remaining information by clicking its button");
         map.put("allDone","All done! You can search for and add courses now!");
         map.put("titlePrefix","Choose ");
         map.put("instructionPrefix","Please click the cell that contains the ");
