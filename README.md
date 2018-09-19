@@ -6,9 +6,11 @@ This program was made as practice with Java FX 8. The aim is to assist students 
 ## End User Guide
 **Use this at your own risk, I am in no way responsible for any damages. This software still has to undergo a lot of testing.**
 
+**Please read the known issues at the end of this text!**
+
 1. [Click here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) to Download Java 8, If you don't already have it.
 
-2. [Click here](https://github.com/yli-yasir/Timetable-Assistant/releases/download/v0.91-beta/Timetable.Assistant.jar) to download the program.
+2. [Click here](https://github.com/yli-yasir/Timetable-Assistant/releases/download/0.92-beta/Timetable.Assistant.jar) to download the program.
 
 3. Open the program, and click choose file. You will have two options:
     1. From Internet: This option grabs the latest timetable from the internet automatically for you.
@@ -43,7 +45,9 @@ Clone the repo, and get the [Apache POI 3.17](https://poi.apache.org/download.ht
 * Rework table drawing
 * Add ability for user to specify how many columns and rows are to be shown in the table sample.
 * Add ability to alter course details.
-
+* Use Toggle Buttons instead of normal buttons for example selection.
+* Add ability for user to provide URL to download table from.
+* Normallize text so you don't get double results when searching.
     
 
 
