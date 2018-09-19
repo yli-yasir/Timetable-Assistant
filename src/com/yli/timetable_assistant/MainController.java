@@ -57,8 +57,7 @@ class MainController {
     @FXML
     private HBox exampleSelectionControlBar;
 
-    //todo change name
-    //The selection mode button that's currently selected.
+    //The  mode button that's currently selected.
     private ModeButton currentModeButton;
 
     /*A grid which will be populated with labels which represent cells from the sheet*/
@@ -100,20 +99,35 @@ class MainController {
     /*populates with controls which will be used to choose example data
   from the sample table*/
     private void populateExampleSelectionControlBar() {
-        //Get a ref to the children since we will be adding to them repeatedly.
-        ObservableList<Node> children = exampleSelectionControlBar.getChildren();
+
+        IntsBundle intBundle = (IntsBundle) ResourceBundle.getBundle(IntsBundle.class.getCanonicalName());
+
+        ArrayList<Button> buttons = new ArrayList<>();
 
         //Add the choose file control first.
-        children.add(makeChooseFileButton());
+        buttons.add(makeChooseFileButton());
 
         //Add the selection mode buttons.
-        children.addAll(makeModeButtons());
+        buttons.addAll(makeModeButtons());
+
+        buttons.forEach(button->{
+            //the following will make all the buttons take the same size.
+            HBox.setHgrow(button,Priority.ALWAYS);
+            //lock it as max size to prevent from overgrowth.
+            button.setMaxWidth(intBundle.getInteger("windowWidth")/buttons.size())
+            ;});
+
+        exampleSelectionControlBar.getChildren().addAll(buttons);
+
+
+
+
+
+
     }
 
     private Button makeChooseFileButton() {
         chooseFileButton = new Button(bundle.getString("chooseFileButton"));
-
-        HBox.setHgrow(chooseFileButton, Priority.ALWAYS);
 
         ContextMenu chooseFileContextMenu = buildChooseFileContextMenu();
         chooseFileButton.setOnAction(e -> chooseFileContextMenu.show(chooseFileButton, Side.BOTTOM, 0, 0));
@@ -174,8 +188,6 @@ class MainController {
         for (SelectionMode mode : SelectionMode.values()) {
 
             ModeButton button = new ModeButton(mode);
-
-            HBox.setHgrow(button, Priority.ALWAYS);
 
             button.setOnAction(e -> {
                 changeCurrentlySelectedModeButton(button);
@@ -332,6 +344,7 @@ class MainController {
         GridPane.setFillWidth(label, true);
         GridPane.setFillHeight(label, true);
         label.getStyleClass().add("tableSampleLabel");
+        label.setTooltip(new Tooltip(text));
         return label;
     }
 
@@ -438,6 +451,7 @@ class MainController {
         searchField.setPromptText(bundle.getString("searchFieldPrompt"));
 
         Button searchButton = new Button(bundle.getString("searchButton"));
+        searchButton.getStyleClass().add("fillingButton");
         searchButton.setOnAction(event -> {
             if (isReadyToSearch()) TableUtils.search(timetableSheet, searchResultList, searchField.getText());
             else showAlert(bundle, "insufficientInfoHeader", "insufficientInfoBody");
@@ -448,7 +462,7 @@ class MainController {
         //-----------------------------------------------------------
         //generate table button
         Button generateButton = new Button(bundle.getString("generateButton"));
-
+        generateButton.getStyleClass().add("fillingButton");
         generateButton.setOnAction(event -> {
             if (!addedCoursesList.isEmpty()) generateTable(addedCoursesList);
             else showAlert(bundle, "notReadyToGenerateHeader", "notReadyToGenerateBody");

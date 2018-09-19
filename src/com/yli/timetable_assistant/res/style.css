@@ -8,8 +8,7 @@ VBox {
 
 .tableSampleLabel{
 -fx-background-color: #00695C;
--fx-max-width: infinity;
--fx-max-height: infinity;
+-fx-max-width: 100;
 -fx-alignment: center;
 -fx-cursor: hand;
 }
@@ -30,7 +29,7 @@ ProgressIndicator{
 visibility:hidden
 }
 
-.button{
+.fillingButton{
 -fx-max-width: infinity}
 
 

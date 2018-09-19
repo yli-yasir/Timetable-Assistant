@@ -3,9 +3,11 @@ package com.yli.timetable_assistant.example_selection;
 import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.res.StringsBundle;
 import javafx.scene.control.Button;
+import javafx.scene.control.OverrunStyle;
 
 import java.util.ResourceBundle;
 
+//todo make this a Toggle Button
 public class ModeButton extends Button {
 
     private static ResourceBundle stringsBundle = ResourceBundle.getBundle(StringsBundle.class.getCanonicalName());

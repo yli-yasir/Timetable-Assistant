@@ -22,6 +22,9 @@ public class FXUtils {
             stage.setTitle(windowName);
             Scene scene = new Scene(root, width, height);
             stage.setScene(scene);
+            stage.setResizable(false);
+            //fix resizable adding extra size to window bug
+            stage.sizeToScene();
             stage.show();
         }
         catch(Exception e){

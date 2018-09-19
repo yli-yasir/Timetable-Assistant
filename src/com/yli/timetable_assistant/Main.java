@@ -5,6 +5,9 @@ import com.yli.timetable_assistant.res.IntsBundle;
 import com.yli.timetable_assistant.res.StringsBundle;
 import javafx.application.Application;
 import javafx.stage.Stage;
+import org.apache.poi.util.StringUtil;
+
+import java.text.Normalizer;
 import java.util.ResourceBundle;
 
 
