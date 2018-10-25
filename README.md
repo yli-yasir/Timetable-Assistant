@@ -47,7 +47,7 @@ Clone the repo, and get the [Apache POI 3.17](https://poi.apache.org/download.ht
 * Add ability to alter course details.
 * Use Toggle Buttons instead of normal buttons for example selection.
 * Add ability for user to provide URL to download table from.
-* Normallize text so you don't get double results when searching.
+* Normallize text so you don't get double results when searching (This is needed because some courses are written with Turkish letters).
     
 
 
