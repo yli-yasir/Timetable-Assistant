@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import javafx.scene.layout.*?>
 
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.control.ProgressIndicator?>
-<VBox xmlns:fx="http://javafx.com/javafx"
-      stylesheets="@style.css">
-    <HBox fx:id="generatedTableControlBar"
-    />
-    <StackPane fx:id="generatedTableImageViewContainer"
-    >
-        <ImageView fx:id="generatedTableImageView"/>
-        <ProgressIndicator fx:id="progressIndicator"/>
-    </StackPane>
 
-</VBox>
+<?import javafx.scene.control.TableView?>
+<TableView xmlns:fx="http://javafx.com/javafx"
+           stylesheets="@style.css"
+fx:id = "table"/>
+

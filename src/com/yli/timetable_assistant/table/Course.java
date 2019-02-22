@@ -3,11 +3,13 @@ package com.yli.timetable_assistant.table;
 import java.util.Objects;
 
 public class Course {
+    private RankedString day;
     private String name;
     private RankedString hall;
     private RankedString time;
 
-     public Course(String name,RankedString hall, RankedString time) {
+     public Course(RankedString day, String name,RankedString hall, RankedString time) {
+         this.day= day;
         this.name=name;
         this.hall = hall;
         this.time = time;
@@ -39,4 +41,6 @@ public class Course {
     public RankedString getTime() {
         return time;
     }
+
+    public RankedString getDay(){return day;}
 }

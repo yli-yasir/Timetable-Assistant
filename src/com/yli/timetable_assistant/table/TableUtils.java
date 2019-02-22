@@ -4,6 +4,7 @@ import com.yli.timetable_assistant.example_selection.SelectionMode;
 import com.yli.timetable_assistant.example_selection.CourseInfoCellData;
 import com.yli.timetable_assistant.example_selection.SelectionModeData;
 import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -16,15 +17,16 @@ import java.util.*;
 public class TableUtils {
 
 
-    public static Workbook readTable(File file) throws Exception{
+    public static Workbook readTable(File file) throws Exception {
         //The file that's passed must never be null!
-        if (file==null){
+        if (file == null) {
             throw new IllegalArgumentException("File to readTable passed must never be null");
         }
 
         //Using input stream to allow deletion of file (If file was tmp) on exit.
         return WorkbookFactory.create(new FileInputStream(file));
     }
+
     //Unpacks all merged cells in the sheet.
     public static void unpackMergedCells(Sheet sheet) {
         //For each merged region...
@@ -112,7 +114,7 @@ public class TableUtils {
 
         /*Check if its CourseInfoCellData, if it is then cast and proceed
         to get the info , it if isn't then return null*/
-        if (selectionModeData instanceof CourseInfoCellData ){
+        if (selectionModeData instanceof CourseInfoCellData) {
         /*If the requested information is in a row, then we get this certain
         row (by using selectionModeData.getIndex()) then the information we want will be
         in the same column as the column of the row.
@@ -124,8 +126,8 @@ public class TableUtils {
                 int rank = courseCell.getColumnIndex();
                 String string = makeStringValue(row.getCell(rank), true);
                 //todo reconsider this line, it's used to replace blank info with "???"
-                if (string.replace(" ","").isEmpty()){
-                    string="???";
+                if (string.replace(" ", "").isEmpty()) {
+                    string = "???";
                 }
                 return new RankedString(string, rank);
 
@@ -134,14 +136,14 @@ public class TableUtils {
         the course first, then we get the certain column in which the information
         was stored (by using selectionModeData.getIndex()). This will give us the information
         we want.*/
-        if (courseInfoCellData.getType() == CourseInfoCellData.TYPE_COLUMN) {
-            //The rank is equal to the index of the row.
-            int rank = courseCell.getRowIndex();
-            Row row = sheet.getRow(rank);
-            String string = makeStringValue(row.getCell(courseInfoCellData.getIndex()), true);
-            return new RankedString(string, rank);
+            if (courseInfoCellData.getType() == CourseInfoCellData.TYPE_COLUMN) {
+                //The rank is equal to the index of the row.
+                int rank = courseCell.getRowIndex();
+                Row row = sheet.getRow(rank);
+                String string = makeStringValue(row.getCell(courseInfoCellData.getIndex()), true);
+                return new RankedString(string, rank);
+            }
         }
-    }
         return null;
     }
 
@@ -153,8 +155,8 @@ public class TableUtils {
      * @param addedCourses A list of the courses, that we are looking to map.
      * @return a sorted map
      */
-    public static DayToCourseListMap makeDayToCourseListMap(Sheet sheet, SelectionModeToDataMap selectionModeToDataMap, ObservableList<String> addedCourses) {
-        DayToCourseListMap dayToCourseListMap = new DayToCourseListMap();
+    public static ObservableList<Course> makeCourseList(Sheet sheet, SelectionModeToDataMap selectionModeToDataMap, ObservableList<String> addedCourses) {
+        ObservableList<Course> courses = FXCollections.observableArrayList();
 
         /*For each cell in the sheet, if it's for a course that's in the list
         of courses that we want, then add it to the hash map , with the day
@@ -163,36 +165,16 @@ public class TableUtils {
         for (Row row : sheet) {
             for (Cell cell : row) {
                 if (addedCourses.contains(makeStringValue(cell, true))) {
-                    RankedString day = getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_DAY);
-
-                    //Either get the list we already have or make a new one.
-                    ArrayList<Course> dayCourses = dayToCourseListMap.getOrDefault(day,
-                            new ArrayList<>());
-
                     //Add the course to it.
-                    dayCourses.add(new Course(makeStringValue(cell, true),
+                    courses.add(new Course(
+                            getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_DAY),
+                            makeStringValue(cell, true),
                             getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_HALL),
                             getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_TIME))
                     );
-
-
-                    dayToCourseListMap.put(day, dayCourses);
                 }
             }
         }
-        /*Keys should be already sorted because it implements comparable
-        ,Now we will sort all the array lists*/
-        for (ArrayList<Course> dayCourses : dayToCourseListMap.values()) {
-            dayCourses.sort((o1, o2) -> {
-                if (o1.equals(o2)) return 0;
-                int result = Integer.compare(o1.getTime().getRank(), o2.getTime().getRank());
-                //To keep it consistent with equals, we can't permit to get a 0 for having similar time.
-                return result == 0 ? 1 : result;
-            });
-        }
-        return dayToCourseListMap;
-
+        return courses;
     }
-
-
 }

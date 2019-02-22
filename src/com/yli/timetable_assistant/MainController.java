@@ -2,9 +2,9 @@ package com.yli.timetable_assistant;
 
 import com.yli.timetable_assistant.example_selection.IncorrectExampleInfoException;
 import com.yli.timetable_assistant.fx.FXUtils;
-import com.yli.timetable_assistant.res.IntsBundle;
+import com.yli.timetable_assistant.res.Dimensions;
 import com.yli.timetable_assistant.res.StringsBundle;
-import com.yli.timetable_assistant.table.DayToCourseListMap;
+import com.yli.timetable_assistant.table.Course;
 import com.yli.timetable_assistant.table.TableUtils;
 import com.yli.timetable_assistant.tasks.CallbackTask;
 import com.yli.timetable_assistant.tasks.FetchOnlineFileTask;
@@ -100,8 +100,6 @@ class MainController {
   from the sample table*/
     private void populateExampleSelectionControlBar() {
 
-        IntsBundle intBundle = (IntsBundle) ResourceBundle.getBundle(IntsBundle.class.getCanonicalName());
-
         ArrayList<Button> buttons = new ArrayList<>();
 
         //Add the choose file control first.
@@ -114,7 +112,7 @@ class MainController {
             //the following will make all the buttons take the same size.
             HBox.setHgrow(button,Priority.ALWAYS);
             //lock it as max size to prevent from overgrowth.
-            button.setMaxWidth(intBundle.getInteger("windowWidth")/buttons.size())
+            button.setMaxWidth(Dimensions.WINDOW_WIDTH/buttons.size())
             ;});
 
         exampleSelectionControlBar.getChildren().addAll(buttons);
@@ -500,15 +498,13 @@ class MainController {
 
     private void generateTable(ObservableList<String> generateFrom){
 
-        IntsBundle intBundle = (IntsBundle) ResourceBundle.getBundle(IntsBundle.class.getCanonicalName());
-
-        DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
+        ObservableList<Course> courses = TableUtils.makeCourseList(timetableSheet, selectionModeToDataMap, generateFrom);
 
         FXUtils.openWindow(bundle.getString("yourTimetable"), new Stage(),
-                intBundle.getInteger("windowWidth"), intBundle.getInteger("windowHeight"),
+                Dimensions.WINDOW_WIDTH, Dimensions.WINDOW_HEIGHT,
                 GeneratedTableController.class.getResource(GeneratedTableController.FXML_PATH),
                 ResourceBundle.getBundle(StringsBundle.class.getCanonicalName()),
-                new GeneratedTableController(map));
+                new GeneratedTableController(courses));
     }
 
     private void startTask(Task task) {

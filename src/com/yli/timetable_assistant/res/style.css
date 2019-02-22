@@ -1,5 +1,5 @@
 VBox {
--fx-background-color:#009688;
+-fx-background-color:#282C34;
 -fx-font-weight:bold;
 }
 
@@ -14,7 +14,7 @@ VBox {
 }
 
 .tableSampleContainer{
--fx-background: #00796B;
+-fx-background: #21252B;
 }
 
 #tableSample{
@@ -36,7 +36,7 @@ visibility:hidden
 .extrasBox{
 -fx-spacing: 2;
 -fx-max-width: infinity;
--fx-background-color: #00796B;
+-fx-background-color: #21252B;
 -fx-padding: 0 10 0 10;
 }
 
@@ -50,8 +50,7 @@ Label{
 
 #instructionLabel{
 -fx-pref-width: infinity;
--fx-effect: dropshadow(gaussian, #004D40, 10, 0, 2, 2);
--fx-background-color:#00897B;
+-fx-background-color:#3A3F4B;
 }
 
 ChoiceBox {
@@ -60,8 +59,7 @@ ChoiceBox {
 
 ScrollPane{
 -fx-padding:4;
--fx-border-color:#00796B;
--fx-effect: dropshadow(gaussian, #004D40, 10, 0, 1, 1);
+-fx-border-color:#21252B;
 }
 
 #courseOperationsGrid{
@@ -70,8 +68,7 @@ ScrollPane{
 #generatedTableControlBar{
 -fx-padding:4;
 -fx-spacing:4;
--fx-effect: dropshadow(gaussian, #004D40, 10, 0, 2, 2);
--fx-background-color:#00897B;
+-fx-background-color:#3A3F4B;
 }
 
 #generatedTableImageViewContainer{
