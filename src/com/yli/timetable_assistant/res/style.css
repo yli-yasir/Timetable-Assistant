@@ -3,8 +3,8 @@ VBox {
 -fx-font-weight:bold;
 }
 
-#exampleSelectionControlBar{
--fx-padding: 8 0 0 0  }
+#exampleSelectionControlsContainer{
+-fx-padding: 0 0 0 0  }
 
 .tableSampleLabel{
 -fx-background-color: #00695C;

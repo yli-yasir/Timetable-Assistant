@@ -26,12 +26,12 @@ public class StringsBundle extends MapResourceBundle<String> {
         map.put("incorrectInfoBody","The cell you selected isn't in-line with the course cell you selected.");
         map.put("chooseRemainingInfo","Please choose any remaining information by clicking its button");
         map.put("allDone","All done! You can search for and add courses now!");
-        map.put("titlePrefix","Choose ");
+        map.put("choose","Choose");
         map.put("instructionPrefix","Please click the cell that contains the ");
-        map.put("selectCourseModeName","Course");
-        map.put("selectDayModeName","Day");
-        map.put("selectTimeModeName","Time");
-        map.put("selectHallModeName","Hall");
+        map.put("course","Course");
+        map.put("day","Day");
+        map.put("time","Time");
+        map.put("hall","Hall");
         map.put("loadFromInternet","From Internet");
         map.put("loadFromPC","From PC");
         map.put("genericAlertTitle","Something went wrong!");
@@ -45,11 +45,12 @@ public class StringsBundle extends MapResourceBundle<String> {
         map.put("courseNotChosenBody","Please choose a course first...");
         map.put("fileNotChosenHeader","File not chosen yet!");
         map.put("fileNotChosenBody","Please choose a file first...");
-        map.put("filePrefix","File:");
+        map.put("file","File");
         map.put("badTempFileIOHeader","Temp file IO Error");
         map.put("badTempFileIOBody","Something went wrong,please download the file manually then select it" +
                 " from your PC instead.");
-
+        map.put("url","URL:");
+        map.put("askForUrl","Where do you want to download the file from?");
         //StringsBundle for generated table window, might be separated
         //from this class in the future.
         map.put("yourTimetable","Your timetable:");

@@ -51,6 +51,23 @@ public class TableUtils {
 
     }
 
+    public static int getTableRowCount(Sheet timetableSheet){
+        return timetableSheet.getPhysicalNumberOfRows();
+    }
+
+    public static int getTableColCount(Sheet timetableSheet){
+        //iterate through the rows and find the widest one
+        //return colCount for that one.
+        int colCount = 0;
+        for (Row row: timetableSheet){
+            int rowCells = row.getPhysicalNumberOfCells();
+            if (rowCells>colCount){
+                colCount = rowCells;
+            }
+        }
+        return colCount;
+    }
+
     /**
      * If cell is null, returns an empty string.
      * Otherwise, removes all white spaces and returns a lower case string.
@@ -58,17 +75,17 @@ public class TableUtils {
      * @param cell to make the String from.
      * @return new String after performing operations.
      */
-    private static String makeStringValue(Cell cell, boolean whiteSpace) {
+    public static String makeStringValue(Cell cell, boolean removeWhiteSpace) {
         if (cell == null) return "";
         String string = cell.toString();
-        return makeStringValue(string, whiteSpace);
+        return makeStringValue(string, removeWhiteSpace);
     }
 
-    private static String makeStringValue(String string, boolean whiteSpace) {
+    private static String makeStringValue(String string, boolean removeWhiteSpace) {
         if (string == null || string.isEmpty()) return "";
         String resultString = string
                 .toLowerCase().trim();
-        return !whiteSpace ? resultString.replace(" ", "") :
+        return removeWhiteSpace ? resultString.replace(" ", "") :
                 resultString;
     }
 

@@ -20,7 +20,8 @@
 
     />
 
-    <HBox fx:id="exampleSelectionControlBar"
+    <HBox fx:id="tableSampleSizeControlsContainer"/>
+    <HBox fx:id="exampleSelectionControlsContainer"
           />
 
 

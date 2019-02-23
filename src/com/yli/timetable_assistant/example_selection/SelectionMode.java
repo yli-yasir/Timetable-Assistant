@@ -1,27 +1,24 @@
 package com.yli.timetable_assistant.example_selection;
 
-import com.yli.timetable_assistant.res.StringsBundle;
-
-import java.util.ResourceBundle;
-
 public enum SelectionMode {
 
     /*Modes and their string key for getting the localized string of what
     they represent from the StringsBundle resource bundle class,
     there is critical use of this key in ModeButton class.*/
-    SELECT_COURSE("selectCourseModeName"),
-    SELECT_DAY("selectDayModeName"),
-    SELECT_TIME("selectTimeModeName"),
-    SELECT_HALL("selectHallModeName");
+    SELECT_COURSE("course"),
+    SELECT_DAY("day"),
+    SELECT_TIME("time"),
+    SELECT_HALL("hall");
 
-    private String modeNameKey;
+    //This key will be used to grab strings from the stringsBundle.
+    private String nameKey;
 
-    SelectionMode(String modeNameKey){
-        this.modeNameKey=modeNameKey;
+    SelectionMode(String nameKey){
+        this.nameKey =nameKey;
     }
 
-    public String modeNameKey(){
-        return modeNameKey;
+    public String nameKey(){
+        return nameKey;
     }
 
 }
