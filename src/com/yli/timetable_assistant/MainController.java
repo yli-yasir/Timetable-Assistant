@@ -8,9 +8,9 @@ import com.yli.timetable_assistant.exampleselection.*;
 import com.yli.timetable_assistant.exampleselection.SelectionMode;
 import com.yli.timetable_assistant.table.GridCell;
 import com.yli.timetable_assistant.utils.FXUtils;
-import com.yli.timetable_assistant.res.Integers;
+import com.yli.timetable_assistant.res.Numbers;
 import com.yli.timetable_assistant.res.StringsBundle;
-import com.yli.timetable_assistant.table.DayToCourseListMap;
+import com.yli.timetable_assistant.table.DayToCoursesMap;
 import com.yli.timetable_assistant.table.TableUtils;
 import com.yli.timetable_assistant.tasks.CallbackTask;
 import com.yli.timetable_assistant.tasks.TableReadTask;
@@ -93,7 +93,11 @@ class MainController {
 
         //make labels for the combo boxes
         Label rowsLabel = new Label(strings.getString("rows") + ": ");
+        //add some styling to push everything starting from the row label to the right
+        //this will only work if it has no background
+        rowsLabel.getStyleClass().add("PushedRight");
         Label columnsLabel = new Label(strings.getString("columns") + ": ");
+        columnsLabel.getStyleClass().add("PushedRight");
 
         tableSampleSizeControlsContainer.getChildren().addAll(
                 chooseFileButton,
@@ -117,11 +121,11 @@ class MainController {
             };
 
             tableSampleRowsComboBox.populate(TableUtils.getTableRowCount(timetableSheet),
-                    Integers.TABLE_SAMPLE_DEFAULT_HEIGHT,
+                    Numbers.TABLE_SAMPLE_DEFAULT_HEIGHT,
                     tableSampleComboBoxChange);
 
             tableSampleColumnsComboBox.populate(TableUtils.getTableColCount(timetableSheet),
-                    Integers.TABLE_SAMPLE_DEFAULT_WIDTH,
+                    Numbers.TABLE_SAMPLE_DEFAULT_WIDTH,
                     tableSampleComboBoxChange);
         }
 
@@ -137,13 +141,6 @@ class MainController {
 
         //Add the selection mode buttons
         modeToggleGroup.getToggles().forEach(toggle -> children.add((Node) toggle));
-
-        children.forEach(child -> {
-            //the following will make all the buttons take the same size.
-            HBox.setHgrow(child, Priority.ALWAYS);
-            //lock it as max size to prevent from overgrowth.
-            //todo((Control) child).setMaxWidth(/ children.size())
-        });
 
 
     }
@@ -219,13 +216,19 @@ class MainController {
     }
 
     //Resets all the mode buttons in a container.
-    private void resetModeButtons(boolean includeToggledButton) {
+    private void refreshModeButtons(boolean includeToggledButton) {
         if (includeToggledButton) {
             modeToggleGroup.selectToggle(null);
         }
 
         modeToggleGroup.getToggles().forEach(toggle -> {
             ModeButton button = ((ModeButton) toggle);
+            //calculate the proper width for the button and show it
+            button.setVisible(true);
+            double fixedWidth = exampleSelectionControlsContainer.getWidth()/modeToggleGroup.getToggles().size();
+            button.setPrefWidth(fixedWidth);
+            button.setMaxWidth(fixedWidth);
+            button.setMinWidth(fixedWidth);
             button.setText(button.getOriginalLabel());
         });
 
@@ -241,7 +244,7 @@ class MainController {
         selectionModeToDataMap.clear();
 
         //reset mode buttons in the exampleSelectionControlsContainer.
-        resetModeButtons(includeToggledButton);
+        refreshModeButtons(includeToggledButton);
 
     }
 
@@ -300,14 +303,14 @@ class MainController {
             //as it's text needs to be altered.
             resetForm(false);
 
-            selectionModeToDataMap.putCourseCellData(columnIndex, rowIndex);
+            selectionModeToDataMap.putDataOfPrimaryCell(columnIndex, rowIndex);
 
             return true;
 
             //If it's for course info cell selection.
         } else {
             try {
-                selectionModeToDataMap.putCourseInfoCellData(
+                selectionModeToDataMap.putDataOfSecondaryCell(
                         columnIndex, rowIndex, currentMode
                 );
                 return true;
@@ -341,8 +344,11 @@ class MainController {
     private void giveSelectionFeedback(ModeButton button, Label tableSampleLabel, Label instructionLabel) {
         String instruction = isReadyToSearch() ? strings.getString("allDone") : strings.getString("chooseRemainingInfo");
         instructionLabel.setText(instruction);
-        button.setText(strings.getString(button.getMode().nameKey()) +
-                ": " + tableSampleLabel.getText());
+        String text = strings.getString(button.getMode().nameKey()) +
+                ": " + tableSampleLabel.getText();
+        button.setText(text);
+        button.setTooltip(new Tooltip(text));
+
     }
 
     private boolean isReadyToSearch() {
@@ -356,7 +362,7 @@ class MainController {
         /*Label and list view for showing courses that have been added from
         the list that contains available courses*/
         Label addedCoursesHeader = new Label(strings.getString("addedCoursesHeader"));
-
+        addedCoursesHeader.getStyleClass().add("Header");
         ListView<String> addedCourses = new ListView<>();
         addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
@@ -371,7 +377,7 @@ class MainController {
         //----------------------------------------------------------
         //Label and list for displaying courses that are available in the sheet.
         Label availableCoursesHeader = new Label(strings.getString("availableCoursesHeader"));
-
+        availableCoursesHeader.getStyleClass().add("Header");
         ListView<String> availableCourses = new ListView<>();
         searchResultList = FXCollections.observableArrayList();
         availableCourses.setItems(searchResultList);
@@ -413,7 +419,7 @@ class MainController {
     }
 
     private void generateTable(ObservableList<String> generateFrom) {
-        DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
+        DayToCoursesMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
         TableUtils.populateGeneratedTableGrid(generatedTableGrid, map);
     }
 
@@ -451,8 +457,8 @@ class MainController {
                 TableUtils.populateTableSampleGrid(
                         tableSample,
                         timetableSheet,
-                        Integers.TABLE_SAMPLE_DEFAULT_HEIGHT,
-                        Integers.TABLE_SAMPLE_DEFAULT_WIDTH,
+                        Numbers.TABLE_SAMPLE_DEFAULT_HEIGHT,
+                        Numbers.TABLE_SAMPLE_DEFAULT_WIDTH,
                         ev-> handleSampleTableCellClick((GridCell)ev.getSource())
                         );
 

@@ -3,7 +3,7 @@ package com.yli.timetable_assistant.exampleselection;
 
 /*Contains information on cells which have information about the course,
 such as the time and place of the course*/
-public class CourseInfoCellData extends SelectionModeData {
+public class SecondaryCellData extends SelectionModeData {
 
 
     public static final int TYPE_ROW = 0;
@@ -23,7 +23,7 @@ public class CourseInfoCellData extends SelectionModeData {
      */
     private int index;
 
-     CourseInfoCellData(int type, int index) {
+     SecondaryCellData(int type, int index) {
         this.type = type;
         this.index = index;
     }

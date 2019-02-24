@@ -6,10 +6,10 @@ public class StringsBundle extends MapResourceBundle<String> {
 
     public StringsBundle(){
         map.put("appName","Timetable Assistant");
-        map.put("welcomeString","Please choose a file, then provide an example of a course with its day, time and hall.");
+        map.put("welcomeString","Welcome, Please choose a file...");
         map.put("windowSize","Example window size:");
         map.put("chooseFileButton","Choose File");
-        map.put("searchFieldPrompt","Course name");
+        map.put("searchFieldPrompt","Enter course name");
         map.put("availableCoursesHeader","Available:");
         map.put("addedCoursesHeader","Added:");
         map.put("searchButton","Search cells");

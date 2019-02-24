@@ -20,8 +20,7 @@
     />
 
     <HBox fx:id="tableSampleSizeControlsContainer"/>
-    <HBox fx:id="exampleSelectionControlsContainer"
-          />
+    <HBox fx:id="exampleSelectionControlsContainer"/>
     <StackPane styleClass="tableSampleContainer">
         <ScrollPane maxWidth="Infinity"
                     prefHeight="320">
@@ -43,8 +42,8 @@
 
 </children>
     <columnConstraints>
-        <ColumnConstraints hgrow="ALWAYS"  percentWidth="40.0"  />
-        <ColumnConstraints hgrow="ALWAYS"  percentWidth="60.0"  />
+        <ColumnConstraints hgrow="ALWAYS"  percentWidth="50.0"  />
+        <ColumnConstraints hgrow="ALWAYS"  percentWidth="50.0"  />
     </columnConstraints>
 
 </GridPane>

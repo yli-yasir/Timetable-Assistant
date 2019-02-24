@@ -2,11 +2,11 @@ package com.yli.timetable_assistant.exampleselection;
 
 /*Contains information about the cell that contains the course itself.*/
 
-public class CourseCellData extends SelectionModeData {
+public class PrimaryCellData extends SelectionModeData {
     private int columnIndex;
     private int RowIndex;
 
-    public CourseCellData(int columnIndex, int rowIndex) {
+    public PrimaryCellData(int columnIndex, int rowIndex) {
         this.columnIndex = columnIndex;
         RowIndex = rowIndex;
     }

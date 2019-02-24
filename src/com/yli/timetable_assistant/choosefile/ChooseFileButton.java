@@ -11,6 +11,7 @@ public class ChooseFileButton extends Button {
     public ChooseFileButton(ResourceBundle strings){
         setText(strings.getString("chooseFileButton"));
         setContextMenu(new ChooseFileContextMenu(strings));
+        getStyleClass().add("ChooseFileButton");
         setOnAction(e -> getContextMenu().show(this, Side.BOTTOM, 0, 0));
     }
     public ChooseFileContextMenu getOwnMenu(){

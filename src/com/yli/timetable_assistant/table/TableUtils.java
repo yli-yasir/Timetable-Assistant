@@ -13,6 +13,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
+import java.util.stream.IntStream;
 
 public class TableUtils {
 
@@ -129,15 +130,15 @@ public class TableUtils {
         //Get selectionModeData about the requested information.
         SelectionModeData selectionModeData = selectionModeToDataMap.get(mode);
 
-        /*Check if its CourseInfoCellData, if it is then cast and proceed
+        /*Check if its SecondaryCellData, if it is then cast and proceed
         to get the info , it if isn't then return null*/
-        if (selectionModeData instanceof CourseInfoCellData) {
+        if (selectionModeData instanceof SecondaryCellData) {
         /*If the requested information is in a row, then we get this certain
         row (by using selectionModeData.getIndex()) then the information we want will be
         in the same column as the column of the row.
          */
-            CourseInfoCellData courseInfoCellData = (CourseInfoCellData) selectionModeData;
-            if (courseInfoCellData.getType() == CourseInfoCellData.TYPE_ROW) {
+            SecondaryCellData courseInfoCellData = (SecondaryCellData) selectionModeData;
+            if (courseInfoCellData.getType() == SecondaryCellData.TYPE_ROW) {
                 Row row = sheet.getRow(courseInfoCellData.getIndex());
                 //The rank is equal to the index of the column.
                 int rank = courseCell.getColumnIndex();
@@ -153,7 +154,7 @@ public class TableUtils {
         the course first, then we get the certain column in which the information
         was stored (by using selectionModeData.getIndex()). This will give us the information
         we want.*/
-            if (courseInfoCellData.getType() == CourseInfoCellData.TYPE_COLUMN) {
+            if (courseInfoCellData.getType() == SecondaryCellData.TYPE_COLUMN) {
                 //The rank is equal to the index of the row.
                 int rank = courseCell.getRowIndex();
                 Row row = sheet.getRow(rank);
@@ -172,8 +173,8 @@ public class TableUtils {
      * @param addedCourses A list of the courses, that we are looking to map.
      * @return a sorted map
      */
-    public static DayToCourseListMap makeDayToCourseListMap(Sheet sheet, SelectionModeToDataMap selectionModeToDataMap, ObservableList<String> addedCourses) {
-        DayToCourseListMap dayToCourseListMap = new DayToCourseListMap();
+    public static DayToCoursesMap makeDayToCourseListMap(Sheet sheet, SelectionModeToDataMap selectionModeToDataMap, ObservableList<String> addedCourses) {
+        DayToCoursesMap dayToCoursesMap = new DayToCoursesMap();
 
         /*For each cell in the sheet, if it's for a course that's in the list
         of courses that we want, then add it to the hash map , with the day
@@ -185,7 +186,7 @@ public class TableUtils {
                     RankedString day = getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_DAY);
 
                     //Either get the list we already have or make a new one.
-                    ArrayList<Course> dayCourses = dayToCourseListMap.getOrDefault(day,
+                    ArrayList<Course> dayCourses = dayToCoursesMap.getOrDefault(day,
                             new ArrayList<>());
 
                     //Add the course to it.
@@ -196,13 +197,13 @@ public class TableUtils {
                     );
 
 
-                    dayToCourseListMap.put(day, dayCourses);
+                    dayToCoursesMap.put(day, dayCourses);
                 }
             }
         }
         /*Keys should be already sorted because it implements comparable
         ,Now we will sort all the array lists*/
-        for (ArrayList<Course> dayCourses : dayToCourseListMap.values()) {
+        for (ArrayList<Course> dayCourses : dayToCoursesMap.values()) {
             dayCourses.sort((o1, o2) -> {
                 if (o1.equals(o2)) return 0;
                 int result = Integer.compare(o1.getTime().getRank(), o2.getTime().getRank());
@@ -210,19 +211,17 @@ public class TableUtils {
                 return result == 0 ? 1 : result;
             });
         }
-        return dayToCourseListMap;
+        return dayToCoursesMap;
 
     }
 
-    public static void populateGeneratedTableGrid(GridPane generatedTableGrid, DayToCourseListMap dayToCourseListMap){
+    public static void populateGeneratedTableGrid(GridPane generatedTableGrid, DayToCoursesMap dayToCoursesMap){
 
         //clear the grid in case it's already been populated
         generatedTableGrid.getChildren().clear();
 
-
-
         //Add days at the top row first.
-        dayToCourseListMap.forEach( (day, courses) ->
+        dayToCoursesMap.forEach( (day, courses) ->
         {
             //Make a label array that represents the column
             //We are adding 1 because we are also going to add the day label
@@ -238,6 +237,7 @@ public class TableUtils {
                 column[i] = new Label(courses.get(i-1).toString());
             }
             generatedTableGrid.addColumn(0,column);
+
         }
 
         );

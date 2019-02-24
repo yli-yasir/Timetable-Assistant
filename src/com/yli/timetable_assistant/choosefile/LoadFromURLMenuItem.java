@@ -1,6 +1,6 @@
 package com.yli.timetable_assistant.choosefile;
 
-import com.yli.timetable_assistant.res.Integers;
+import com.yli.timetable_assistant.res.Numbers;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputDialog;
 
@@ -16,7 +16,7 @@ final public class LoadFromURLMenuItem extends MenuItem {
         setText(strings.getString("loadFromInternet"));
         setOnAction(e -> {
             TextInputDialog dialog = new TextInputDialog("http://docs.neu.edu.tr/library/timetable.xlsx");
-            dialog.getDialogPane().setPrefWidth(Integers.WIDE_DIALOG);
+            dialog.getDialogPane().setPrefWidth(Numbers.WIDE_DIALOG);
             dialog.setTitle(strings.getString("url"));
             dialog.setHeaderText(strings.getString("askForUrl"));
             dialog.show();

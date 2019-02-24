@@ -1,87 +1,96 @@
 #root {
--fx-background-color:#282C34;
--fx-font-weight:bold;
+-fx-font-family: "courier new";
+-fx-background-color: #282C34;
+-fx-font-size: 14px;
+-fx-font-weight: bold;
+-fx-padding: 0 12;
 }
 
-#generatedTableGrid{
+#instructionLabel{
+-fx-pref-width: infinity;
+-fx-background-color:#3A3F4B;
+-fx-background-radius: 0 0 8 8;
 
 }
 
-.fillingButton{
--fx-max-width: infinity}
+#tableSampleSizeControlsContainer{
+-fx-padding: 16 0;
+-fx-max-width: infinity;
+}
 
+.PushedRight{
+-fx-padding: 0 0 0 40;
+}
 
-#exampleSelectionControlsContainer{
--fx-padding: 0 0 0 0  }
+.Header{
+-fx-padding: 12 0 0 0;
+-fx-font-style:italic;
+-fx-text-fill:white;
+}
+
+Label{
+-fx-text-fill:white;
+
+}
+
+#instructionLabel{
+-fx-text-fill:white;
+-fx-padding:2;
+}
+
+.ChooseFileButton{
+-fx-min-width: 200px;
+-fx-pref-width:200px;
+-fx-max-width: 200px;
+-fx-background-radius: 30px;
+}
+
+.ModeButton{
+-fx-background-radius: 30 30 0 0;
+}
+
+ProgressIndicator{
+-fx-max-height:100;
+-fx-max-width:100;
+-fx-progress-color: #FE4068;
+visibility:hidden
+}
 
 .GridCell{
--fx-background-color: #0477E2;
+-fx-padding: 4px;
+-fx-background-color: rgba(254,64,104,0.5);
 -fx-background-radius:16;
 -fx-max-width: 100;
 -fx-alignment: center;
 -fx-cursor: hand;
 }
 
+.GridCell:hover{
+-fx-background-color: rgba(254,64,104,0.8);
+}
 
 .tableSampleContainer{
 -fx-background: #21252B;
 }
+
 
 #tableSample{
 -fx-padding:4;
 -fx-hgap: 5;
 -fx-vgap: 5}
 
-
-ProgressIndicator{
--fx-max-height:100;
--fx-max-width:100;
--fx-progress-color: #64FFDA;
-visibility:hidden
-}
-
-
-
-
-.extrasBox{
--fx-spacing: 2;
--fx-max-width: infinity;
--fx-background-color: #21252B;
--fx-padding: 0 10 0 10;
-}
-
-Label{
--fx-text-fill:white;
--fx-padding:2;
-}
-
-.Header{
--fx-font-style: italic}
-
-#instructionLabel{
--fx-pref-width: infinity;
--fx-background-color:#3A3F4B;
-}
-
-ChoiceBox {
--fx-background-color:#00695C;
-}
-
 ScrollPane{
 -fx-padding:4;
 -fx-border-color:#21252B;
 }
 
+ScrollPane:focused {
+-fx-background-color:#21252B;
+}
+
 #courseOperationsGrid{
 -fx-padding: 16 0 0 0 }
 
-#generatedTableControlBar{
--fx-padding:4;
--fx-spacing:4;
--fx-background-color:#3A3F4B;
-}
+#generatedTableGrid{
 
-#generatedTableImageViewContainer{
--fx-padding: 16 0 0 0;
--fx-min-width: 0;
--fx-min-height:0}
+}

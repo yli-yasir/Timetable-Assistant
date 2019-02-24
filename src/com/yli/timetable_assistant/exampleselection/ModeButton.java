@@ -2,6 +2,7 @@ package com.yli.timetable_assistant.exampleselection;
 
 import com.yli.timetable_assistant.res.StringsBundle;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 
 import java.util.ResourceBundle;
 
@@ -21,7 +22,8 @@ public class ModeButton extends ToggleButton {
 
         //set the mode that's triggered when it's toggled.
         this.mode = mode;
-
+        this.setVisible(false);
+        getStyleClass().add("ModeButton");
         //---------Make original label and set it on the button----------
         originalLabel = stringsBundle.getString("choose") +
                 " " +
