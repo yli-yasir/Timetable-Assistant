@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant.example_selection;
+package com.yli.timetable_assistant.exampleselection;
 
 import java.util.HashMap;
 
@@ -85,6 +85,11 @@ public class SelectionModeToDataMap {
     public void clear(){
          exampleMap.clear();
     }
+
+    public boolean isCourseSelected() {
+        return containsKey(SelectionMode.SELECT_COURSE);
+    }
+
 
 
 }

@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant.example_selection;
+package com.yli.timetable_assistant.exampleselection;
 
 public class IncorrectExampleInfoException extends Exception {
     IncorrectExampleInfoException(String msg){

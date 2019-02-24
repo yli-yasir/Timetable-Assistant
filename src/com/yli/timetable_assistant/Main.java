@@ -1,6 +1,6 @@
 package com.yli.timetable_assistant;
 
-import com.yli.timetable_assistant.fx.FXUtils;
+import com.yli.timetable_assistant.utils.FXUtils;
 import com.yli.timetable_assistant.res.Integers;
 import com.yli.timetable_assistant.res.StringsBundle;
 import javafx.application.Application;

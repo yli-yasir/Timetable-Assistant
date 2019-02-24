@@ -1,7 +1,6 @@
-package com.yli.timetable_assistant.example_selection;
+package com.yli.timetable_assistant.exampleselection;
 
 import com.yli.timetable_assistant.res.StringsBundle;
-import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 
 import java.util.ResourceBundle;

@@ -14,7 +14,7 @@
 #exampleSelectionControlsContainer{
 -fx-padding: 0 0 0 0  }
 
-.tableSampleLabel{
+.GridCell{
 -fx-background-color: #0477E2;
 -fx-background-radius:16;
 -fx-max-width: 100;

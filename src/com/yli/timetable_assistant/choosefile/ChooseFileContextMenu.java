@@ -1,7 +1,6 @@
-package com.yli.timetable_assistant.controls;
+package com.yli.timetable_assistant.choosefile;
 
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 
 import java.util.ResourceBundle;
 

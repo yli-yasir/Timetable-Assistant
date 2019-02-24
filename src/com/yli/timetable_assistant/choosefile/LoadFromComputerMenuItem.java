@@ -1,6 +1,6 @@
-package com.yli.timetable_assistant.controls;
+package com.yli.timetable_assistant.choosefile;
 
-import com.yli.timetable_assistant.fx.FXUtils;
+import com.yli.timetable_assistant.utils.FXUtils;
 import javafx.scene.control.MenuItem;
 
 import java.io.File;
@@ -9,9 +9,9 @@ import java.util.function.Consumer;
 
 final public class LoadFromComputerMenuItem extends MenuItem {
 
-    Consumer<File> onReceiveResult;
+    private Consumer<File> onReceiveResult;
 
-    public LoadFromComputerMenuItem(ResourceBundle strings){
+     LoadFromComputerMenuItem(ResourceBundle strings){
         setText(strings.getString("loadFromPC"));
         setOnAction(e -> {
             File file = FXUtils.browseFile(getParentPopup().getOwnerWindow());

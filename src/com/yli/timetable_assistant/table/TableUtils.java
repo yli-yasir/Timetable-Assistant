@@ -1,12 +1,10 @@
 package com.yli.timetable_assistant.table;
 
-import com.yli.timetable_assistant.example_selection.SelectionMode;
-import com.yli.timetable_assistant.example_selection.CourseInfoCellData;
-import com.yli.timetable_assistant.example_selection.SelectionModeData;
-import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
-import javafx.collections.FXCollections;
+import com.yli.timetable_assistant.exampleselection.*;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -216,7 +214,7 @@ public class TableUtils {
 
     }
 
-    public static void populateGrid(GridPane generatedTableGrid,DayToCourseListMap dayToCourseListMap){
+    public static void populateGeneratedTableGrid(GridPane generatedTableGrid, DayToCourseListMap dayToCourseListMap){
 
         //clear the grid in case it's already been populated
         generatedTableGrid.getChildren().clear();
@@ -245,4 +243,41 @@ public class TableUtils {
         );
 
     }
+
+    /**
+     * Initializes a GridPane to show a small part from the timetable, in which
+     * the user can select a course and it's corresponding data as an example
+     * to the program.
+     *
+     * @param sheet   Sheet to open window from.
+     * @param rows    Number of rows in the window.
+     * @param columns Number of columns in the window.
+     */
+    public static void populateTableSampleGrid(GridPane tableSampleGrid, Sheet sheet, int rows, int columns
+            , EventHandler<MouseEvent> CellClickHandler) {
+        System.out.println("populating" + rows + " " + columns);
+
+        //Clear the grid first since it might have been already populated with other children.
+        tableSampleGrid.getChildren().clear();
+
+        //For each row in the table
+        for (int currentRowIndex = 0; currentRowIndex < rows; currentRowIndex++) {
+            Row row = sheet.getRow(currentRowIndex);
+            //For each column in that row
+            for (int currentColumnIndex = 0; currentColumnIndex < columns; currentColumnIndex++) {
+                //Get the cell at that column
+                Cell cell = row.getCell(currentColumnIndex);
+                //Get the text from the cell
+                String text = TableUtils.makeStringValue(cell, false);
+                //make a table sample label from the text
+                //Each label in the grid, represents a cell in the table sample
+                GridCell gridCell = new GridCell(text);
+                gridCell.setOnMouseClicked(CellClickHandler);
+                tableSampleGrid.add(gridCell, currentColumnIndex, currentRowIndex);
+
+            }
+
+        }
+    }
+
 }

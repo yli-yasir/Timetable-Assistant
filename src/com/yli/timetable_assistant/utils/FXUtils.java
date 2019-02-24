@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant.fx;
+package com.yli.timetable_assistant.utils;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant.example_selection;
+package com.yli.timetable_assistant.exampleselection;
 
 
 /*Contains information on cells which have information about the course,
