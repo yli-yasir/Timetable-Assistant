@@ -1,10 +1,13 @@
 package com.yli.timetable_assistant;
 
+import com.yli.timetable_assistant.controls.ChooseFileButton;
+import com.yli.timetable_assistant.controls.LoadFromComputerMenuItem;
+import com.yli.timetable_assistant.controls.LoadFromURLMenuItem;
 import com.yli.timetable_assistant.example_selection.IncorrectExampleInfoException;
 import com.yli.timetable_assistant.fx.FXUtils;
-import com.yli.timetable_assistant.res.Dimensions;
+import com.yli.timetable_assistant.res.Integers;
 import com.yli.timetable_assistant.res.StringsBundle;
-import com.yli.timetable_assistant.table.Course;
+import com.yli.timetable_assistant.table.DayToCourseListMap;
 import com.yli.timetable_assistant.table.TableUtils;
 import com.yli.timetable_assistant.tasks.CallbackTask;
 import com.yli.timetable_assistant.tasks.FetchOnlineFileTask;
@@ -19,82 +22,66 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
-import static com.yli.timetable_assistant.fx.FXUtils.showAlert;
+import static com.yli.timetable_assistant.fx.FXUtils.showErrorAlert;
 
 class MainController {
 
     //path for fxml resource for this controller.
     static final String FXML_PATH = "/com/yli/timetable_assistant/res/main.fxml";
-
     //The sheet that contains the timetable.
     private Sheet timetableSheet;
-
     //A label to guide the user through the example selection process.
     @FXML
     private Label instructionLabel;
-
-
+    //Contains the combo boxes that control the table sample size.
     @FXML
     private HBox tableSampleSizeControlsContainer;
-
+    private ComboBox<Integer> tableSampleColumnsComboBox = new ComboBox<>();
+    private ComboBox<Integer> tableSampleRowsComboBox = new ComboBox<>();
     //Contains controls that have to do with selecting example course info.
     @FXML
     private HBox exampleSelectionControlsContainer;
-
-    private Button chooseFileButton;
-
+    private ChooseFileButton chooseFileButton;
     //This contains the mode buttons.
     private ToggleGroup modeToggleGroup = new ToggleGroup();
-
-    /*A grid which will be populated with labels which represent cells from the sheet*/
+    /*A grid which will be populated with labels which represent cells from the sheet
+    the user will use this to set an example for the program*/
     @FXML
     private GridPane tableSample;
-
-    private ComboBox<Integer> tableSampleColumnsComboBox = new ComboBox<>();
-
-    private ComboBox<Integer> tableSampleRowsComboBox = new ComboBox<>();
-
     //Progress indicator which will be shown or hidden at loading.
     @FXML
     private ProgressIndicator progressIndicator;
-
     /*A grid which contains all controls other than the ones
      that have to do with example selection.*/
     @FXML
     private GridPane courseOperationsGrid;
-
     //This will hold the data selected in each mode.
     private static SelectionModeToDataMap selectionModeToDataMap = new SelectionModeToDataMap();
-
     //search query field.
     private TextField searchField;
-
+    //This will contain the search results of the courses.
     private ObservableList<String> searchResultList;
-
+    //This will contain the courses that user wants to be included in his table.
     private ObservableList<String> addedCoursesList;
+    @FXML
+    private GridPane generatedTableGrid;
 
     //Bundle which has string resources that will be used in the GUI.
     private ResourceBundle strings = ResourceBundle.getBundle(StringsBundle.class.getCanonicalName());
-
 
     /*This will be automatically called after injecting the variables above
     with their values*/
@@ -105,15 +92,18 @@ class MainController {
         populateCourseOperationsGrid();
     }
 
-
+    //put the combo boxes and label inside their container.
     private void populateTableSampleSizeControlsContainer() {
+        //make labels for the combo boxes
+        Label rowsLabel = new Label(strings.getString("rows") + ": ");
+        Label columnsLabel = new Label(strings.getString("columns") + ": ");
 
         tableSampleSizeControlsContainer.getChildren().addAll(
-                tableSampleRowsComboBox
-                , tableSampleColumnsComboBox);
+                rowsLabel, tableSampleRowsComboBox,
+                columnsLabel, tableSampleColumnsComboBox);
     }
 
-    //when these are populated they will trigger tableSample load.
+    //populate the combo boxes with numbers
     private void populateColsRowsComboBoxes() {
         if (timetableSheet != null) {
 
@@ -123,26 +113,27 @@ class MainController {
 
             ObservableList<Integer> cols = tableSampleColumnsComboBox.getItems();
             ObservableList<Integer> rows = tableSampleRowsComboBox.getItems();
+
+            //clear the lists since they might have been already populated.
             cols.clear();
             rows.clear();
 
+            //populate the rows list with numbers
             for (int i = 1; i <= TableUtils.getTableRowCount(timetableSheet); i++)
                 rows.add(i);
+            //populate the columns list with numbers
             for (int i = 1; i <= TableUtils.getTableColCount(timetableSheet); i++)
                 cols.add(i);
 
-            tableSampleColumnsComboBox.setValue(5);
-            tableSampleRowsComboBox.setValue(5);
+            tableSampleColumnsComboBox.setValue(Integers.TABLE_SAMPLE_DEFAULT_WIDTH);
+            tableSampleRowsComboBox.setValue(Integers.TABLE_SAMPLE_DEFAULT_HEIGHT);
 
 
-            EventHandler<ActionEvent> tableSampleComboBoxChange = new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    if (timetableSheet != null) {
-                        populateTableSample(timetableSheet,
-                                tableSampleRowsComboBox.getValue()
-                                , tableSampleColumnsComboBox.getValue());
-                    }
+            EventHandler<ActionEvent> tableSampleComboBoxChange = e -> {
+                if (timetableSheet != null) {
+                    populateTableSample(timetableSheet,
+                            tableSampleRowsComboBox.getValue()
+                            , tableSampleColumnsComboBox.getValue());
                 }
             };
 
@@ -155,7 +146,6 @@ class MainController {
     /*populates with controls which will be used to choose example data
   from the sample table*/
     private void populateExampleSelectionControlBar() {
-
         initChooseFileButton();
         initToggleGroup();
 
@@ -171,7 +161,7 @@ class MainController {
             //the following will make all the buttons take the same size.
             HBox.setHgrow(child, Priority.ALWAYS);
             //lock it as max size to prevent from overgrowth.
-            ((Control) child).setMaxWidth(Dimensions.WINDOW_WIDTH / children.size())
+            ((Control) child).setMaxWidth(Integers.WINDOW_WIDTH / children.size())
             ;
         });
 
@@ -179,52 +169,30 @@ class MainController {
     }
 
     private void initChooseFileButton() {
-        chooseFileButton = new Button(strings.getString("chooseFileButton"));
+        chooseFileButton = new ChooseFileButton(strings);
 
-        ContextMenu chooseFileContextMenu = buildChooseFileContextMenu();
-        chooseFileButton.setOnAction(e -> chooseFileContextMenu.show(chooseFileButton, Side.BOTTOM, 0, 0));
+        LoadFromURLMenuItem loadFromURL = chooseFileButton.getOwnMenu().getLoadFromURLMenuItem();
 
-    }
+        loadFromURL.setOnReceiveResult(url -> {
 
-    //Build a context menu to show.
-    private ContextMenu buildChooseFileContextMenu() {
-        ContextMenu menu = new ContextMenu();
-        MenuItem loadFromURLMenuItem = new MenuItem(strings.getString("loadFromInternet"));
+            chooseFileButton.setText(strings.getString("file") + ": "
+                    + strings.getString("loadFromInternet"));
 
-        loadFromURLMenuItem.setOnAction(e -> {
+            loadFromURL(url, makeTempFile());
+        });
 
-            TextInputDialog dialog = new TextInputDialog("http://docs.neu.edu.tr/library/timetable.xlsx");
-            dialog.getDialogPane().setPrefWidth(Dimensions.WIDE_DIALOG);
-            dialog.setTitle(strings.getString("url"));
-            dialog.setHeaderText(strings.getString("askForUrl"));
-            dialog.show();
-            dialog.setOnCloseRequest(ev -> {
-                if (dialog.getResult() != null) {
-                    chooseFileButton.setText(strings.getString("file") + ": "
-                            + strings.getString("loadFromInternet"));
-                    loadFromURL(dialog.getResult(), makeTempFile());
-                }
+        LoadFromComputerMenuItem loadFromComputer = chooseFileButton.getOwnMenu().getLoadFromComputerMenuItem();
+        loadFromComputer.setOnReceiveResult(file -> {
 
-            });
+            chooseFileButton.setText(strings.getString("file") + ": " +
+                    strings.getString("loadFromPC"));
+
+            loadFromFile(file);
 
         });
 
-        MenuItem loadFromComputerMenuItem = new MenuItem(strings.getString("loadFromPC"));
-
-        loadFromComputerMenuItem.setOnAction(e -> {
-            File file = browseFile(loadFromComputerMenuItem.getParentPopup().getOwnerWindow());
-            //If a file was indeed chosen.
-            if (file != null) {
-                chooseFileButton.setText(strings.getString("file") + ": " +
-                        strings.getString("loadFromPC"));
-                loadFromFile(file);
-            }
-        });
-
-        menu.getItems().addAll(loadFromURLMenuItem, loadFromComputerMenuItem);
-
-        return menu;
     }
+
 
     //Loads Url into the file, in a background thread with a task.
     private void loadFromURL(String url, File tmpFile) {
@@ -263,14 +231,14 @@ class MainController {
         //Reject changes if file isn't selected yet.
         if (!isFileLoaded()) {
             button.setSelected(false);
-            showAlert(strings, "fileNotChosenHeader",
+            showErrorAlert(strings, "fileNotChosenHeader",
                     "fileNotChosenBody");
         }
 
         //Reject changes when a button other than the course button is clicked and the course hasn't been selected.
         else if (button.getMode() != SelectionMode.SELECT_COURSE && !isCourseSelected()) {
             button.setSelected(false);
-            showAlert(strings, "courseNotChosenHeader",
+            showErrorAlert(strings, "courseNotChosenHeader",
                     "courseNotChosenBody");
             //select the course toggle for the user
             ModeButton courseButton = (ModeButton) modeToggleGroup.getToggles().get(0);
@@ -362,20 +330,11 @@ class MainController {
             tmpFile = File.createTempFile("TA_TMP", null);
             tmpFile.deleteOnExit();
         } catch (IOException io) {
-            FXUtils.showAlert(strings, "badTempFileIOHeader", "badTempFileIOBody");
+            FXUtils.showErrorAlert(strings, "badTempFileIOHeader", "badTempFileIOBody");
         }
         return tmpFile;
     }
 
-    //browse for a file.
-    private File browseFile(Window parentWindow) {
-        //New file chooser obj.
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XLSX", "*.xlsx"));
-
-        return chooser.showOpenDialog(parentWindow);
-
-    }
 
     /**
      * Initializes a GridPane to show a small part from the timetable, in which
@@ -498,7 +457,7 @@ class MainController {
                         been selected yet,Thus the following dialog will assume that the user
                         has selected incorrect information.
                         */
-                showAlert(strings, "incorrectInfoHeader", "incorrectInfoBody");
+                showErrorAlert(strings, "incorrectInfoHeader", "incorrectInfoBody");
                 return false;
             }
         }
@@ -552,7 +511,10 @@ class MainController {
         addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
 
-        addedCourses.setOnMouseClicked(e -> removeItem(addedCourses));
+        addedCourses.setOnMouseClicked(e -> {
+            removeItem(addedCourses);
+            generateTable(addedCoursesList);
+        });
         //--------------------------------------------------------
 
 
@@ -564,7 +526,10 @@ class MainController {
         searchResultList = FXCollections.observableArrayList();
         availableCourses.setItems(searchResultList);
 
-        availableCourses.setOnMouseClicked(e -> addItem(availableCourses, addedCoursesList));
+        availableCourses.setOnMouseClicked(e -> {
+            addItem(availableCourses, addedCoursesList);
+            generateTable(addedCoursesList);
+        });
         //------------------------------------------------------------
 
 
@@ -574,11 +539,10 @@ class MainController {
         searchField.setPromptText(strings.getString("searchFieldPrompt"));
 
         searchField.setOnKeyReleased(event -> {
-            if (isReadyToSearch() ) {
+            if (isReadyToSearch()) {
                 TableUtils.search(timetableSheet, searchResultList, searchField.getText());
-            }
-            else {
-                showAlert(strings, "insufficientInfoHeader", "insufficientInfoBody");
+            } else {
+                showErrorAlert(strings, "insufficientInfoHeader", "insufficientInfoBody");
                 searchField.clear();
             }
         });
@@ -586,22 +550,8 @@ class MainController {
 
 
         //-----------------------------------------------------------
-        //generate table button
-        Button generateButton = new Button(strings.getString("generateButton"));
-        generateButton.getStyleClass().add("fillingButton");
-        generateButton.setOnAction(event -> {
-            if (!addedCoursesList.isEmpty()) generateTable(addedCoursesList);
-            else showAlert(strings, "notReadyToGenerateHeader", "notReadyToGenerateBody");
-        });
+
         //------------------------------------------------------------
-
-
-        //extra Box-------------------------------------
-        //todo Currently this is a stub. Might add option to change course details in this box.
-        Label extrasBoxHeader = new Label("");
-        extrasBoxHeader.getStyleClass().add("Header");
-        VBox extrasBox = makeExtrasBox();
-        //---------------------------------------------
 
         //Add controls to grid
         courseOperationsGrid.add(searchField, 0, 0);
@@ -609,9 +559,6 @@ class MainController {
         courseOperationsGrid.add(addedCoursesHeader, 1, 1);
         courseOperationsGrid.add(availableCourses, 0, 2);
         courseOperationsGrid.add(addedCourses, 1, 2);
-        courseOperationsGrid.add(generateButton, 0, 3, 3, 1);
-        courseOperationsGrid.add(extrasBoxHeader, 2, 1);
-        courseOperationsGrid.add(extrasBox, 2, 2);
 
     }
 
@@ -625,13 +572,9 @@ class MainController {
 
     private void generateTable(ObservableList<String> generateFrom) {
 
-        ObservableList<Course> courses = TableUtils.makeCourseList(timetableSheet, selectionModeToDataMap, generateFrom);
+        DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
+        TableUtils.populateGrid(generatedTableGrid, map);
 
-        FXUtils.openWindow(strings.getString("yourTimetable"), new Stage(),
-                Dimensions.WINDOW_WIDTH, Dimensions.WINDOW_HEIGHT,
-                GeneratedTableController.class.getResource(GeneratedTableController.FXML_PATH),
-                ResourceBundle.getBundle(StringsBundle.class.getCanonicalName()),
-                new GeneratedTableController(courses));
     }
 
     private void startTask(Task task) {
@@ -672,8 +615,8 @@ class MainController {
                 populateColsRowsComboBoxes();
 
                 populateTableSample(timetableSheet,
-                        Dimensions.TABLE_SAMPLE_HEIGHT,
-                        Dimensions.TABLE_SAMPLE_WIDTH
+                        Integers.TABLE_SAMPLE_DEFAULT_HEIGHT,
+                        Integers.TABLE_SAMPLE_DEFAULT_WIDTH
                 );
 
                 //simulate a click on the first button, in the toggle group
@@ -690,7 +633,7 @@ class MainController {
 
         @Override
         public void onFailed(Throwable e) {
-            FXUtils.showAlert(strings, "badIOHeader", "badIOBody");
+            FXUtils.showErrorAlert(strings, "badIOHeader", "badIOBody");
             taskFailedMode();
         }
 
@@ -711,7 +654,7 @@ class MainController {
 
         @Override
         public void onFailed(Throwable e) {
-            FXUtils.showAlert(strings, "badNetworkIOHeader", "badNetworkIOBody");
+            FXUtils.showErrorAlert(strings, "badNetworkIOHeader", "badNetworkIOBody");
             taskFailedMode();
 
         }

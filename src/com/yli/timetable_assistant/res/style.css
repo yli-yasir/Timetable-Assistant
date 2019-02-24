@@ -1,23 +1,34 @@
-VBox {
+#root {
 -fx-background-color:#282C34;
 -fx-font-weight:bold;
 }
+
+#generatedTableGrid{
+
+}
+
+.fillingButton{
+-fx-max-width: infinity}
+
 
 #exampleSelectionControlsContainer{
 -fx-padding: 0 0 0 0  }
 
 .tableSampleLabel{
--fx-background-color: #00695C;
+-fx-background-color: #0477E2;
+-fx-background-radius:16;
 -fx-max-width: 100;
 -fx-alignment: center;
 -fx-cursor: hand;
 }
+
 
 .tableSampleContainer{
 -fx-background: #21252B;
 }
 
 #tableSample{
+-fx-padding:4;
 -fx-hgap: 5;
 -fx-vgap: 5}
 
@@ -29,8 +40,7 @@ ProgressIndicator{
 visibility:hidden
 }
 
-.fillingButton{
--fx-max-width: infinity}
+
 
 
 .extrasBox{

@@ -34,7 +34,7 @@ public class StringsBundle extends MapResourceBundle<String> {
         map.put("hall","Hall");
         map.put("loadFromInternet","From Internet");
         map.put("loadFromPC","From PC");
-        map.put("genericAlertTitle","Something went wrong!");
+        map.put("genericAlertTitle","Woops!");
         map.put("badNetworkIOHeader","Connectivity problem");
         map.put("badNetworkIOBody","Something went wrong while trying to download the file from the URL...\n\nPlease check" +
                 " the URL and your internet connection for any problems.\n\nIf the problem persists, " +
@@ -51,11 +51,9 @@ public class StringsBundle extends MapResourceBundle<String> {
                 " from your PC instead.");
         map.put("url","URL:");
         map.put("askForUrl","Where do you want to download the file from?");
-        //StringsBundle for generated table window, might be separated
-        //from this class in the future.
-        map.put("yourTimetable","Your timetable:");
-        map.put("changeFont","Please change the font as suitable: ");
-        map.put("saveImage","then click the table to save.");
+        map.put("rows","Rows");
+        map.put("columns","Columns");
+
     }
 
 }

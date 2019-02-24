@@ -6,6 +6,8 @@ import com.yli.timetable_assistant.example_selection.SelectionModeData;
 import com.yli.timetable_assistant.example_selection.SelectionModeToDataMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
@@ -172,8 +174,8 @@ public class TableUtils {
      * @param addedCourses A list of the courses, that we are looking to map.
      * @return a sorted map
      */
-    public static ObservableList<Course> makeCourseList(Sheet sheet, SelectionModeToDataMap selectionModeToDataMap, ObservableList<String> addedCourses) {
-        ObservableList<Course> courses = FXCollections.observableArrayList();
+    public static DayToCourseListMap makeDayToCourseListMap(Sheet sheet, SelectionModeToDataMap selectionModeToDataMap, ObservableList<String> addedCourses) {
+        DayToCourseListMap dayToCourseListMap = new DayToCourseListMap();
 
         /*For each cell in the sheet, if it's for a course that's in the list
         of courses that we want, then add it to the hash map , with the day
@@ -182,16 +184,65 @@ public class TableUtils {
         for (Row row : sheet) {
             for (Cell cell : row) {
                 if (addedCourses.contains(makeStringValue(cell, true))) {
+                    RankedString day = getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_DAY);
+
+                    //Either get the list we already have or make a new one.
+                    ArrayList<Course> dayCourses = dayToCourseListMap.getOrDefault(day,
+                            new ArrayList<>());
+
                     //Add the course to it.
-                    courses.add(new Course(
-                            getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_DAY),
-                            makeStringValue(cell, true),
+                    dayCourses.add(new Course(makeStringValue(cell, true),
                             getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_HALL),
-                            getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_TIME))
+                            getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_TIME),
+                            day)
                     );
+
+
+                    dayToCourseListMap.put(day, dayCourses);
                 }
             }
         }
-        return courses;
+        /*Keys should be already sorted because it implements comparable
+        ,Now we will sort all the array lists*/
+        for (ArrayList<Course> dayCourses : dayToCourseListMap.values()) {
+            dayCourses.sort((o1, o2) -> {
+                if (o1.equals(o2)) return 0;
+                int result = Integer.compare(o1.getTime().getRank(), o2.getTime().getRank());
+                //To keep it consistent with equals, we can't permit to get a 0 for having similar time.
+                return result == 0 ? 1 : result;
+            });
+        }
+        return dayToCourseListMap;
+
+    }
+
+    public static void populateGrid(GridPane generatedTableGrid,DayToCourseListMap dayToCourseListMap){
+
+        //clear the grid in case it's already been populated
+        generatedTableGrid.getChildren().clear();
+
+
+
+        //Add days at the top row first.
+        dayToCourseListMap.forEach( (day, courses) ->
+        {
+            //Make a label array that represents the column
+            //We are adding 1 because we are also going to add the day label
+            //which is stored as the key at the top of the column.
+            Label[] column = new Label[1+courses.size()];
+
+            //populate the column
+            //first add the day (the key)
+            column[0] = new Label(day.toString());
+
+            //Next add all the remaining courses by looping
+            for (int i = 1 ; i <= courses.size() ; i++){
+                column[i] = new Label(courses.get(i-1).toString());
+            }
+            generatedTableGrid.addColumn(0,column);
+        }
+
+        );
+
     }
 }

@@ -3,16 +3,16 @@ package com.yli.timetable_assistant.table;
 import java.util.Objects;
 
 public class Course {
-    private RankedString day;
     private String name;
     private RankedString hall;
     private RankedString time;
+    private RankedString day;
 
-     public Course(RankedString day, String name,RankedString hall, RankedString time) {
-         this.day= day;
+    public Course(String name,RankedString hall, RankedString time,RankedString day) {
         this.name=name;
         this.hall = hall;
         this.time = time;
+        this.day = day;
     }
 
     @Override
@@ -41,6 +41,13 @@ public class Course {
     public RankedString getTime() {
         return time;
     }
+    public RankedString getDay() {
+        return day;
+    }
 
-    public RankedString getDay(){return day;}
+    @Override
+    public String toString(){
+        return name + "/n" + hall + "/n" + time;
+    }
+
 }
