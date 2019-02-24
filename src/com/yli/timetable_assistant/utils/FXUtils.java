@@ -1,9 +1,12 @@
 package com.yli.timetable_assistant.utils;
 
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -72,4 +75,21 @@ public class FXUtils {
         return chooser.showOpenDialog(parentWindow);
     }
 
+    //remove an item from a list view
+    public static void removeItem(ListView<String> removingFrom) {
+        MultipleSelectionModel<String> sModel = removingFrom.getSelectionModel();
+        String string = sModel.getSelectedItem();
+        if (string != null)
+            removingFrom.getItems()
+                    .remove(sModel.getSelectedIndex());
+    }
+
+    //Handle adding an item from a list view to a list of another.
+    public static void addItem(ListView<String> addingFrom, ObservableList<String> addingTo) {
+        String clickedItem = addingFrom.getSelectionModel().getSelectedItem();
+        if (!addingTo.contains(clickedItem) && clickedItem != null) {
+            addingTo.add(clickedItem
+            );
+        }
+    }
 }

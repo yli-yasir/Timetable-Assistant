@@ -46,7 +46,7 @@ class MainController {
     private HBox tableSampleSizeControlsContainer;
     private RowsColsComboBox tableSampleColumnsComboBox = new RowsColsComboBox();
     private RowsColsComboBox tableSampleRowsComboBox = new RowsColsComboBox();
-    //Contains choosefile that have to do with selecting example course info.
+    //Contains controls that have to do with selecting example course info.
     @FXML
     private HBox exampleSelectionControlsContainer;
     private ChooseFileButton chooseFileButton;
@@ -59,7 +59,7 @@ class MainController {
     //Progress indicator which will be shown or hidden at loading.
     @FXML
     private ProgressIndicator progressIndicator;
-    /*A grid which contains all choosefile other than the ones
+    /*A grid which contains all controls other than the ones
      that have to do with example selection.*/
     @FXML
     private GridPane courseOperationsGrid;
@@ -112,7 +112,7 @@ class MainController {
                             timetableSheet,
                             tableSampleRowsComboBox.getValue()
                             ,tableSampleColumnsComboBox.getValue(),
-                            ev->{handleSampleTableCellClick((GridCell)ev.getSource());});
+                            ev->handleSampleTableCellClick((GridCell)ev.getSource()));
                 }
             };
 
@@ -127,7 +127,7 @@ class MainController {
 
     }
 
-    /*populates with choosefile which will be used to choose example data
+    /*populates with controls which will be used to choose example data
   from the sample table*/
     private void populateExampleSelectionControlBar() {
 
@@ -147,7 +147,6 @@ class MainController {
 
 
     }
-
 
     private void initChooseFileButton() {
         chooseFileButton = new ChooseFileButton(strings);
@@ -219,7 +218,6 @@ class MainController {
         return timetableSheet != null;
     }
 
-
     //Resets all the mode buttons in a container.
     private void resetModeButtons(boolean includeToggledButton) {
         if (includeToggledButton) {
@@ -264,7 +262,6 @@ class MainController {
         instructionLabel.setText(strings.getString("chooseRemainingInfo"));
         clearForm(includeToggledButton);
     }
-
 
     private void handlePutDataSuccess(ModeButton button, Label label) {
 
@@ -352,44 +349,20 @@ class MainController {
         return !(selectionModeToDataMap.size() < modeToggleGroup.getToggles().size());
     }
 
-    private Label makeHeaderLabel(String text) {
-        Label headerLabel = new Label(text);
-        headerLabel.getStyleClass().add("Header");
-        return headerLabel;
-    }
-
-    //remove an item from a list view
-    private void removeItem(ListView<String> removingFrom) {
-        MultipleSelectionModel<String> sModel = removingFrom.getSelectionModel();
-        String string = sModel.getSelectedItem();
-        if (string != null)
-            removingFrom.getItems()
-                    .remove(sModel.getSelectedIndex());
-    }
-
-    //Handle adding an item from a list view to a list of another.
-    private void addItem(ListView<String> addingFrom, ObservableList<String> addingTo) {
-        String clickedItem = addingFrom.getSelectionModel().getSelectedItem();
-        if (!addingTo.contains(clickedItem) && clickedItem != null) {
-            addingTo.add(clickedItem
-            );
-        }
-    }
-
-    //Initializes choosefile that are related to manipulating courses.
+    //Initializes controls that are related to manipulating courses.
     private void populateCourseOperationsGrid() {
 
         //-----------------------------------------------------------
         /*Label and list view for showing courses that have been added from
         the list that contains available courses*/
-        Label addedCoursesHeader = makeHeaderLabel(strings.getString("addedCoursesHeader"));
+        Label addedCoursesHeader = new Label(strings.getString("addedCoursesHeader"));
 
         ListView<String> addedCourses = new ListView<>();
         addedCoursesList = FXCollections.observableArrayList();
         addedCourses.setItems(addedCoursesList);
 
         addedCourses.setOnMouseClicked(e -> {
-            removeItem(addedCourses);
+            FXUtils.removeItem(addedCourses);
             generateTable(addedCoursesList);
         });
         //--------------------------------------------------------
@@ -397,14 +370,14 @@ class MainController {
 
         //----------------------------------------------------------
         //Label and list for displaying courses that are available in the sheet.
-        Label availableCoursesHeader = makeHeaderLabel(strings.getString("availableCoursesHeader"));
+        Label availableCoursesHeader = new Label(strings.getString("availableCoursesHeader"));
 
         ListView<String> availableCourses = new ListView<>();
         searchResultList = FXCollections.observableArrayList();
         availableCourses.setItems(searchResultList);
 
         availableCourses.setOnMouseClicked(e -> {
-            addItem(availableCourses, addedCoursesList);
+            FXUtils.addItem(availableCourses, addedCoursesList);
             generateTable(addedCoursesList);
         });
         //------------------------------------------------------------
@@ -440,10 +413,8 @@ class MainController {
     }
 
     private void generateTable(ObservableList<String> generateFrom) {
-
         DayToCourseListMap map = TableUtils.makeDayToCourseListMap(timetableSheet, selectionModeToDataMap, generateFrom);
         TableUtils.populateGeneratedTableGrid(generatedTableGrid, map);
-
     }
 
     private void taskLoadingMode() {
