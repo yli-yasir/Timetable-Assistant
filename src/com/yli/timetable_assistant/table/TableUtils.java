@@ -3,6 +3,7 @@ package com.yli.timetable_assistant.table;
 import com.yli.timetable_assistant.exampleselection.*;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import org.apache.poi.ss.usermodel.*;
@@ -230,27 +231,30 @@ public class TableUtils {
         //Add days at the top row first.
         dayToCoursesMap.forEach( (day, courses) ->
         {
-            //Make a label array that represents the column
-            //We are adding 1 because we are also going to add the day label
-            //which is stored as the key at the top of the column.
-            GeneratedTableCell[] column = new GeneratedTableCell[1+courses.size()];
+            //Make a label list that represents the column
+            ArrayList<GeneratedTableCell> column = new ArrayList<>();
 
             
             //populate the column
             //first add the day (the key)
-            column[0] = new GeneratedTableCell(day.toString());
+            column.add(new GeneratedTableCell(day.toString()));
 
             //Next add all the remaining courses by looping
-            for (int i = 1 ; i <= courses.size() ; i++){
-                column[i] = new GeneratedTableCell(courses.get(i-1).toString());
-            }
+            courses.forEach(course-> column.add(new GeneratedTableCell(course.toString())));
 
             //the current column index is stored in the user data
-            generatedTableGrid.addColumn((int)generatedTableGrid.getUserData(),column);
+            int curColumnIndex = (int)generatedTableGrid.getUserData();
+
+            //add program credit table to the first column :)
+            if (curColumnIndex==0)column.add(new GeneratedTableCell("Timetable Assistant by:\n Yasir Al-Baldawi"));
+
+            generatedTableGrid.addColumn(curColumnIndex,column.toArray(new GridCell[0]));
+
+
 
             //keep track of the columns we have populated by increasing the
             //index stored in userData
-            generatedTableGrid.setUserData((int)generatedTableGrid.getUserData() +  1 );
+            generatedTableGrid.setUserData((curColumnIndex +  1 ));
 
         }
 
