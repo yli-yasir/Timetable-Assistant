@@ -6,6 +6,8 @@
 -fx-padding: 0 12;
 }
 
+Label{
+-fx-text-fill: #FFFFFF;}
 #instructionLabel{
 -fx-pref-width: infinity;
 -fx-background-color:#3A3F4B;
@@ -28,10 +30,6 @@
 -fx-text-fill:white;
 }
 
-Label{
--fx-text-fill:white;
-
-}
 
 #instructionLabel{
 -fx-text-fill:white;
@@ -56,7 +54,7 @@ ProgressIndicator{
 visibility:hidden
 }
 
-.GridCell{
+.SampleTableCell{
 -fx-padding: 4px;
 -fx-background-color: rgba(254,64,104,0.5);
 -fx-background-radius:16;
@@ -65,13 +63,31 @@ visibility:hidden
 -fx-cursor: hand;
 }
 
-.GridCell:hover{
+.SampleTableCell:hover{
 -fx-background-color: rgba(254,64,104,0.8);
+}
+
+TextField{
+-fx-background-radius:16;}
+
+ListView{
+-fx-background-radius:4;
+}
+.GeneratedTableCell{
+-fx-background-color : #FFFFFF;
+-fx-alignment: center;
+-fx-max-height: infinity;
+-fx-max-width: infinity;
+-fx-wrap-text: true;
+-fx-padding:8;
+-fx-background-radius:4;
+
 }
 
 .tableSampleContainer{
 -fx-background: #21252B;
 }
+
 
 
 #tableSample{
@@ -92,5 +108,8 @@ ScrollPane:focused {
 -fx-padding: 16 0 0 0 }
 
 #generatedTableGrid{
-
+-fx-padding: 8 12;
+-fx-hgap: 5;
+-fx-vgap: 5;
 }
+

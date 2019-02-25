@@ -47,7 +47,7 @@ public class Course {
 
     @Override
     public String toString(){
-        return name + "/n" + hall + "/n" + time;
+        return name + "\n\n" + hall + "\n\n" + time;
     }
 
 }

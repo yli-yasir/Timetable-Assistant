@@ -6,7 +6,7 @@ import com.yli.timetable_assistant.choosefile.LoadFromURLMenuItem;
 import com.yli.timetable_assistant.exampleselection.RowsColsComboBox;
 import com.yli.timetable_assistant.exampleselection.*;
 import com.yli.timetable_assistant.exampleselection.SelectionMode;
-import com.yli.timetable_assistant.table.GridCell;
+import com.yli.timetable_assistant.table.SampleTableCell;
 import com.yli.timetable_assistant.utils.FXUtils;
 import com.yli.timetable_assistant.res.Numbers;
 import com.yli.timetable_assistant.res.StringsBundle;
@@ -116,7 +116,7 @@ class MainController {
                             timetableSheet,
                             tableSampleRowsComboBox.getValue()
                             ,tableSampleColumnsComboBox.getValue(),
-                            ev->handleSampleTableCellClick((GridCell)ev.getSource()));
+                            ev->handleSampleTableCellClick((SampleTableCell)ev.getSource()));
                 }
             };
 
@@ -259,6 +259,7 @@ class MainController {
     private void clearForm(boolean includeToggledButton) {
         clearExampleSelection(includeToggledButton);
         clearUserCourseOperations();
+        generatedTableGrid.getChildren().clear();
     }
 
     private void resetForm(boolean includeToggledButton) {
@@ -326,7 +327,7 @@ class MainController {
         }
     }
 
-    private void handleSampleTableCellClick(GridCell cell){
+    private void handleSampleTableCellClick(SampleTableCell cell){
 
             //ignore any clicks if a button is not selected
             if (modeToggleGroup.isButtonToggled()) {
@@ -459,7 +460,7 @@ class MainController {
                         timetableSheet,
                         Numbers.TABLE_SAMPLE_DEFAULT_HEIGHT,
                         Numbers.TABLE_SAMPLE_DEFAULT_WIDTH,
-                        ev-> handleSampleTableCellClick((GridCell)ev.getSource())
+                        ev-> handleSampleTableCellClick((SampleTableCell)ev.getSource())
                         );
 
 

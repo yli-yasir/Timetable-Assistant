@@ -3,7 +3,6 @@ package com.yli.timetable_assistant.table;
 import com.yli.timetable_assistant.exampleselection.*;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import org.apache.poi.ss.usermodel.*;
@@ -13,7 +12,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class TableUtils {
 
@@ -220,23 +218,33 @@ public class TableUtils {
         //clear the grid in case it's already been populated
         generatedTableGrid.getChildren().clear();
 
+        //Put the current column we are populating as userData in the grid
+        generatedTableGrid.setUserData(0);
+
         //Add days at the top row first.
         dayToCoursesMap.forEach( (day, courses) ->
         {
             //Make a label array that represents the column
             //We are adding 1 because we are also going to add the day label
             //which is stored as the key at the top of the column.
-            Label[] column = new Label[1+courses.size()];
+            GeneratedTableCell[] column = new GeneratedTableCell[1+courses.size()];
 
+            
             //populate the column
             //first add the day (the key)
-            column[0] = new Label(day.toString());
+            column[0] = new GeneratedTableCell(day.toString());
 
             //Next add all the remaining courses by looping
             for (int i = 1 ; i <= courses.size() ; i++){
-                column[i] = new Label(courses.get(i-1).toString());
+                column[i] = new GeneratedTableCell(courses.get(i-1).toString());
             }
-            generatedTableGrid.addColumn(0,column);
+
+            //the current column index is stored in the user data
+            generatedTableGrid.addColumn((int)generatedTableGrid.getUserData(),column);
+
+            //keep track of the columns we have populated by increasing the
+            //index stored in userData
+            generatedTableGrid.setUserData((int)generatedTableGrid.getUserData() +  1 );
 
         }
 
@@ -271,7 +279,7 @@ public class TableUtils {
                 String text = TableUtils.makeStringValue(cell, false);
                 //make a table sample label from the text
                 //Each label in the grid, represents a cell in the table sample
-                GridCell gridCell = new GridCell(text);
+                SampleTableCell gridCell = new SampleTableCell(text);
                 gridCell.setOnMouseClicked(CellClickHandler);
                 tableSampleGrid.add(gridCell, currentColumnIndex, currentRowIndex);
 
