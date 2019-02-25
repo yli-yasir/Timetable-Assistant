@@ -39,7 +39,7 @@
               />
 
 
-    <ScrollPane maxWidth="Infinity"
+    <ScrollPane fx:id="generatedTableGridContainer" maxWidth="Infinity"
                 GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.rowSpan="2">
     <GridPane fx:id="generatedTableGrid"/>
 

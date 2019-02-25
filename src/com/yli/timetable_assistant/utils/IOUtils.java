@@ -6,6 +6,8 @@ import com.yli.timetable_assistant.tasks.TableReadTask;
 import javafx.concurrent.Task;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
@@ -42,5 +44,15 @@ public class IOUtils {
             FXUtils.showErrorAlert(strings, "badTempFileIOHeader", "badTempFileIOBody");
         }
         return tmpFile;
+    }
+
+    public static void saveImage(BufferedImage image, File file, String extension){
+        try{
+            ImageIO.write(image,extension,file);
+        }
+        catch(IOException e ){
+            e.printStackTrace();
+        }
+
     }
 }

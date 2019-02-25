@@ -91,7 +91,7 @@ public class TableUtils {
     //Find the query and populates a list with the results.
     public static void search(Sheet searchSheet, ObservableList<String> resultList, String searchQuery) {
         //lower case and remove white space from search query.
-        searchQuery = makeStringValue(searchQuery, false);
+        searchQuery = makeStringValue(searchQuery, true);
 
         if (searchSheet != null) {
             HashSet<String> results = new HashSet<>();
@@ -99,14 +99,14 @@ public class TableUtils {
                 for (Cell cell : row) {
                     /*lower case and remove white space from the string of the
                     current cell*/
-                    String currentText = makeStringValue(cell, false);
+                    String currentText = makeStringValue(cell, true);
 
                     /*Using contains because user might not have entered a completely
                     matching search query*/
                     if (currentText.contains(searchQuery)) {
                         /*add what we found to the results in lower case and
                         with white space*/
-                        results.add(makeStringValue(cell, true));
+                        results.add(makeStringValue(cell, false));
                     }
                 }
             }
@@ -140,7 +140,7 @@ public class TableUtils {
                 Row row = sheet.getRow(courseInfoCellData.getIndex());
                 //The rank is equal to the index of the column.
                 int rank = courseCell.getColumnIndex();
-                String string = makeStringValue(row.getCell(rank), true);
+                String string = makeStringValue(row.getCell(rank), false);
                 //todo reconsider this line, it's used to replace blank info with "???"
                 if (string.replace(" ", "").isEmpty()) {
                     string = "???";
@@ -152,11 +152,11 @@ public class TableUtils {
         the course first, then we get the certain column in which the information
         was stored (by using selectionModeData.getIndex()). This will give us the information
         we want.*/
-            if (courseInfoCellData.getType() == SecondaryCellData.TYPE_COLUMN) {
+            else if (courseInfoCellData.getType() == SecondaryCellData.TYPE_COLUMN) {
                 //The rank is equal to the index of the row.
                 int rank = courseCell.getRowIndex();
                 Row row = sheet.getRow(rank);
-                String string = makeStringValue(row.getCell(courseInfoCellData.getIndex()), true);
+                String string = makeStringValue(row.getCell(courseInfoCellData.getIndex()), false);
                 return new RankedString(string, rank);
             }
         }
@@ -174,13 +174,19 @@ public class TableUtils {
     public static DayToCoursesMap makeDayToCourseListMap(Sheet sheet, SelectionModeToDataMap selectionModeToDataMap, ObservableList<String> addedCourses) {
         DayToCoursesMap dayToCoursesMap = new DayToCoursesMap();
 
+        ArrayList<String> noWhiteSpaceCourseList = new ArrayList<>();
+
+        //remove white space from added courses and add it to the other list...
+        addedCourses.forEach( string ->
+                noWhiteSpaceCourseList.add(string.replace(" ","")));
+
         /*For each cell in the sheet, if it's for a course that's in the list
         of courses that we want, then add it to the hash map , with the day
         as a key, and add that course to the array list value for that key
          */
         for (Row row : sheet) {
             for (Cell cell : row) {
-                if (addedCourses.contains(makeStringValue(cell, true))) {
+                if (noWhiteSpaceCourseList.contains(makeStringValue(cell, true))) {
                     RankedString day = getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_DAY);
 
                     //Either get the list we already have or make a new one.
@@ -188,7 +194,7 @@ public class TableUtils {
                             new ArrayList<>());
 
                     //Add the course to it.
-                    dayCourses.add(new Course(makeStringValue(cell, true),
+                    dayCourses.add(new Course(makeStringValue(cell, false),
                             getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_HALL),
                             getCourseInfo(sheet, cell, selectionModeToDataMap, SelectionMode.SELECT_TIME),
                             day)

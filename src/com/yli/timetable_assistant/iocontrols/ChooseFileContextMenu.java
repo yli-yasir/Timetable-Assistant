@@ -1,4 +1,4 @@
-package com.yli.timetable_assistant.choosefile;
+package com.yli.timetable_assistant.iocontrols;
 
 import javafx.scene.control.ContextMenu;
 

@@ -1,11 +1,12 @@
 package com.yli.timetable_assistant;
 
-import com.yli.timetable_assistant.choosefile.ChooseFileButton;
-import com.yli.timetable_assistant.choosefile.LoadFromComputerMenuItem;
-import com.yli.timetable_assistant.choosefile.LoadFromURLMenuItem;
+import com.yli.timetable_assistant.iocontrols.ChooseFileButton;
+import com.yli.timetable_assistant.iocontrols.LoadFromComputerMenuItem;
+import com.yli.timetable_assistant.iocontrols.LoadFromURLMenuItem;
 import com.yli.timetable_assistant.exampleselection.RowsColsComboBox;
 import com.yli.timetable_assistant.exampleselection.*;
 import com.yli.timetable_assistant.exampleselection.SelectionMode;
+import com.yli.timetable_assistant.iocontrols.SnapshotButton;
 import com.yli.timetable_assistant.table.SampleTableCell;
 import com.yli.timetable_assistant.utils.FXUtils;
 import com.yli.timetable_assistant.res.Numbers;
@@ -71,6 +72,8 @@ class MainController {
     private ObservableList<String> searchResultList;
     //This will contain the courses that user wants to be included in his table.
     private ObservableList<String> addedCoursesList;
+    @FXML
+    private ScrollPane generatedTableGridContainer;
     @FXML
     private GridPane generatedTableGrid;
 
@@ -387,10 +390,7 @@ class MainController {
             FXUtils.addItem(availableCourses, addedCoursesList);
             generateTable(addedCoursesList);
         });
-        //------------------------------------------------------------
 
-
-        //------------------------------------------------------------
         //Controls for searching
         searchField = new TextField();
         searchField.setPromptText(strings.getString("searchFieldPrompt"));
@@ -403,19 +403,17 @@ class MainController {
                 searchField.clear();
             }
         });
-        //--------------------------------------------------
 
+        //add save generated table button
+        SnapshotButton snapshotButton = new SnapshotButton("Snap",generatedTableGrid);
 
-        //-----------------------------------------------------------
-
-        //------------------------------------------------------------
-
-        //Add choosefile to grid
+        //Add controls to grid
         courseOperationsGrid.add(searchField, 0, 0);
         courseOperationsGrid.add(availableCoursesHeader, 0, 1);
         courseOperationsGrid.add(addedCoursesHeader, 1, 1);
         courseOperationsGrid.add(availableCourses, 0, 2);
         courseOperationsGrid.add(addedCourses, 1, 2);
+        courseOperationsGrid.add(snapshotButton,2,2);
 
     }
 

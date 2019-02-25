@@ -44,7 +44,7 @@ Label{
 }
 
 .ModeButton{
--fx-background-radius: 30 30 0 0;
+-fx-background-radius: 16 16 0 0;
 }
 
 ProgressIndicator{
@@ -73,7 +73,7 @@ visibility:hidden
 -fx-text-fill: #FFFFFF;
 -fx-alignment: center;
 -fx-max-height: infinity;
--fx-max-width: infinity;
+-fx-max-width: 500;
 -fx-wrap-text: true;
 -fx-padding:4;
 -fx-background-radius:2;
@@ -108,6 +108,7 @@ ScrollPane:focused {
 -fx-vgap: 5;
 -fx-background-color:#21252B;
 }
+
 
 
 
