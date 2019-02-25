@@ -246,7 +246,7 @@ public class TableUtils {
             int curColumnIndex = (int)generatedTableGrid.getUserData();
 
             //add program credit table to the first column :)
-            if (curColumnIndex==0)column.add(new GeneratedTableCell("Timetable Assistant by:\n Yasir Al-Baldawi"));
+            if (curColumnIndex==0)column.add(new GeneratedTableCell("By:\nYasir Al-Baldawi"));
 
             generatedTableGrid.addColumn(curColumnIndex,column.toArray(new GridCell[0]));
 

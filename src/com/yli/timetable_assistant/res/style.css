@@ -85,6 +85,7 @@ visibility:hidden
 -fx-pref-width: 100;
 -fx-font-size:50px;
 }
+
 #sampleTableGrid{
 -fx-padding:4;
 -fx-hgap: 5;
