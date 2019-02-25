@@ -8,25 +8,32 @@ This program was made as practice with Java FX 8. The aim is to assist students 
 
 **Please read the known issues at the end of this text!**
 
-1. [Click here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) to Download Java 8, If you don't already have it.
+### This program requires Java 8!
+[Click here](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html) to Download Java 8 (You probably already have it).
 
-2. [Click here](https://github.com/yli-yasir/Timetable-Assistant/releases/download/0.92-beta/Timetable.Assistant.jar) to download the program.
+### If you are using the new version, [click here](https://github.com/yli-yasir/Timetable-Assistant/releases/download/0.98-beta/Timetable.Assistant.jar) to download the program, and watch the GIF below:
 
-3. Open the program, and click choose file. You will have two options:
+<img src="https://i.imgur.com/MwJVmwn.gif" height="400" width="800"/>
+
+### If you are using the old version, refer to this guide:
+
+1. [Click here](https://github.com/yli-yasir/Timetable-Assistant/releases/download/0.92-beta/Timetable.Assistant.jar) to download the program.
+
+2. Open the program, and click choose file. You will have two options:
     1. From Internet: This option grabs the latest timetable from the internet automatically for you.
     1. From PC: This allows you to browse your computer for the timetable file. Which you can manually download from [here](http://library.neu.edu.tr/uploaded-files/classtimetable/index_en.html).
     
 <img src="https://i.imgur.com/YkuR8wZ.gif" height="400" width="500"/>
 
-4. You will be shown a table sample, provide example information. Start by selecting a course from the table, then select the day, time and hall for that course. It's critical that you provide correct information or you will get incorrect results when you generate your own timetable.
+3. You will be shown a table sample, provide example information. Start by selecting a course from the table, then select the day, time and hall for that course. It's critical that you provide correct information or you will get incorrect results when you generate your own timetable.
 
 <img src="https://i.imgur.com/D3xy4LL.gif" height="400" width="500"/>
 
-5. Searching will show you courses that are available in the timetable, click a course to add it. If you see two identical courses in the table (You normally shouldn't see that), make sure to add them both.
+4. Searching will show you courses that are available in the timetable, click a course to add it. If you see two identical courses in the table (You normally shouldn't see that), make sure to add them both.
 
 <img src="https://i.imgur.com/2F5vUJq.gif" height="400" width="500"/>
 
-6. Clicking generate will generate an image of an oraganized timetable for you, which is based on the courses that you have added. You can change the font size as suitable, then click the image to save it.
+5. Clicking generate will generate an image of an oraganized timetable for you, which is based on the courses that you have added. You can change the font size as suitable, then click the image to save it.
 
 <img src="https://i.imgur.com/dNRmUXh.gif" height="400" width="500"/>
 
