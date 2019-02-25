@@ -261,7 +261,7 @@ public class TableUtils {
      * @param rows    Number of rows in the window.
      * @param columns Number of columns in the window.
      */
-    public static void populateTableSampleGrid(GridPane tableSampleGrid, Sheet sheet, int rows, int columns
+    public static void populateSampleTableGrid(GridPane tableSampleGrid, Sheet sheet, int rows, int columns
             , EventHandler<MouseEvent> CellClickHandler) {
         System.out.println("populating" + rows + " " + columns);
 

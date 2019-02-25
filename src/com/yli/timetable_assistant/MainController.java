@@ -43,9 +43,9 @@ class MainController {
     private Label instructionLabel;
     //Contains the combo boxes that control the table sample size.
     @FXML
-    private HBox tableSampleSizeControlsContainer;
-    private RowsColsComboBox tableSampleColumnsComboBox = new RowsColsComboBox();
-    private RowsColsComboBox tableSampleRowsComboBox = new RowsColsComboBox();
+    private HBox sampleTableSizeControlsContainer;
+    private RowsColsComboBox sampleTableColumnsComboBox = new RowsColsComboBox();
+    private RowsColsComboBox sampleTableRowsComboBox = new RowsColsComboBox();
     //Contains controls that have to do with selecting example course info.
     @FXML
     private HBox exampleSelectionControlsContainer;
@@ -55,7 +55,7 @@ class MainController {
     /*A grid which will be populated with labels which represent cells from the sheet
     the user will use this to set an example for the program*/
     @FXML
-    private GridPane tableSample;
+    private GridPane sampleTableGrid;
     //Progress indicator which will be shown or hidden at loading.
     @FXML
     private ProgressIndicator progressIndicator;
@@ -82,14 +82,14 @@ class MainController {
     @FXML
     private void initialize() {
         initChooseFileButton();
-        populateTableSampleSizeControlsContainer();
+        populateSampleTableSizeControlsContainer();
         populateExampleSelectionControlBar();
         populateCourseOperationsGrid();
     }
 
     //the choose file button will also be added here!
     //put the combo boxes and label inside their container.
-    private void populateTableSampleSizeControlsContainer() {
+    private void populateSampleTableSizeControlsContainer() {
 
         //make labels for the combo boxes
         Label rowsLabel = new Label(strings.getString("rows") + ": ");
@@ -99,34 +99,34 @@ class MainController {
         Label columnsLabel = new Label(strings.getString("columns") + ": ");
         columnsLabel.getStyleClass().add("PushedRight");
 
-        tableSampleSizeControlsContainer.getChildren().addAll(
+        sampleTableSizeControlsContainer.getChildren().addAll(
                 chooseFileButton,
-                rowsLabel, tableSampleRowsComboBox,
-                columnsLabel, tableSampleColumnsComboBox);
+                rowsLabel, sampleTableRowsComboBox,
+                columnsLabel, sampleTableColumnsComboBox);
     }
 
     //populate the combo boxes with numbers
     private void populateColsRowsComboBoxes() {
         if (timetableSheet != null) {
             //When the combo boxes change repopulate the table...
-            EventHandler<ActionEvent> tableSampleComboBoxChange = e -> {
+            EventHandler<ActionEvent> sampleTableComboBoxChange = e -> {
                 if (timetableSheet != null) {
-                    TableUtils.populateTableSampleGrid(
-                            tableSample,
+                    TableUtils.populateSampleTableGrid(
+                            sampleTableGrid,
                             timetableSheet,
-                            tableSampleRowsComboBox.getValue()
-                            ,tableSampleColumnsComboBox.getValue(),
+                            sampleTableRowsComboBox.getValue()
+                            ,sampleTableColumnsComboBox.getValue(),
                             ev->handleSampleTableCellClick((SampleTableCell)ev.getSource()));
                 }
             };
 
-            tableSampleRowsComboBox.populate(TableUtils.getTableRowCount(timetableSheet),
+            sampleTableRowsComboBox.populate(TableUtils.getTableRowCount(timetableSheet),
                     Numbers.TABLE_SAMPLE_DEFAULT_HEIGHT,
-                    tableSampleComboBoxChange);
+                    sampleTableComboBoxChange);
 
-            tableSampleColumnsComboBox.populate(TableUtils.getTableColCount(timetableSheet),
+            sampleTableColumnsComboBox.populate(TableUtils.getTableColCount(timetableSheet),
                     Numbers.TABLE_SAMPLE_DEFAULT_WIDTH,
-                    tableSampleComboBoxChange);
+                    sampleTableComboBoxChange);
         }
 
     }
@@ -289,10 +289,10 @@ class MainController {
         }
     }
 
-    private boolean putSelectedData(Label tableSampleLabel, SelectionMode currentMode) {
+    private boolean putSelectedData(Label sampleTableLabel, SelectionMode currentMode) {
         //Get the row and column of the label that was clicked.
-        int rowIndex = GridPane.getRowIndex(tableSampleLabel);
-        int columnIndex = GridPane.getColumnIndex(tableSampleLabel);
+        int rowIndex = GridPane.getRowIndex(sampleTableLabel);
+        int columnIndex = GridPane.getColumnIndex(sampleTableLabel);
 
         //If the currently selected mode is for course cell selection.
         if (currentMode == SelectionMode.SELECT_COURSE) {
@@ -342,11 +342,11 @@ class MainController {
     }
 
     /*Changes the text of the instructionLabel and the clicked button*/
-    private void giveSelectionFeedback(ModeButton button, Label tableSampleLabel, Label instructionLabel) {
+    private void giveSelectionFeedback(ModeButton button, Label sampleTableLabel, Label instructionLabel) {
         String instruction = isReadyToSearch() ? strings.getString("allDone") : strings.getString("chooseRemainingInfo");
         instructionLabel.setText(instruction);
         String text = strings.getString(button.getMode().nameKey()) +
-                ": " + tableSampleLabel.getText();
+                ": " + sampleTableLabel.getText();
         button.setText(text);
         button.setTooltip(new Tooltip(text));
 
@@ -426,15 +426,15 @@ class MainController {
 
     private void taskLoadingMode() {
         chooseFileButton.setDisable(true);
-        tableSample.setVisible(false);
+        sampleTableGrid.setVisible(false);
         progressIndicator.setVisible(true);
     }
 
     private void taskFailedMode() {
         chooseFileButton.setDisable(false);
         progressIndicator.setVisible(false);
-        tableSample.setVisible(true);
-        tableSample.getChildren().clear();
+        sampleTableGrid.setVisible(true);
+        sampleTableGrid.getChildren().clear();
         timetableSheet = null;
         chooseFileButton.setText(strings.getString("chooseFileButton"));
     }
@@ -455,8 +455,8 @@ class MainController {
                 //When they are populated they will trigger table load
                 populateColsRowsComboBoxes();
 
-                TableUtils.populateTableSampleGrid(
-                        tableSample,
+                TableUtils.populateSampleTableGrid(
+                        sampleTableGrid,
                         timetableSheet,
                         Numbers.TABLE_SAMPLE_DEFAULT_HEIGHT,
                         Numbers.TABLE_SAMPLE_DEFAULT_WIDTH,
@@ -471,7 +471,7 @@ class MainController {
 
             }
             progressIndicator.setVisible(false);
-            tableSample.setVisible(true);
+            sampleTableGrid.setVisible(true);
             chooseFileButton.setDisable(false);
 
         }

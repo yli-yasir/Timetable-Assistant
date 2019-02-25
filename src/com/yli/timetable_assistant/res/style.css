@@ -4,18 +4,20 @@
 -fx-font-size: 14px;
 -fx-font-weight: bold;
 -fx-padding: 0 12;
+-fx-hgap: 8;
 }
 
 Label{
 -fx-text-fill: #FFFFFF;}
+
 #instructionLabel{
 -fx-pref-width: infinity;
 -fx-background-color:#3A3F4B;
--fx-background-radius: 0 0 8 8;
+-fx-padding:4px;
 
 }
 
-#tableSampleSizeControlsContainer{
+#sampleTableSizeControlsContainer{
 -fx-padding: 16 0;
 -fx-max-width: infinity;
 }
@@ -30,7 +32,6 @@ Label{
 -fx-text-fill:white;
 }
 
-
 #instructionLabel{
 -fx-text-fill:white;
 -fx-padding:2;
@@ -40,7 +41,6 @@ Label{
 -fx-min-width: 200px;
 -fx-pref-width:200px;
 -fx-max-width: 200px;
--fx-background-radius: 30px;
 }
 
 .ModeButton{
@@ -50,47 +50,36 @@ Label{
 ProgressIndicator{
 -fx-max-height:100;
 -fx-max-width:100;
--fx-progress-color: #FE4068;
+-fx-progress-color: #0484FC;
 visibility:hidden
 }
 
 .SampleTableCell{
 -fx-padding: 4px;
--fx-background-color: rgba(254,64,104,0.5);
--fx-background-radius:16;
+-fx-background-color: rgba(4, 132, 252, 0.95);
+-fx-background-radius: 4;
 -fx-max-width: 100;
 -fx-alignment: center;
 -fx-cursor: hand;
+
 }
 
 .SampleTableCell:hover{
--fx-background-color: rgba(254,64,104,0.8);
+-fx-background-color: rgba(4, 132, 252, 0.87);
 }
 
-TextField{
--fx-background-radius:16;}
-
-ListView{
--fx-background-radius:4;
-}
 .GeneratedTableCell{
--fx-background-color : #FFFFFF;
+-fx-background-color : #0484FC;
+-fx-text-fill: #FFFFFF;
 -fx-alignment: center;
 -fx-max-height: infinity;
 -fx-max-width: infinity;
 -fx-wrap-text: true;
--fx-padding:8;
--fx-background-radius:4;
-
+-fx-padding:4;
+-fx-background-radius:2;
 }
 
-.tableSampleContainer{
--fx-background: #21252B;
-}
-
-
-
-#tableSample{
+#sampleTableGrid{
 -fx-padding:4;
 -fx-hgap: 5;
 -fx-vgap: 5}
@@ -98,6 +87,8 @@ ListView{
 ScrollPane{
 -fx-padding:4;
 -fx-border-color:#21252B;
+-fx-background: #21252B;
+-fx-background-color:#21252B;
 }
 
 ScrollPane:focused {
@@ -105,11 +96,19 @@ ScrollPane:focused {
 }
 
 #courseOperationsGrid{
--fx-padding: 16 0 0 0 }
+-fx-padding: 16 0 0 0;
+-fx-hgap: 4;
+
+}
+
 
 #generatedTableGrid{
 -fx-padding: 8 12;
 -fx-hgap: 5;
 -fx-vgap: 5;
+-fx-background-color:#21252B;
 }
+
+
+
 

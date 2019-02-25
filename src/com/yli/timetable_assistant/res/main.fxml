@@ -19,16 +19,18 @@
            styleClass="Header"
     />
 
-    <HBox fx:id="tableSampleSizeControlsContainer"/>
+    <HBox fx:id="sampleTableSizeControlsContainer"/>
     <HBox fx:id="exampleSelectionControlsContainer"/>
-    <StackPane styleClass="tableSampleContainer">
+
+    <StackPane styleClass="SampleTableContainer">
         <ScrollPane maxWidth="Infinity"
                     prefHeight="320">
-            <GridPane fx:id="tableSample"
+            <GridPane fx:id="sampleTableGrid"
                       />
         </ScrollPane>
         <ProgressIndicator fx:id="progressIndicator"/>
     </StackPane>
+
 </VBox>
 
 
@@ -37,8 +39,11 @@
               />
 
 
-    <GridPane fx:id="generatedTableGrid" styleClass="generatedTableGrid"
-          GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.rowSpan="2"/>
+    <ScrollPane maxWidth="Infinity"
+                GridPane.columnIndex="1" GridPane.rowIndex="0" GridPane.rowSpan="2">
+    <GridPane fx:id="generatedTableGrid"/>
+
+    </ScrollPane>
 
 </children>
     <columnConstraints>
