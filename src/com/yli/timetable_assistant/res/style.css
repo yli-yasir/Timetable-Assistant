@@ -3,7 +3,7 @@
 -fx-background-color: #282C34;
 -fx-font-size: 14px;
 -fx-font-weight: bold;
--fx-padding: 0 12;
+-fx-padding: 0 8 8 8;
 -fx-hgap: 8;
 }
 
@@ -79,6 +79,12 @@ visibility:hidden
 -fx-background-radius:2;
 }
 
+.SnapshotButton{
+-fx-max-width: infinity;
+-fx-max-height: infinity;
+-fx-pref-width: 100;
+-fx-font-size:50px;
+}
 #sampleTableGrid{
 -fx-padding:4;
 -fx-hgap: 5;
@@ -98,9 +104,7 @@ ScrollPane:focused {
 #courseOperationsGrid{
 -fx-padding: 16 0 0 0;
 -fx-hgap: 4;
-
 }
-
 
 #generatedTableGrid{
 -fx-padding: 8 12;

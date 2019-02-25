@@ -405,7 +405,7 @@ class MainController {
         });
 
         //add save generated table button
-        SnapshotButton snapshotButton = new SnapshotButton("Snap",generatedTableGrid);
+        SnapshotButton snapshotButton = new SnapshotButton("\uD83D\uDCF7",generatedTableGrid);
 
         //Add controls to grid
         courseOperationsGrid.add(searchField, 0, 0);
